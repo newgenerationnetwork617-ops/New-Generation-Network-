@@ -31,6 +31,18 @@ jobs:
       - name: Restore project files overwritten by flutter create
         run: git checkout -- analysis_options.yaml test/widget_test.dart
 
+      - name: Enable Android internet access
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          s = p.read_text()
+          permission = '<uses-permission android:name="android.permission.INTERNET"/>'
+          if permission not in s:
+              s = s.replace('<manifest xmlns:android="http://schemas.android.com/apk/res/android">', '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n    ' + permission)
+          p.write_text(s)
+          PY
+
       - name: Apply N.G.N. Android app icon
         run: |
           for dir in android/app/src/main/res/mipmap-*; do
