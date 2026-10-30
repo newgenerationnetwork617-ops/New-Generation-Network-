@@ -274,6 +274,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final speaker = TextEditingController();
     final description = TextEditingController();
     final url = TextEditingController();
+    final mediaUrl = TextEditingController();
 
     await showDialog(
       context: context,
@@ -285,7 +286,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
               TextField(controller: speaker, decoration: const InputDecoration(labelText: 'Speaker')),
               TextField(controller: description, maxLines: 3, decoration: const InputDecoration(labelText: 'Description')),
-              TextField(controller: url, decoration: const InputDecoration(labelText: 'YouTube or audio URL')),
+              TextField(controller: url, decoration: const InputDecoration(labelText: 'YouTube URL (optional)')),
+              TextField(controller: mediaUrl, decoration: const InputDecoration(labelText: 'Direct media URL for offline download (optional)')),
             ],
           ),
         ),
@@ -299,6 +301,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 'speaker': speaker.text.trim(),
                 'description': description.text.trim(),
                 'youtube_url': url.text.trim(),
+                'media_url': mediaUrl.text.trim(),
                 'published_at': DateTime.now().toIso8601String(),
               });
               }, 'Teaching published.');
@@ -314,6 +317,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     speaker.dispose();
     description.dispose();
     url.dispose();
+    mediaUrl.dispose();
   }
 
   Future<void> addAnnouncement() async {
