@@ -100,12 +100,14 @@ class HomeContent extends StatelessWidget {
           children: [
             Row(
               children: [
-                ClipOval(
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
                   child: Image.asset(
                     'assets/branding/team_logo.jpg',
-                    width: 54,
-                    height: 54,
-                    fit: BoxFit.cover,
+                    width: 58,
+                    height: 58,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
                   ),
                 ),
                 const SizedBox(width: 12),
