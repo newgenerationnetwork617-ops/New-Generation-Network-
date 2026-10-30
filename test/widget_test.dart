@@ -18,7 +18,7 @@ void main() {
 
     expect(find.text('NEW GENERATION NETWORK'), findsOneWidget);
     expect(
-      find.text('Raising a righteous generation for Christ.'),
+      find.text('Raising a righteous generation for Christ'),
       findsOneWidget,
     );
     expect(find.text('Daily Bible Verse'), findsOneWidget);
