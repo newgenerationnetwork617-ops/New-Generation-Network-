@@ -362,37 +362,67 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final title = TextEditingController();
     final description = TextEditingController();
     final venue = TextEditingController();
+    DateTime startsAt = DateTime.now().add(const Duration(days: 1));
 
     await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Add Event'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: title, decoration: const InputDecoration(labelText: 'Event title')),
-            TextField(controller: description, decoration: const InputDecoration(labelText: 'Description')),
-            TextField(controller: venue, decoration: const InputDecoration(labelText: 'Venue')),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Add Event'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: title, decoration: const InputDecoration(labelText: 'Event title')),
+                TextField(controller: description, maxLines: 3, decoration: const InputDecoration(labelText: 'Description')),
+                TextField(controller: venue, decoration: const InputDecoration(labelText: 'Venue')),
+                const SizedBox(height: 14),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.calendar_month_rounded),
+                  title: const Text('Event date & time'),
+                  subtitle: Text(startsAt.toString().substring(0, 16)),
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: startsAt,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 3650)),
+                    );
+                    if (date == null || !context.mounted) return;
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(startsAt),
+                    );
+                    if (time == null) return;
+                    setDialogState(() {
+                      startsAt = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+            FilledButton(
+              onPressed: () async {
+                final ok = await runSave(() async {
+                  await supabase.from('events').insert({
+                    'title': title.text.trim(),
+                    'description': description.text.trim(),
+                    'venue': venue.text.trim(),
+                    'starts_at': startsAt.toUtc().toIso8601String(),
+                    'published': true,
+                    'published_at': DateTime.now().toUtc().toIso8601String(),
+                  });
+                }, 'Event published.');
+                if (ok && dialogContext.mounted) Navigator.pop(dialogContext);
+              },
+              child: const Text('Publish'),
+            ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () async {
-              final ok = await runSave(() async {
-                await supabase.from('events').insert({
-                'title': title.text.trim(),
-                'description': description.text.trim(),
-                'venue': venue.text.trim(),
-                'starts_at': DateTime.now().add(const Duration(days: 1)).toIso8601String(),
-                'published': true,
-              });
-              }, 'Event published.');
-              if (ok && mounted) Navigator.pop(context);
-            },
-            child: const Text('Publish'),
-          ),
-        ],
       ),
     );
 
