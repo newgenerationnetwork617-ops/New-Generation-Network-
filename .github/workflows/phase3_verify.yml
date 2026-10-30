@@ -53,6 +53,11 @@ jobs:
           from pathlib import Path
           ImageFile.LOAD_TRUNCATED_IMAGES = True
           src = Image.open("assets/branding/app_icon.jpg").convert("RGB")
+          # Crop once from the original master so Android never stretches the logo.
+          side = min(src.size)
+          left = (src.width - side) // 2
+          top = (src.height - side) // 2
+          src = src.crop((left, top, left + side, top + side))
           sizes = {
               "mipmap-mdpi": 48,
               "mipmap-hdpi": 72,
@@ -63,7 +68,8 @@ jobs:
           for folder, size in sizes.items():
               out = Path("android/app/src/main/res") / folder
               out.mkdir(parents=True, exist_ok=True)
-              src.resize((size, size), Image.Resampling.LANCZOS).save(out / "ic_launcher.png", "PNG")
+              icon = src.resize((size, size), Image.Resampling.LANCZOS)
+              icon.save(out / "ic_launcher.png", "PNG", optimize=True)
           PY
 
       - name: Prepare Bible data
