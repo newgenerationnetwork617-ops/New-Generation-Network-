@@ -95,7 +95,7 @@ class HomePage extends StatelessWidget {
                       else if (verse == null)
                         const Text('Your daily verse will appear here when published by N.G.N.')
                       else ...[
-                        Text('“' + (verse['verse_text']?.toString() ?? '') + '”', style: const TextStyle(fontSize: 17, height: 1.5)),
+                        Text('“${verse['verse_text']?.toString() ?? ''}”', style: const TextStyle(fontSize: 17, height: 1.5)),
                         const SizedBox(height: 8),
                         Text(verse['reference']?.toString() ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
                       ],
@@ -120,10 +120,12 @@ class _FeatureCard extends StatelessWidget {
   const _FeatureCard({
     required this.title,
     required this.icon,
+    required this.onTap,
   });
 
   final String title;
   final IconData icon;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -136,6 +138,7 @@ class _FeatureCard extends StatelessWidget {
         ),
         title: Text(title),
         trailing: Icon(icon),
+        onTap: onTap,
       ),
     );
   }
