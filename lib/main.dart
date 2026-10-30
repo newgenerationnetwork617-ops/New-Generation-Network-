@@ -20,6 +20,8 @@ class NewGenerationNetworkApp extends StatelessWidget {
   const NewGenerationNetworkApp({super.key});
   static const primaryBlue = Color(0xFF0B5ED7);
   static const accentYellow = Color(0xFFFFC107);
+  static const softYellow = Color(0xFFFFF5CC);
+  static const inkBlack = Color(0xFF111827);
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +30,11 @@ class NewGenerationNetworkApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue),
-        scaffoldBackgroundColor: const Color(0xFFF7F9FC),
+        colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue).copyWith(
+          secondary: accentYellow,
+          surface: Colors.white,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFFFFCF2),
         cardTheme: const CardThemeData(elevation: 0, margin: EdgeInsets.zero),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
@@ -65,6 +70,8 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: IndexedStack(index: index, children: pages),
       bottomNavigationBar: NavigationBar(
+        backgroundColor: Colors.white,
+        indicatorColor: NewGenerationNetworkApp.softYellow,
         selectedIndex: index,
         onDestinationSelected: (value) => setState(() => index = value),
         destinations: const [
@@ -118,8 +125,16 @@ class HomeContent extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
-                color: NewGenerationNetworkApp.primaryBlue,
+                gradient: const LinearGradient(
+                  colors: [NewGenerationNetworkApp.primaryBlue, Color(0xFF063B8C)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: NewGenerationNetworkApp.accentYellow, width: 1.5),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x22000000), blurRadius: 18, offset: Offset(0, 8)),
+                ],
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +210,11 @@ class _QuickCard extends StatelessWidget {
       child: Container(
         height: 112,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+        decoration: BoxDecoration(
+          color: NewGenerationNetworkApp.softYellow,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFFFE082)),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
