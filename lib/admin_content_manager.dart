@@ -70,11 +70,18 @@ class _AdminContentManagerPageState extends State<AdminContentManagerPage> {
         ],
       ),
     );
-    if (save != true) { for (final c in controllers.values) c.dispose(); return; }
+    if (save != true) {
+      for (final c in controllers.values) {
+        c.dispose();
+      }
+      return;
+    }
     final update = <String,dynamic>{for (final e in controllers.entries) e.key: e.value.text.trim()};
     if (table == 'events') update['published'] = true;
     await client.from(table).update(update).eq('id', row['id']);
-    for (final c in controllers.values) c.dispose();
+    for (final c in controllers.values) {
+      c.dispose();
+    }
     await refresh();
   }
 
