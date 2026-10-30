@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'bible_repository.dart';
+import 'bible_saved_page.dart';
 
 class BiblePage extends StatelessWidget {
   const BiblePage({super.key});
@@ -15,6 +16,14 @@ class BiblePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Holy Bible'),
         actions: [
+          IconButton(
+            tooltip: 'Saved Bible',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const BibleSavedPage()),
+            ),
+            icon: const Icon(Icons.bookmarks_rounded),
+          ),
           IconButton(
             tooltip: 'Search Bible',
             onPressed: () => showSearch(
