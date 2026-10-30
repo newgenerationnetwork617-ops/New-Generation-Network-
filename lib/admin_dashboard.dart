@@ -107,6 +107,25 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   bool checking = true;
   bool allowed = false;
 
+  void notice(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<bool> runSave(Future<void> Function() action, String success) async {
+    try {
+      await action();
+      notice(success);
+      return true;
+    } on PostgrestException catch (e) {
+      notice('Could not save: ${e.message}');
+      return false;
+    } catch (_) {
+      notice('Could not save. Check your connection and try again.');
+      return false;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -175,13 +194,15 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           FilledButton(
             onPressed: () async {
-              await supabase.from('daily_bible_verses').upsert({
+              final ok = await runSave(() async {
+                await supabase.from('daily_bible_verses').upsert({
                 'verse_date': date.text.trim(),
                 'reference': reference.text.trim(),
                 'verse_text': verse.text.trim(),
                 'updated_at': DateTime.now().toIso8601String(),
               });
-              if (mounted) Navigator.pop(context);
+              }, 'Daily Bible verse published.');
+              if (ok && mounted) Navigator.pop(context);
             },
             child: const Text('Save'),
           ),
@@ -220,7 +241,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           FilledButton(
             onPressed: () async {
-              await supabase.from('devotionals').insert({
+              final ok = await runSave(() async {
+                await supabase.from('devotionals').insert({
                 'title': title.text.trim(),
                 'theme': theme.text.trim(),
                 'bible_reference': bible.text.trim(),
@@ -228,7 +250,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 'life_application': application.text.trim(),
                 'published_at': DateTime.now().toIso8601String(),
               });
-              if (mounted) Navigator.pop(context);
+              }, 'Devotional published.');
+              if (ok && mounted) Navigator.pop(context);
             },
             child: const Text('Publish'),
           ),
@@ -267,14 +290,16 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           FilledButton(
             onPressed: () async {
-              await supabase.from('teachings').insert({
+              final ok = await runSave(() async {
+                await supabase.from('teachings').insert({
                 'title': title.text.trim(),
                 'speaker': speaker.text.trim(),
                 'description': description.text.trim(),
                 'youtube_url': url.text.trim(),
                 'published_at': DateTime.now().toIso8601String(),
               });
-              if (mounted) Navigator.pop(context);
+              }, 'Teaching published.');
+              if (ok && mounted) Navigator.pop(context);
             },
             child: const Text('Publish'),
           ),
@@ -307,12 +332,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           FilledButton(
             onPressed: () async {
-              await supabase.from('announcements').insert({
+              final ok = await runSave(() async {
+                await supabase.from('announcements').insert({
                 'title': title.text.trim(),
                 'body': body.text.trim(),
                 'published_at': DateTime.now().toIso8601String(),
               });
-              if (mounted) Navigator.pop(context);
+              }, 'Announcement published.');
+              if (ok && mounted) Navigator.pop(context);
             },
             child: const Text('Publish'),
           ),
@@ -345,14 +372,16 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           FilledButton(
             onPressed: () async {
-              await supabase.from('events').insert({
+              final ok = await runSave(() async {
+                await supabase.from('events').insert({
                 'title': title.text.trim(),
                 'description': description.text.trim(),
                 'venue': venue.text.trim(),
                 'starts_at': DateTime.now().add(const Duration(days: 1)).toIso8601String(),
                 'published': true,
               });
-              if (mounted) Navigator.pop(context);
+              }, 'Event published.');
+              if (ok && mounted) Navigator.pop(context);
             },
             child: const Text('Publish'),
           ),
