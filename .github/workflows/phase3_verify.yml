@@ -31,6 +31,13 @@ jobs:
       - name: Restore project files overwritten by flutter create
         run: git checkout -- analysis_options.yaml test/widget_test.dart
 
+      - name: Apply N.G.N. Android app icon
+        run: |
+          for dir in android/app/src/main/res/mipmap-*; do
+            rm -f "$dir/ic_launcher.png" "$dir/ic_launcher.webp" "$dir/ic_launcher.jpg"
+            cp assets/branding/app_icon.jpg "$dir/ic_launcher.jpg"
+          done
+
       - name: Prepare Bible data
         run: bash scripts/prepare_bible_data.sh
 
