@@ -25,8 +25,8 @@ class NewGenerationNetworkApp extends StatefulWidget {
   const NewGenerationNetworkApp({super.key});
   static const primaryBlue = Color(0xFF0B5ED7);
   static const accentYellow = Color(0xFFFFC107);
-  static const softYellow = Color(0xFFFFF5CC);
-  static const inkBlack = Color(0xFF111827);
+
+
   @override
   State<NewGenerationNetworkApp> createState() => _NewGenerationNetworkAppState();
 }
@@ -109,7 +109,7 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: IndexedStack(index: index, children: pages),
       bottomNavigationBar: NavigationBar(
-        indicatorColor: NewGenerationNetworkApp.softYellow,
+        indicatorColor: const Color(0xFFFFF5CC),
         selectedIndex: index,
         onDestinationSelected: (value) => setState(() => index = value),
         destinations: const [
