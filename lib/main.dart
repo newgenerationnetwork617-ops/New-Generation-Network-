@@ -23,6 +23,10 @@ Future<void> main() async {
 
 class NewGenerationNetworkApp extends StatefulWidget {
   const NewGenerationNetworkApp({super.key});
+  static const primaryBlue = Color(0xFF0B5ED7);
+  static const accentYellow = Color(0xFFFFC107);
+  static const softYellow = Color(0xFFFFF5CC);
+  static const inkBlack = Color(0xFF111827);
   @override
   State<NewGenerationNetworkApp> createState() => _NewGenerationNetworkAppState();
 }
@@ -62,7 +66,8 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           surface: Colors.white,
         ),
         scaffoldBackgroundColor: const Color(0xFFFFFCF2),
-        cardTheme: const CardThemeData(elevation: 0, margin: EdgeInsets.zero),
+        cardTheme: CardThemeData(elevation: 0, margin: EdgeInsets.zero, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22))),
+        navigationBarTheme: const NavigationBarThemeData(height: 72, elevation: 8),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           foregroundColor: Color(0xFF14213D),
@@ -74,6 +79,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
         useMaterial3: true,
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue, brightness: Brightness.dark).copyWith(secondary: accentYellow),
+        cardTheme: CardThemeData(elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22))),
       ),
       home: SplashScreen(onDone: () => Navigator.of(appNavigatorKey.currentContext!).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()))),
       navigatorKey: appNavigatorKey,
@@ -103,7 +109,6 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: IndexedStack(index: index, children: pages),
       bottomNavigationBar: NavigationBar(
-        backgroundColor: Colors.white,
         indicatorColor: NewGenerationNetworkApp.softYellow,
         selectedIndex: index,
         onDestinationSelected: (value) => setState(() => index = value),
