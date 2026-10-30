@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'admin_dashboard.dart';
+
 const supabaseUrl = 'https://nlhjxoevyatvxstxgnhs.supabase.co';
 const supabasePublishableKey =
     'sb_publishable_QiReFPxygdWtOlRy5Eol6Q_uuubGD7j';
@@ -15,8 +17,6 @@ Future<void> main() async {
 
   runApp(const NewGenerationNetworkApp());
 }
-
-final supabase = Supabase.instance.client;
 
 class NewGenerationNetworkApp extends StatelessWidget {
   const NewGenerationNetworkApp({super.key});
@@ -55,6 +55,19 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('NEW GENERATION NETWORK'),
+        actions: [
+          IconButton(
+            tooltip: 'Admin',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const AdminLoginPage(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.admin_panel_settings_rounded),
+          ),
+        ],
       ),
       body: SafeArea(
         child: ListView(
