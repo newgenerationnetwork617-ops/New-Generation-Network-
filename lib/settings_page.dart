@@ -51,9 +51,15 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: const EdgeInsets.all(16),
         children: [
           section('Appearance', [
-            RadioListTile<ThemeMode>(title: const Text('System default'), subtitle: const Text('Follow your phone appearance'), value: ThemeMode.system, groupValue: widget.currentMode, onChanged: (v) { if (v != null) widget.onThemeChanged(v); }),
-            RadioListTile<ThemeMode>(title: const Text('Light mode'), value: ThemeMode.light, groupValue: widget.currentMode, onChanged: (v) { if (v != null) widget.onThemeChanged(v); }),
-            RadioListTile<ThemeMode>(title: const Text('Dark mode'), value: ThemeMode.dark, groupValue: widget.currentMode, onChanged: (v) { if (v != null) widget.onThemeChanged(v); }),
+            RadioGroup<ThemeMode>(
+              groupValue: widget.currentMode,
+              onChanged: (v) { if (v != null) widget.onThemeChanged(v); },
+              child: const Column(children: [
+                RadioListTile<ThemeMode>(title: Text('System default'), subtitle: Text('Follow your phone appearance'), value: ThemeMode.system),
+                RadioListTile<ThemeMode>(title: Text('Light mode'), value: ThemeMode.light),
+                RadioListTile<ThemeMode>(title: Text('Dark mode'), value: ThemeMode.dark),
+              ]),
+            ),
           ]),
           section('Language', [
             ListTile(
