@@ -1,0 +1,7 @@
+The N.G.N. app uses the World English Bible (WEB), a public-domain Bible translation.
+
+Source data:
+https://github.com/midvash/bible-data
+https://ebible.org/engwebp/copyright.htm
+
+The World English Bible is dedicated to the public domain. The name "World English Bible" is a trademark; the translation text may be copied and distributed freely as described by eBible.org.
