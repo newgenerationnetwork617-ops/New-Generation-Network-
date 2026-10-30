@@ -27,7 +27,7 @@ class BiblePage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
+          const Card(
             child: ListTile(
               leading: const Icon(Icons.offline_bolt_rounded),
               title: const Text('Offline Bible'),
