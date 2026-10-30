@@ -185,12 +185,41 @@ class BibleRepository {
   }
 
   Future<List<Map<String, Object?>>> search(String query) async {
+    final clean = query.trim();
+    if (clean.isEmpty) return const [];
+
+    // Search must cover the whole offline Bible, not only books the user has
+    // previously opened. Import any missing bundled books before querying.
+    for (final book in _books) {
+      await ensureBook(book);
+    }
+
     final db = await _open();
+    final reference = RegExp(r'^(.+?)\\s+(\\d+)(?::(\\d+))?\\
+}
+).firstMatch(clean);
+    if (reference != null) {
+      final requestedBook = reference.group(1)!.trim().toLowerCase();
+      final book = _books.where((b) => b.toLowerCase() == requestedBook).firstOrNull;
+      if (book != null) {
+        final chapter = int.parse(reference.group(2)!);
+        final verse = reference.group(3);
+        return db.query(
+          'verses',
+          columns: ['book', 'chapter', 'verse', 'text'],
+          where: verse == null ? 'book = ? AND chapter = ?' : 'book = ? AND chapter = ? AND verse = ?',
+          whereArgs: verse == null ? [book, chapter] : [book, chapter, int.parse(verse)],
+          orderBy: 'verse ASC',
+          limit: 100,
+        );
+      }
+    }
+
     return db.query(
       'verses',
       columns: ['book', 'chapter', 'verse', 'text'],
-      where: 'text LIKE ?',
-      whereArgs: ['%$query%'],
+      where: 'LOWER(text) LIKE ?',
+      whereArgs: ['%${clean.toLowerCase()}%'],
       orderBy: 'book ASC, chapter ASC, verse ASC',
       limit: 100,
     );
