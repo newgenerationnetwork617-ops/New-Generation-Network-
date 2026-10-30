@@ -13,14 +13,24 @@ void main() {
     );
   });
 
-  testWidgets('N.G.N. home page loads', (WidgetTester tester) async {
+  testWidgets('N.G.N. splash and home load', (WidgetTester tester) async {
     await tester.pumpWidget(const NewGenerationNetworkApp());
 
     expect(find.text('NEW GENERATION NETWORK'), findsOneWidget);
     expect(
-      find.text('Raising a righteous generation for Christ'),
+      find.text('Raising a Righteous Generation for Christ'),
       findsOneWidget,
     );
+
+    await tester.pump(const Duration(milliseconds: 1900));
+    await tester.pumpAndSettle();
+
+    expect(find.text('NEW GENERATION NETWORK'), findsOneWidget);
     expect(find.text('Daily Bible Verse'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Bible'), findsOneWidget);
+    expect(find.text('Devotional'), findsOneWidget);
+    expect(find.text('Teachings'), findsOneWidget);
+    expect(find.text('More'), findsOneWidget);
   });
 }
