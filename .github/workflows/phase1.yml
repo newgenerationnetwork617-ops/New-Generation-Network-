@@ -1,41 +1,11 @@
-name: Phase 1 - Verify Flutter Foundation
+name: Phase 1 - Foundation (Retired)
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
-  verify:
+  foundation:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Generate Flutter platform files
-        run: flutter create --platforms=android .
-
-      - name: Restore project files overwritten by flutter create
-        run: git checkout -- analysis_options.yaml test/widget_test.dart
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Test
-        run: flutter test
+      - name: Phase 1 complete
+        run: echo "Phase 1 is complete. Current verification is handled by Phase 3."
