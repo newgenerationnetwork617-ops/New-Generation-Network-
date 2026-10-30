@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'content_repository.dart';
 
@@ -51,7 +52,7 @@ class DevotionalsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final repo = ContentRepository(SupabaseHolder.client);
+    final repo = ContentRepository(Supabase.instance.client);
     return ContentListPage(
       title: 'Daily Devotionals',
       loader: repo.devotionals,
