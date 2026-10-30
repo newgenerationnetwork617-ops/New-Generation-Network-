@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+const supabaseUrl = 'https://nlhjxoevyatvxstxgnhs.supabase.co';
+const supabasePublishableKey =
+    'sb_publishable_QiReFPxygdWtOlRy5Eol6Q_uuubGD7j';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: supabaseUrl,
+    publishableKey: supabasePublishableKey,
+  );
+
   runApp(const NewGenerationNetworkApp());
 }
+
+final supabase = Supabase.instance.client;
 
 class NewGenerationNetworkApp extends StatelessWidget {
   const NewGenerationNetworkApp({super.key});
