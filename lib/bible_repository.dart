@@ -188,18 +188,24 @@ class BibleRepository {
     final clean = query.trim();
     if (clean.isEmpty) return const [];
 
-    // Search must cover the whole offline Bible, not only books the user has
-    // previously opened. Import any missing bundled books before querying.
     for (final book in _books) {
       await ensureBook(book);
     }
 
     final db = await _open();
-    final reference = RegExp(r'^(.+?)\\s+(\\d+)(?::(\\d+))?\\
-}
-).firstMatch(clean);
-    if (reference != null) {
-      final requestedBook = reference.group(1)!.trim().toLowerCase();
+
+    // Reference search without a regular expression, e.g. John 3:16 or Romans 8.
+    final parts = clean.split(RegExp(r'\\s+'));
+    if (parts.length >= 2) {
+      final last = parts.last;
+      final referenceParts = last.split(':');
+      final chapter = int.tryParse(referenceParts.first);
+      final verse = referenceParts.length == 2
+          ? int.tryParse(referenceParts[1])
+          : null;
+      final requestedBook =
+          parts.sublist(0, parts.length - 1).join(' ').toLowerCase();
+
       String? book;
       for (final candidate in _books) {
         if (candidate.toLowerCase() == requestedBook) {
@@ -207,17 +213,28 @@ class BibleRepository {
           break;
         }
       }
-      if (book != null) {
-        final chapter = int.parse(reference.group(2)!);
-        final verse = reference.group(3);
-        return db.query(
-          'verses',
-          columns: ['book', 'chapter', 'verse', 'text'],
-          where: verse == null ? 'book = ? AND chapter = ?' : 'book = ? AND chapter = ? AND verse = ?',
-          whereArgs: verse == null ? [book, chapter] : [book, chapter, int.parse(verse)],
-          orderBy: 'verse ASC',
-          limit: 100,
-        );
+
+      if (book != null && chapter != null) {
+        if (referenceParts.length == 2 && verse != null) {
+          return db.query(
+            'verses',
+            columns: ['book', 'chapter', 'verse', 'text'],
+            where: 'book = ? AND chapter = ? AND verse = ?',
+            whereArgs: [book, chapter, verse],
+            orderBy: 'verse ASC',
+            limit: 100,
+          );
+        }
+        if (referenceParts.length == 1) {
+          return db.query(
+            'verses',
+            columns: ['book', 'chapter', 'verse', 'text'],
+            where: 'book = ? AND chapter = ?',
+            whereArgs: [book, chapter],
+            orderBy: 'verse ASC',
+            limit: 100,
+          );
+        }
       }
     }
 
