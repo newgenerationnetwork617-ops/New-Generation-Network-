@@ -200,7 +200,13 @@ class BibleRepository {
 ).firstMatch(clean);
     if (reference != null) {
       final requestedBook = reference.group(1)!.trim().toLowerCase();
-      final book = _books.where((b) => b.toLowerCase() == requestedBook).firstOrNull;
+      String? book;
+      for (final candidate in _books) {
+        if (candidate.toLowerCase() == requestedBook) {
+          book = candidate;
+          break;
+        }
+      }
       if (book != null) {
         final chapter = int.parse(reference.group(2)!);
         final verse = reference.group(3);
