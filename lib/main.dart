@@ -35,7 +35,6 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
   ThemeMode themeMode = ThemeMode.system;
   static const primaryBlue = Color(0xFF0B5ED7);
   static const accentYellow = Color(0xFFFFC107);
-  static const softYellow = Color(0xFFFFF5CC);
 
   @override
   void initState() {
