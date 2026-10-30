@@ -100,8 +100,8 @@ class _MainShellState extends State<MainShell> {
     const pages = <Widget>[
       HomeContent(),
       BiblePage(),
-      DevotionalsPage(),
       TeachingsPage(),
+      EventsPage(),
       MorePage(),
     ];
     return Scaffold(
@@ -113,9 +113,9 @@ class _MainShellState extends State<MainShell> {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home_rounded), label: 'Home'),
           NavigationDestination(icon: Icon(Icons.auto_stories_outlined), selectedIcon: Icon(Icons.auto_stories_rounded), label: 'Bible'),
-          NavigationDestination(icon: Icon(Icons.favorite_border_rounded), selectedIcon: Icon(Icons.favorite_rounded), label: 'Devotional'),
-          NavigationDestination(icon: Icon(Icons.play_circle_outline_rounded), selectedIcon: Icon(Icons.play_circle_fill_rounded), label: 'Teachings'),
-          NavigationDestination(icon: Icon(Icons.grid_view_rounded), label: 'More'),
+          NavigationDestination(icon: Icon(Icons.play_circle_outline_rounded), selectedIcon: Icon(Icons.play_circle_fill_rounded), label: 'Media'),
+          NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event_rounded), label: 'Events'),
+          NavigationDestination(icon: Icon(Icons.more_horiz_rounded), label: 'More'),
         ],
       ),
     );
