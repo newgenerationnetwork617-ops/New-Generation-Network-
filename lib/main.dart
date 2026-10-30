@@ -36,7 +36,6 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
   static const primaryBlue = Color(0xFF0B5ED7);
   static const accentYellow = Color(0xFFFFC107);
   static const softYellow = Color(0xFFFFF5CC);
-  static const inkBlack = Color(0xFF111827);
 
   @override
   void initState() {
@@ -251,7 +250,7 @@ class _QuickCard extends StatelessWidget {
         height: 112,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: NewGenerationNetworkApp.softYellow,
+          color: const Color(0xFFFFF5CC),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: const Color(0xFFFFE082)),
         ),
