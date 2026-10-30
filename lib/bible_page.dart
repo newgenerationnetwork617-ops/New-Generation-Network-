@@ -28,7 +28,7 @@ class BiblePage extends StatelessWidget {
           final book = books[index];
           return Card(
             child: ListTile(
-              leading: CircleAvatar(child: Text('$' + '{index + 1}')),
+              leading: CircleAvatar(child: Text('${index + 1}')),
               title: Text(book),
               subtitle: const Text('Chapters and verses available offline'),
               trailing: const Icon(Icons.chevron_right_rounded),
