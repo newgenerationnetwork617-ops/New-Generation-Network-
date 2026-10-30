@@ -124,9 +124,7 @@ class EventsPage extends StatelessWidget {
           leading: const Icon(Icons.event_rounded),
           title: Text(item['title']?.toString() ?? 'Event'),
           subtitle: Text(
-            (item['venue']?.toString() ?? '') +
-                '\n' +
-                (item['starts_at']?.toString() ?? ''),
+            '${item['venue']?.toString() ?? ''}\n${item['starts_at']?.toString() ?? ''}',
           ),
         ),
       ),
