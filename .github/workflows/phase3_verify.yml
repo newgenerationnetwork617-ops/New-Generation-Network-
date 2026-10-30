@@ -49,8 +49,9 @@ jobs:
       - name: Apply N.G.N. Android app icon
         run: |
           python3 - <<'PY'
-          from PIL import Image
+          from PIL import Image, ImageFile
           from pathlib import Path
+          ImageFile.LOAD_TRUNCATED_IMAGES = True
           src = Image.open("assets/branding/app_icon.jpg").convert("RGB")
           sizes = {
               "mipmap-mdpi": 48,
