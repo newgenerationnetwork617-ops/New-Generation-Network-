@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
-
 import 'bible_repository.dart';
 
-class BiblePage extends StatefulWidget {
+class BiblePage extends StatelessWidget {
   const BiblePage({super.key});
 
-  @override
-  State<BiblePage> createState() => _BiblePageState();
-}
-
-class _BiblePageState extends State<BiblePage> {
-  final repository = BibleRepository();
+  static const books = BibleRepository.bookNames;
 
   @override
   Widget build(BuildContext context) {
+    final repository = BibleRepository();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Holy Bible'),
@@ -41,25 +36,26 @@ class _BiblePageState extends State<BiblePage> {
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Old Testament',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+          const Text('Old Testament', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          ...repository.bookNames.take(39).map(_bookTile),
+          ...books.take(39).map((book) => _BookTile(repository: repository, book: book)),
           const SizedBox(height: 16),
-          const Text(
-            'New Testament',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+          const Text('New Testament', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          ...repository.bookNames.skip(39).map(_bookTile),
+          ...books.skip(39).map((book) => _BookTile(repository: repository, book: book)),
         ],
       ),
     );
   }
+}
 
-  Widget _bookTile(String book) {
+class _BookTile extends StatelessWidget {
+  const _BookTile({required this.repository, required this.book});
+  final BibleRepository repository;
+  final String book;
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       child: ListTile(
         leading: const Icon(Icons.menu_book_rounded),
@@ -67,10 +63,7 @@ class _BiblePageState extends State<BiblePage> {
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => BibleBookPage(
-              repository: repository,
-              book: book,
-            ),
+            builder: (_) => BibleBookPage(repository: repository, book: book),
           ),
         ),
       ),
@@ -79,12 +72,7 @@ class _BiblePageState extends State<BiblePage> {
 }
 
 class BibleBookPage extends StatelessWidget {
-  const BibleBookPage({
-    super.key,
-    required this.repository,
-    required this.book,
-  });
-
+  const BibleBookPage({super.key, required this.repository, required this.book});
   final BibleRepository repository;
   final String book;
 
@@ -99,16 +87,8 @@ class BibleBookPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  'Bible data is not ready: ${snapshot.error}',
-                ),
-              ),
-            );
+            return Center(child: Text('Bible data is not ready: ${snapshot.error}'));
           }
-
           final chapters = snapshot.data ?? const [];
           return GridView.builder(
             padding: const EdgeInsets.all(16),
@@ -116,7 +96,6 @@ class BibleBookPage extends StatelessWidget {
               crossAxisCount: 4,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              childAspectRatio: 1.15,
             ),
             itemCount: chapters.length,
             itemBuilder: (context, index) {
@@ -127,19 +106,16 @@ class BibleBookPage extends StatelessWidget {
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => BibleChapterPage(
+                        repository: repository,
                         book: book,
                         chapter: chapter.number,
-                        repository: repository,
                       ),
                     ),
                   ),
                   child: Center(
                     child: Text(
                       '${chapter.number}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -155,14 +131,14 @@ class BibleBookPage extends StatelessWidget {
 class BibleChapterPage extends StatelessWidget {
   const BibleChapterPage({
     super.key,
+    required this.repository,
     required this.book,
     required this.chapter,
-    required this.repository,
   });
 
+  final BibleRepository repository;
   final String book;
   final int chapter;
-  final BibleRepository repository;
 
   @override
   Widget build(BuildContext context) {
@@ -175,16 +151,8 @@ class BibleChapterPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  'Bible data is not ready: ${snapshot.error}',
-                ),
-              ),
-            );
+            return Center(child: Text('Bible data is not ready: ${snapshot.error}'));
           }
-
           final verses = snapshot.data ?? const [];
           return ListView.builder(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 30),
@@ -195,17 +163,11 @@ class BibleChapterPage extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 14),
                 child: RichText(
                   text: TextSpan(
-                    style: DefaultTextStyle.of(context).style.copyWith(
-                          fontSize: 17,
-                          height: 1.6,
-                        ),
+                    style: DefaultTextStyle.of(context).style.copyWith(fontSize: 17, height: 1.6),
                     children: [
                       TextSpan(
                         text: '${verse.number} ',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0B5ED7),
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0B5ED7)),
                       ),
                       TextSpan(text: verse.text),
                     ],
@@ -222,16 +184,12 @@ class BibleChapterPage extends StatelessWidget {
 
 class BibleSearchDelegate extends SearchDelegate<String?> {
   BibleSearchDelegate(this.repository);
-
   final BibleRepository repository;
 
   @override
   List<Widget>? buildActions(BuildContext context) => [
         if (query.isNotEmpty)
-          IconButton(
-            onPressed: () => query = '',
-            icon: const Icon(Icons.clear_rounded),
-          ),
+          IconButton(onPressed: () => query = '', icon: const Icon(Icons.clear_rounded)),
       ];
 
   @override
@@ -248,12 +206,8 @@ class BibleSearchDelegate extends SearchDelegate<String?> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-
         final results = snapshot.data ?? const [];
-        if (results.isEmpty) {
-          return const Center(child: Text('No matching verses found.'));
-        }
-
+        if (results.isEmpty) return const Center(child: Text('No matching verses found.'));
         return ListView.builder(
           padding: const EdgeInsets.all(12),
           itemCount: results.length,
@@ -275,9 +229,7 @@ class BibleSearchDelegate extends SearchDelegate<String?> {
   }
 
   @override
-  Widget buildSuggestions(BuildContext context) {
-    return const Center(
-      child: Text('Search words or phrases in the Bible.'),
-    );
-  }
+  Widget buildSuggestions(BuildContext context) => const Center(
+        child: Text('Search words or phrases in the Bible.'),
+      );
 }
