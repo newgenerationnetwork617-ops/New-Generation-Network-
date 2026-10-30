@@ -72,7 +72,7 @@ class TeachingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final repo = ContentRepository(SupabaseHolder.client);
+    final repo = ContentRepository(Supabase.instance.client);
     return ContentListPage(
       title: 'Teachings & Sermons',
       loader: repo.teachings,
@@ -93,7 +93,7 @@ class AnnouncementsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final repo = ContentRepository(SupabaseHolder.client);
+    final repo = ContentRepository(Supabase.instance.client);
     return ContentListPage(
       title: 'Announcements',
       loader: repo.announcements,
@@ -114,7 +114,7 @@ class EventsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final repo = ContentRepository(SupabaseHolder.client);
+    final repo = ContentRepository(Supabase.instance.client);
     return ContentListPage(
       title: 'Upcoming Events',
       loader: repo.events,
