@@ -4,45 +4,48 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'content_repository.dart';
 import 'offline_media_service.dart';
 
-class ContentListPage extends StatelessWidget {
-  const ContentListPage({
-    super.key,
-    required this.title,
-    required this.loader,
-    required this.emptyMessage,
-    required this.itemBuilder,
-  });
-
+class ContentListPage extends StatefulWidget {
+  const ContentListPage({super.key, required this.title, required this.loader, required this.emptyMessage, required this.itemBuilder});
   final String title;
   final Future<List<Map<String, dynamic>>> Function() loader;
   final String emptyMessage;
   final Widget Function(BuildContext, Map<String, dynamic>) itemBuilder;
+  @override
+  State<ContentListPage> createState() => _ContentListPageState();
+}
 
+class _ContentListPageState extends State<ContentListPage> {
+  late Future<List<Map<String,dynamic>>> future;
+  @override
+  void initState() { super.initState(); future = widget.loader(); }
+  Future<void> refresh() async {
+    final next = widget.loader();
+    setState(() => future = next);
+    await next;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: loader(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final items = snapshot.data ?? const [];
-          if (items.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(emptyMessage, textAlign: TextAlign.center),
-              ),
+      appBar: AppBar(title: Text(widget.title)),
+      body: RefreshIndicator(
+        onRefresh: refresh,
+        child: FutureBuilder<List<Map<String,dynamic>>>(
+          future: future,
+          builder: (context,snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+              return ListView(children: const [SizedBox(height: 220), Center(child: CircularProgressIndicator())]);
+            }
+            final items = snapshot.data ?? const [];
+            if (items.isEmpty) {
+              return ListView(children: [const SizedBox(height: 180), Center(child: Padding(padding: const EdgeInsets.all(24), child: Text(widget.emptyMessage, textAlign: TextAlign.center)))]);
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: items.length,
+              itemBuilder: (context,index) => widget.itemBuilder(context,items[index]),
             );
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: items.length,
-            itemBuilder: (context, index) => itemBuilder(context, items[index]),
-          );
-        },
+          },
+        ),
       ),
     );
   }
