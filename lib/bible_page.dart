@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'bible_repository.dart';
 
@@ -154,7 +155,7 @@ class BibleBookPage extends StatelessWidget {
   }
 }
 
-class BibleChapterPage extends StatelessWidget {
+class BibleChapterPage extends StatefulWidget {
   const BibleChapterPage({
     super.key,
     required this.repository,
@@ -167,11 +168,82 @@ class BibleChapterPage extends StatelessWidget {
   final int chapter;
 
   @override
+  State<BibleChapterPage> createState() => _BibleChapterPageState();
+}
+
+class _BibleChapterPageState extends State<BibleChapterPage> {
+  Set<String> _bookmarks = <String>{};
+
+  String _key(int verse) => '${widget.book}|${widget.chapter}|$verse';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBookmarks();
+  }
+
+  Future<void> _loadBookmarks() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _bookmarks = (prefs.getStringList('bible_bookmarks') ?? const <String>[]).toSet();
+    });
+  }
+
+  Future<void> _toggleBookmark(BibleVerse verse) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = _key(verse.number);
+    setState(() {
+      _bookmarks.contains(key) ? _bookmarks.remove(key) : _bookmarks.add(key);
+    });
+    await prefs.setStringList('bible_bookmarks', _bookmarks.toList());
+  }
+
+  Future<void> _editNote(BibleVerse verse) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'bible_note_${_key(verse.number)}';
+    final controller = TextEditingController(text: prefs.getString(key) ?? '');
+    if (!mounted) return;
+    final note = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Note • ${widget.book} ${widget.chapter}:${verse.number}'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          minLines: 4,
+          maxLines: 8,
+          decoration: const InputDecoration(
+            hintText: 'Write your personal note...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Save')),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (note == null) return;
+    if (note.isEmpty) {
+      await prefs.remove(key);
+    } else {
+      await prefs.setString(key, note);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(note.isEmpty ? 'Note removed.' : 'Note saved on this phone.')),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('$book $chapter')),
+      appBar: AppBar(title: Text('${widget.book} ${widget.chapter}')),
       body: FutureBuilder<List<BibleVerse>>(
-        future: repository.verses(book, chapter),
+        future: widget.repository.verses(widget.book, widget.chapter),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -188,23 +260,59 @@ class BibleChapterPage extends StatelessWidget {
             itemCount: verses.length,
             itemBuilder: (context, index) {
               final verse = verses[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: RichText(
-                  text: TextSpan(
-                    style: DefaultTextStyle.of(context).style.copyWith(
-                          fontSize: 17,
-                          height: 1.6,
-                        ),
+              final bookmarked = _bookmarks.contains(_key(verse.number));
+              return Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextSpan(
-                        text: '${verse.number} ',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0B5ED7),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: DefaultTextStyle.of(context).style.copyWith(
+                                  fontSize: 17,
+                                  height: 1.6,
+                                ),
+                            children: [
+                              TextSpan(
+                                text: '${verse.number} ',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0B5ED7),
+                                ),
+                              ),
+                              TextSpan(text: verse.text),
+                            ],
+                          ),
                         ),
                       ),
-                      TextSpan(text: verse.text),
+                      PopupMenuButton<String>(
+                        tooltip: 'Verse options',
+                        onSelected: (value) {
+                          if (value == 'bookmark') _toggleBookmark(verse);
+                          if (value == 'note') _editNote(verse);
+                        },
+                        itemBuilder: (_) => [
+                          PopupMenuItem(
+                            value: 'bookmark',
+                            child: ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: Icon(bookmarked ? Icons.bookmark_remove_rounded : Icons.bookmark_add_rounded),
+                              title: Text(bookmarked ? 'Remove bookmark' : 'Bookmark verse'),
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'note',
+                            child: ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: Icon(Icons.edit_note_rounded),
+                              title: Text('Write a note'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
