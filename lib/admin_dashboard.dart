@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'admin_content_manager.dart';
+import 'admin_storage_page.dart';
+
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({super.key});
 
@@ -432,6 +435,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           const SizedBox(height: 8),
           const Text('Manage N.G.N. content from inside the app.'),
           const SizedBox(height: 24),
+          _AdminAction(
+            title: 'Manage Existing Content',
+            icon: Icons.edit_note_rounded,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminContentManagerPage())),
+          ),
+          _AdminAction(
+            title: 'Media Storage',
+            icon: Icons.cloud_rounded,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminStoragePage())),
+          ),
+          const SizedBox(height: 8),
           _AdminAction(
             title: 'Daily Bible Verse',
             icon: Icons.menu_book_rounded,
