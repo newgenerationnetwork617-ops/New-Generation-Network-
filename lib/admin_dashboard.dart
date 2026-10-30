@@ -1,0 +1,457 @@
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class AdminLoginPage extends StatefulWidget {
+  const AdminLoginPage({super.key});
+
+  @override
+  State<AdminLoginPage> createState() => _AdminLoginPageState();
+}
+
+class _AdminLoginPageState extends State<AdminLoginPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  bool loading = false;
+  String? error;
+
+  Future<void> login() async {
+    setState(() {
+      loading = true;
+      error = null;
+    });
+
+    try {
+      await Supabase.instance.client.auth.signInWithPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const AdminDashboardPage()),
+      );
+    } on AuthException catch (e) {
+      setState(() => error = e.message);
+    } catch (_) {
+      setState(() => error = 'Unable to sign in. Please try again.');
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('N.G.N. Admin')),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const SizedBox(height: 24),
+          const Text(
+            'Administrator Sign In',
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          const Text('Only authorized N.G.N. administrators can continue.'),
+          const SizedBox(height: 28),
+          TextField(
+            controller: emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              labelText: 'Admin email',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: passwordController,
+            obscureText: true,
+            decoration: const InputDecoration(
+              labelText: 'Password',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (error != null)
+            Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          const SizedBox(height: 8),
+          FilledButton(
+            onPressed: loading ? null : login,
+            child: Text(loading ? 'Signing in...' : 'Sign in'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AdminDashboardPage extends StatefulWidget {
+  const AdminDashboardPage({super.key});
+
+  @override
+  State<AdminDashboardPage> createState() => _AdminDashboardPageState();
+}
+
+class _AdminDashboardPageState extends State<AdminDashboardPage> {
+  final supabase = Supabase.instance.client;
+  bool checking = true;
+  bool allowed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    checkAdmin();
+  }
+
+  Future<void> checkAdmin() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const AdminLoginPage()),
+        );
+      }
+      return;
+    }
+
+    final row = await supabase
+        .from('admin_members')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+    if (!mounted) return;
+    setState(() {
+      allowed = row != null;
+      checking = false;
+    });
+
+    if (row == null) {
+      await supabase.auth.signOut();
+      if (!mounted) return;
+      setState(() => checking = false);
+    }
+  }
+
+  Future<void> signOut() async {
+    await supabase.auth.signOut();
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const AdminLoginPage()),
+    );
+  }
+
+  Future<void> addBibleVerse() async {
+    final reference = TextEditingController();
+    final verse = TextEditingController();
+    final date = TextEditingController(
+      text: DateTime.now().toIso8601String().substring(0, 10),
+    );
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Add Daily Bible Verse'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(controller: date, decoration: const InputDecoration(labelText: 'Date (YYYY-MM-DD)')),
+              TextField(controller: reference, decoration: const InputDecoration(labelText: 'Bible reference')),
+              TextField(controller: verse, maxLines: 4, decoration: const InputDecoration(labelText: 'Verse text')),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              await supabase.from('daily_bible_verses').upsert({
+                'verse_date': date.text.trim(),
+                'reference': reference.text.trim(),
+                'verse_text': verse.text.trim(),
+                'updated_at': DateTime.now().toIso8601String(),
+              });
+              if (mounted) Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    reference.dispose();
+    verse.dispose();
+    date.dispose();
+  }
+
+  Future<void> addDevotional() async {
+    final title = TextEditingController();
+    final theme = TextEditingController();
+    final bible = TextEditingController();
+    final message = TextEditingController();
+    final application = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Add Devotional'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
+              TextField(controller: theme, decoration: const InputDecoration(labelText: 'Theme')),
+              TextField(controller: bible, decoration: const InputDecoration(labelText: 'Bible verse')),
+              TextField(controller: message, maxLines: 5, decoration: const InputDecoration(labelText: 'Devotional message')),
+              TextField(controller: application, maxLines: 4, decoration: const InputDecoration(labelText: 'Life application')),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              await supabase.from('devotionals').insert({
+                'title': title.text.trim(),
+                'theme': theme.text.trim(),
+                'bible_reference': bible.text.trim(),
+                'message': message.text.trim(),
+                'life_application': application.text.trim(),
+                'published_at': DateTime.now().toIso8601String(),
+              });
+              if (mounted) Navigator.pop(context);
+            },
+            child: const Text('Publish'),
+          ),
+        ],
+      ),
+    );
+
+    title.dispose();
+    theme.dispose();
+    bible.dispose();
+    message.dispose();
+    application.dispose();
+  }
+
+  Future<void> addTeaching() async {
+    final title = TextEditingController();
+    final speaker = TextEditingController();
+    final description = TextEditingController();
+    final url = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Add Teaching'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
+              TextField(controller: speaker, decoration: const InputDecoration(labelText: 'Speaker')),
+              TextField(controller: description, maxLines: 3, decoration: const InputDecoration(labelText: 'Description')),
+              TextField(controller: url, decoration: const InputDecoration(labelText: 'YouTube or audio URL')),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              await supabase.from('teachings').insert({
+                'title': title.text.trim(),
+                'speaker': speaker.text.trim(),
+                'description': description.text.trim(),
+                'youtube_url': url.text.trim(),
+                'published_at': DateTime.now().toIso8601String(),
+              });
+              if (mounted) Navigator.pop(context);
+            },
+            child: const Text('Publish'),
+          ),
+        ],
+      ),
+    );
+
+    title.dispose();
+    speaker.dispose();
+    description.dispose();
+    url.dispose();
+  }
+
+  Future<void> addAnnouncement() async {
+    final title = TextEditingController();
+    final body = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Add Announcement'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
+            TextField(controller: body, maxLines: 4, decoration: const InputDecoration(labelText: 'Message')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              await supabase.from('announcements').insert({
+                'title': title.text.trim(),
+                'body': body.text.trim(),
+                'published_at': DateTime.now().toIso8601String(),
+              });
+              if (mounted) Navigator.pop(context);
+            },
+            child: const Text('Publish'),
+          ),
+        ],
+      ),
+    );
+
+    title.dispose();
+    body.dispose();
+  }
+
+  Future<void> addEvent() async {
+    final title = TextEditingController();
+    final description = TextEditingController();
+    final venue = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Add Event'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: title, decoration: const InputDecoration(labelText: 'Event title')),
+            TextField(controller: description, decoration: const InputDecoration(labelText: 'Description')),
+            TextField(controller: venue, decoration: const InputDecoration(labelText: 'Venue')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              await supabase.from('events').insert({
+                'title': title.text.trim(),
+                'description': description.text.trim(),
+                'venue': venue.text.trim(),
+                'starts_at': DateTime.now().add(const Duration(days: 1)).toIso8601String(),
+                'published': true,
+              });
+              if (mounted) Navigator.pop(context);
+            },
+            child: const Text('Publish'),
+          ),
+        ],
+      ),
+    );
+
+    title.dispose();
+    description.dispose();
+    venue.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (checking) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (!allowed) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Admin Access')),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'This account is not authorized as an N.G.N. administrator.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('N.G.N. Admin Dashboard'),
+        actions: [
+          IconButton(onPressed: signOut, icon: const Icon(Icons.logout)),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const Text(
+            'Content Management',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          const Text('Manage N.G.N. content from inside the app.'),
+          const SizedBox(height: 24),
+          _AdminAction(
+            title: 'Daily Bible Verse',
+            icon: Icons.menu_book_rounded,
+            onTap: addBibleVerse,
+          ),
+          _AdminAction(
+            title: 'Daily Devotional',
+            icon: Icons.auto_stories_rounded,
+            onTap: addDevotional,
+          ),
+          _AdminAction(
+            title: 'Teachings & Sermons',
+            icon: Icons.play_circle_fill_rounded,
+            onTap: addTeaching,
+          ),
+          _AdminAction(
+            title: 'Announcements',
+            icon: Icons.campaign_rounded,
+            onTap: addAnnouncement,
+          ),
+          _AdminAction(
+            title: 'Events',
+            icon: Icons.event_rounded,
+            onTap: addEvent,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdminAction extends StatelessWidget {
+  const _AdminAction({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(title),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+        onTap: onTap,
+      ),
+    );
+  }
+}
