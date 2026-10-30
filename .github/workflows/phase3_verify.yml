@@ -45,10 +45,25 @@ jobs:
 
       - name: Apply N.G.N. Android app icon
         run: |
-          for dir in android/app/src/main/res/mipmap-*; do
-            rm -f "$dir/ic_launcher.png" "$dir/ic_launcher.webp" "$dir/ic_launcher.jpg"
-            cp assets/branding/app_icon.jpg "$dir/ic_launcher.jpg"
-          done
+          python3 - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          src = Image.open("assets/branding/app_icon.jpg").convert("RGB")
+          sizes = {
+              "mipmap-mdpi": 48,
+              "mipmap-hdpi": 72,
+              "mipmap-xhdpi": 96,
+              "mipmap-xxhdpi": 144,
+              "mipmap-xxxhdpi": 192,
+          }
+          for folder, size in sizes.items():
+              out = Path("android/app/src/main/res") / folder
+              out.mkdir(parents=True, exist_ok=True)
+              src.resize((size, size), Image.Resampling.LANCZOS).save(out / "ic_launcher.png", "PNG")
+          PY
+
+      - name: Install icon image tooling
+        run: python3 -m pip install --quiet Pillow
 
       - name: Prepare Bible data
         run: bash scripts/prepare_bible_data.sh
