@@ -23,7 +23,7 @@ class _AdminStoragePageState extends State<AdminStoragePage> {
     setState(() => loading = true);
     try {
       final result = await client.storage.from('ngn-media').list(
-        options: const SearchOptions(limit: 100, sortBy: SortBy(column: 'created_at', order: 'desc')),
+        searchOptions: const SearchOptions(limit: 100, sortBy: SortBy(column: 'created_at', order: 'desc')),
       );
       if (mounted) setState(() => files = result);
     } on StorageException catch (e) {
