@@ -15,7 +15,7 @@ class _AdminContentManagerPageState extends State<AdminContentManagerPage> {
 
   static const configs = <String, List<String>>{
     'devotionals': ['title','theme','bible_reference','message','life_application','prayer','memory_verse'],
-    'teachings': ['title','speaker','description','youtube_url','audio_url','content_type','series_name','thumbnail_url'],
+    'teachings': ['title','speaker','description','youtube_url','audio_url','content_type','series_name','thumbnail_url','media_url'],
     'announcements': ['title','body'],
     'events': ['title','description','venue','starts_at'],
     'daily_bible_verses': ['verse_date','reference','verse_text'],
