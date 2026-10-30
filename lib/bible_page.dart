@@ -29,9 +29,9 @@ class BiblePage extends StatelessWidget {
         children: [
           const Card(
             child: ListTile(
-              leading: const Icon(Icons.offline_bolt_rounded),
-              title: const Text('Offline Bible'),
-              subtitle: const Text(
+              leading: Icon(Icons.offline_bolt_rounded),
+              title: Text('Offline Bible'),
+              subtitle: Text(
                 'World English Bible (WEB) • 66 books • stored locally',
               ),
             ),
