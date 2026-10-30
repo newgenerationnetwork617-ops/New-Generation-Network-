@@ -1,4 +1,4 @@
-name: Phase 3 - Verify Bible and App
+name: Phase 3 - Verify and Build Android
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  verify:
+  verify-and-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -42,3 +42,13 @@ jobs:
 
       - name: Test
         run: flutter test
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ngn-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
