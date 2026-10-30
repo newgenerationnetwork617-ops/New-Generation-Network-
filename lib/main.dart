@@ -76,6 +76,18 @@ class HomePage extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           children: [
             const SizedBox(height: 8),
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Image.asset(
+                  'assets/branding/team_logo.jpg',
+                  width: 180,
+                  height: 180,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
             const Text('Raising a righteous generation for Christ.', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             const Text('Faith. Hope. Truth. Christ.', style: TextStyle(fontSize: 16)),
