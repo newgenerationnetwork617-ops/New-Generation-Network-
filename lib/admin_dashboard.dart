@@ -33,7 +33,10 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     } on AuthException catch (e) {
       setState(() => error = e.message);
     } catch (_) {
-      setState(() => error = 'Unable to sign in. Please try again.');
+      setState(
+        () => error =
+            'Unable to connect. Check your internet connection and try again.',
+      );
     } finally {
       if (mounted) setState(() => loading = false);
     }
