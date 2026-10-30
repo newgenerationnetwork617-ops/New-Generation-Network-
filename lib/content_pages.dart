@@ -71,17 +71,81 @@ class DevotionalsPage extends StatelessWidget {
   }
 }
 
-class TeachingsPage extends StatelessWidget {
+class TeachingsPage extends StatefulWidget {
   const TeachingsPage({super.key});
+  @override
+  State<TeachingsPage> createState() => _TeachingsPageState();
+}
+
+class _TeachingsPageState extends State<TeachingsPage> {
+  final repo = ContentRepository(Supabase.instance.client);
+  final search = TextEditingController();
+  late Future<List<Map<String,dynamic>>> future;
+  String query = '';
+
+  @override
+  void initState() { super.initState(); future = repo.teachings(); }
+  @override
+  void dispose() { search.dispose(); super.dispose(); }
+
+  Future<void> refresh() async {
+    final next = repo.teachings();
+    setState(() => future = next);
+    await next;
+  }
+
+  bool matches(Map<String,dynamic> item) {
+    if (query.trim().isEmpty) return true;
+    final q = query.toLowerCase();
+    final text = [
+      item['title'], item['speaker'], item['description'],
+      item['series_name'], item['content_type'],
+    ].where((v) => v != null).join(' ').toLowerCase();
+    return text.contains(q);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final repo = ContentRepository(Supabase.instance.client);
-    return ContentListPage(
-      title: 'Teachings & Sermons',
-      loader: repo.teachings,
-      emptyMessage: 'No published teachings yet.',
-      itemBuilder: (_, item) => _TeachingCard(item: item),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Teachings & Sermons')),
+      body: RefreshIndicator(
+        onRefresh: refresh,
+        child: FutureBuilder<List<Map<String,dynamic>>>(
+          future: future,
+          builder: (context,snapshot) {
+            final all = snapshot.data ?? const <Map<String,dynamic>>[];
+            final items = all.where(matches).toList();
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                TextField(
+                  controller: search,
+                  onChanged: (value) => setState(() => query = value),
+                  decoration: InputDecoration(
+                    hintText: 'Search title, speaker, topic or series',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: query.isEmpty ? null : IconButton(
+                      onPressed: () { search.clear(); setState(() => query = ''); },
+                      icon: const Icon(Icons.clear_rounded),
+                    ),
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData)
+                  const Padding(padding: EdgeInsets.only(top: 100), child: Center(child: CircularProgressIndicator()))
+                else if (items.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 100),
+                    child: Center(child: Text(query.isEmpty ? 'No published teachings yet.' : 'No teachings match your search.')),
+                  )
+                else
+                  ...items.map((item) => _TeachingCard(item: item)),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 }
