@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'settings_page.dart';
 
 import 'admin_dashboard.dart';
 import 'bible_page.dart';
@@ -7,6 +10,8 @@ import 'content_pages.dart';
 import 'content_repository.dart';
 
 const supabaseUrl = 'https://nlhjxoevyatvxstxgnhs.supabase.co';
+final appNavigatorKey = GlobalKey<NavigatorState>();
+
 const supabasePublishableKey =
     'sb_publishable_QiReFPxygdWtOlRy5Eol6Q_uuubGD7j';
 
@@ -16,18 +21,40 @@ Future<void> main() async {
   runApp(const NewGenerationNetworkApp());
 }
 
-class NewGenerationNetworkApp extends StatelessWidget {
+class NewGenerationNetworkApp extends StatefulWidget {
   const NewGenerationNetworkApp({super.key});
+  @override
+  State<NewGenerationNetworkApp> createState() => _NewGenerationNetworkAppState();
+}
+
+class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
+  ThemeMode themeMode = ThemeMode.system;
   static const primaryBlue = Color(0xFF0B5ED7);
   static const accentYellow = Color(0xFFFFC107);
   static const softYellow = Color(0xFFFFF5CC);
   static const inkBlack = Color(0xFF111827);
 
   @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((prefs) {
+      final saved = prefs.getString('ngn_theme_mode') ?? 'system';
+      if (mounted) setState(() => themeMode = saved == 'light' ? ThemeMode.light : saved == 'dark' ? ThemeMode.dark : ThemeMode.system);
+    });
+  }
+
+  Future<void> changeTheme(ThemeMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('ngn_theme_mode', mode.name);
+    if (mounted) setState(() => themeMode = mode);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'NEW GENERATION NETWORK',
       debugShowCheckedModeBanner: false,
+      themeMode: themeMode,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue).copyWith(
@@ -43,7 +70,13 @@ class NewGenerationNetworkApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: const MainShell(),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue, brightness: Brightness.dark).copyWith(secondary: accentYellow),
+      ),
+      home: SplashScreen(onDone: () => Navigator.of(appNavigatorKey.currentContext!).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()))),
+      navigatorKey: appNavigatorKey,
     );
   }
 }
@@ -100,15 +133,15 @@ class HomeContent extends StatelessWidget {
           children: [
             Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    'assets/branding/team_logo.jpg',
-                    width: 58,
-                    height: 58,
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
+                Container(
+                  width: 48,
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: NewGenerationNetworkApp.primaryBlue,
+                    borderRadius: BorderRadius.circular(14),
                   ),
+                  child: const Text('N', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
@@ -246,6 +279,7 @@ class MorePage extends StatelessWidget {
           const SizedBox(height: 18),
           _MoreTile(icon: Icons.campaign_rounded, title: 'Announcements', onTap: () => open(context, const AnnouncementsPage())),
           _MoreTile(icon: Icons.event_rounded, title: 'Upcoming Events', onTap: () => open(context, const EventsPage())),
+          _MoreTile(icon: Icons.settings_rounded, title: 'Settings', onTap: () => open(context, SettingsPage(currentMode: context.findAncestorStateOfType<_NewGenerationNetworkAppState>()?.themeMode ?? ThemeMode.system, onThemeChanged: (mode) => context.findAncestorStateOfType<_NewGenerationNetworkAppState>()?.changeTheme(mode)))),
           _MoreTile(icon: Icons.admin_panel_settings_rounded, title: 'Administrator', onTap: () => open(context, const AdminLoginPage())),
         ],
       ),
@@ -272,4 +306,17 @@ class _MoreTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key, required this.onDone});
+  final VoidCallback onDone;
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() { super.initState(); Future.delayed(const Duration(milliseconds: 1800), widget.onDone); }
+  @override
+  Widget build(BuildContext context) => Scaffold(body: Center(child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [Image.asset('assets/branding/team_logo.jpg', width: 150, height: 150, fit: BoxFit.contain), const SizedBox(height: 24), const Text('NEW GENERATION NETWORK', textAlign: TextAlign.center, style: TextStyle(fontSize: 23, fontWeight: FontWeight.w900)), const SizedBox(height: 8), const Text('Raising a Righteous Generation for Christ', textAlign: TextAlign.center)]))));
 }
