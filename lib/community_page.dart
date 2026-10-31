@@ -49,7 +49,7 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
           .maybeSingle();
       final displayName = profile?['display_name']?.toString().trim() ?? '';
       if (!mounted) return;
-      if (displayName.length >= 2) {
+      if (displayName.length >= 2 && displayName != 'N.G.N. Member') {
         setState(() {
           joined = true;
           loading = false;
