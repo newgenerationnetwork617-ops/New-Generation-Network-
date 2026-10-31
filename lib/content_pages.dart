@@ -55,6 +55,33 @@ class _ContentListPageState extends State<ContentListPage> {
 class DevotionalsPage extends StatelessWidget {
   const DevotionalsPage({super.key});
 
+  static const _months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+
+  String _dateLabel(dynamic value) {
+    final date = DateTime.tryParse(value?.toString() ?? '')?.toLocal();
+    if (date == null) return '';
+    return '${_months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  Widget _optionalSection(String heading, dynamic value) {
+    final text = value?.toString().trim() ?? '';
+    if (text.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(heading, style: const TextStyle(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 6),
+          SelectableText(text, style: const TextStyle(height: 1.55)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final repo = ContentRepository(Supabase.instance.client);
@@ -62,12 +89,63 @@ class DevotionalsPage extends StatelessWidget {
       title: 'Daily Devotionals',
       loader: repo.devotionals,
       emptyMessage: 'No published devotionals yet.',
-      itemBuilder: (_, item) => Card(
-        child: ListTile(
-          title: Text(item['title']?.toString() ?? 'Devotional'),
-          subtitle: Text(item['theme']?.toString() ?? ''),
-        ),
-      ),
+      itemBuilder: (context, item) {
+        final theme = item['theme']?.toString().trim() ?? '';
+        final reference = item['bible_reference']?.toString().trim() ?? '';
+        final message = item['message']?.toString().trim() ?? '';
+        final date = _dateLabel(item['published_at']);
+        return Card(
+          margin: const EdgeInsets.only(bottom: 14),
+          clipBehavior: Clip.antiAlias,
+          child: ExpansionTile(
+            tilePadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+            childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
+            leading: const CircleAvatar(
+              backgroundColor: Color(0xFFFFF8E1),
+              child: Icon(Icons.menu_book_rounded, color: Color(0xFF9A7410)),
+            ),
+            title: Text(
+              item['title']?.toString() ?? 'Daily Devotional',
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (date.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(date),
+                ],
+                if (theme.isNotEmpty) ...[
+                  const SizedBox(height: 5),
+                  Text(theme, maxLines: 2, overflow: TextOverflow.ellipsis),
+                ],
+              ],
+            ),
+            children: [
+              if (reference.isNotEmpty) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    reference,
+                    style: const TextStyle(
+                      color: Color(0xFF0B5ED7),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (message.isNotEmpty)
+                SelectableText(message, style: const TextStyle(height: 1.65))
+              else
+                const Text('The devotional message is not available.'),
+              _optionalSection('Life Application', item['life_application']),
+              _optionalSection('Memory Verse', item['memory_verse']),
+              _optionalSection('Prayer', item['prayer']),
+            ],
+          ),
+        );
+      },
     );
   }
 }
