@@ -10,7 +10,6 @@ class InAppNotificationService {
   final client = Supabase.instance.client;
   final ValueNotifier<int> communityUnread = ValueNotifier<int>(0);
   final ValueNotifier<int> announcementsUnread = ValueNotifier<int>(0);
-  RealtimeChannel? _channel;
   bool _started = false;
 
   String _now() => DateTime.now().toUtc().toIso8601String();
@@ -37,7 +36,7 @@ class InAppNotificationService {
     }
 
     await refreshCounts();
-    _channel = client
+    client
         .channel('ngn-in-app-notification-counts')
         .onPostgresChanges(
           event: PostgresChangeEvent.all,
