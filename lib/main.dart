@@ -345,7 +345,12 @@ class _HomeFeatureCard extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () {\n        if (page is AnnouncementsPage) {\n          InAppNotificationService.instance.markAnnouncementsRead();\n        }\n        Navigator.push(context, MaterialPageRoute(builder: (_) => page));\n      },
+      onTap: () {
+        if (page is AnnouncementsPage) {
+          InAppNotificationService.instance.markAnnouncementsRead();
+        }
+        Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+      },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
