@@ -109,7 +109,7 @@ class _AdminStoragePageState extends State<AdminStoragePage> {
     }
 
     final safeName = item.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
-    final path = 'community-files/${DateTime.now().millisecondsSinceEpoch}_$safeName';
+    final path = 'community_${DateTime.now().millisecondsSinceEpoch}_$safeName';
     final mime = _mimeType(item.name);
     var uploaded = false;
     try {
