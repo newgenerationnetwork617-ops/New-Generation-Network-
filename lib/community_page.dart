@@ -36,7 +36,7 @@ class _CommunityAuthPageState extends State<CommunityAuthPage>{
   }
   @override void dispose(){name.dispose();email.dispose();password.dispose();super.dispose();}
   @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('N.G.N. Community')),body:ListView(padding:const EdgeInsets.all(20),children:[
-    const Icon(Icons.groups_rounded,size:56,color:Color(0xFF0B5ED7)),const SizedBox(height:16),Text(createAccount?'Join the Community':'Community Sign In',textAlign:TextAlign.center,style:const TextStyle(fontSize:24,fontWeight:FontWeight.w800)),
+    const CircleAvatar(radius:34,backgroundColor:Color(0xFFE8F0FE),child:Icon(Icons.groups_rounded,size:38,color:Color(0xFF0B5ED7))),const SizedBox(height:16),Text(createAccount?'Join the Community':'Community Sign In',textAlign:TextAlign.center,style:const TextStyle(fontSize:24,fontWeight:FontWeight.w800)),
     const SizedBox(height:8),const Text('Only Community requires an account. The rest of N.G.N. remains open to everyone.',textAlign:TextAlign.center),const SizedBox(height:24),
     if(createAccount)TextField(controller:name,maxLength:40,decoration:const InputDecoration(labelText:'Display name',border:OutlineInputBorder())),if(createAccount)const SizedBox(height:12),
     TextField(controller:email,keyboardType:TextInputType.emailAddress,decoration:const InputDecoration(labelText:'Email',border:OutlineInputBorder())),const SizedBox(height:12),
