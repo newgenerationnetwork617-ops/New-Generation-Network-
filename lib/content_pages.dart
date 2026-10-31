@@ -101,7 +101,7 @@ class _DevotionalsPageState extends State<DevotionalsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final today = DateTime.now();
+    final today = DateTime.now().toUtc().add(const Duration(hours: 1));
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daily Devotional'),
