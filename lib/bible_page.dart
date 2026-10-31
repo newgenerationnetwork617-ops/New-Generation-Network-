@@ -40,7 +40,7 @@ class BiblePage extends StatelessWidget {
         children: [
           const Card(
             child: ListTile(
-              leading: Icon(Icons.offline_bolt_rounded),
+              leading: CircleAvatar(backgroundColor: Color(0xFFE8F0FE), child: Icon(Icons.offline_bolt_rounded, color: Color(0xFF0B5ED7))),
               title: Text('Offline Bible'),
               subtitle: Text(
                 'World English Bible (WEB) • 66 books • stored locally',
@@ -81,7 +81,7 @@ class _BookTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: const Icon(Icons.menu_book_rounded),
+        leading: const CircleAvatar(backgroundColor: Color(0xFFE8F0FE), child: Icon(Icons.menu_book_rounded, color: Color(0xFF0B5ED7))),
         title: Text(book),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: () => Navigator.of(context).push(
