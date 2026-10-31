@@ -26,7 +26,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('NEW GENERATION NETWORK'), findsOneWidget);
-    expect(find.text('Daily Bible Verse'), findsOneWidget);
+    expect(find.text('WORD FOR TODAY'), findsOneWidget);
     expect(find.text('Teachings'), findsOneWidget);
     expect(find.text('Bible Studies'), findsOneWidget);
     expect(find.text('Devotional'), findsOneWidget);
