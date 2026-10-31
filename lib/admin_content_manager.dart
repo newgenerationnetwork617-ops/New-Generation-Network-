@@ -164,13 +164,19 @@ class _AdminContentManagerPageState extends State<AdminContentManagerPage> {
                                 margin: const EdgeInsets.only(bottom: 10),
                                 child: ListTile(
                                   title: Text(title.toString(), style: const TextStyle(fontWeight: FontWeight.w600)),
-                                  subtitle: Column(\n                                    crossAxisAlignment: CrossAxisAlignment.start,\n                                    children: [\n                                      if (scheduleText.isNotEmpty) Text('Publish: $scheduleText'),\n                                      if (row['is_archived'] == true) const Text('Archived — hidden from public', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w700)),\n                                    ],\n                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (scheduleText.isNotEmpty) Text('Publish: $scheduleText'),
+                                      if (row['is_archived'] == true) const Text('Archived — hidden from public', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w700)),
+                                    ],
+                                  ),
                                   trailing: PopupMenuButton<String>(
                                     onSelected: (v) { if (v == 'edit') edit(row); if (v == 'schedule') schedule(row); if (v == 'archive') setArchived(row, true); if (v == 'restore') setArchived(row, false); },
                                     itemBuilder: (_) => [
                                       const PopupMenuItem(value: 'edit', child: Text('Edit')),
                                       if (table != 'daily_bible_verses') const PopupMenuItem(value: 'schedule', child: Text('Schedule publication')),
-                                      if (row['is_archived'] == true) const PopupMenuItem(value: 'restore', child: Text('Restore to public')) else const PopupMenuItem(value: 'archive', child: Text('Archive (keep safe')),
+                                      if (row['is_archived'] == true) const PopupMenuItem(value: 'restore', child: Text('Restore to public')) else const PopupMenuItem(value: 'archive', child: Text('Archive (keep safe)')),
                                     ],
                                   ),
                                 ),
