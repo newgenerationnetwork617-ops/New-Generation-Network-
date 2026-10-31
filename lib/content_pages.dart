@@ -52,31 +52,48 @@ class _ContentListPageState extends State<ContentListPage> {
   }
 }
 
-class DevotionalsPage extends StatelessWidget {
+class DevotionalsPage extends StatefulWidget {
   const DevotionalsPage({super.key});
 
-  static const _months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ];
+  @override
+  State<DevotionalsPage> createState() => _DevotionalsPageState();
+}
 
-  String _dateLabel(dynamic value) {
-    final date = DateTime.tryParse(value?.toString() ?? '')?.toLocal();
-    if (date == null) return '';
-    return '${_months[date.month - 1]} ${date.day}, ${date.year}';
+class _DevotionalsPageState extends State<DevotionalsPage> {
+  final repo = ContentRepository(Supabase.instance.client);
+  late Future<Map<String, dynamic>?> future;
+
+  @override
+  void initState() {
+    super.initState();
+    future = repo.devotionalForDate(DateTime.now());
   }
 
-  Widget _optionalSection(String heading, dynamic value) {
+  Future<void> refresh() async {
+    final next = repo.devotionalForDate(DateTime.now());
+    setState(() => future = next);
+    await next;
+  }
+
+  String _dateLabel(DateTime date) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  Widget _section(String heading, dynamic value) {
     final text = value?.toString().trim() ?? '';
     if (text.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(heading, style: const TextStyle(fontWeight: FontWeight.w800)),
-          const SizedBox(height: 6),
-          SelectableText(text, style: const TextStyle(height: 1.55)),
+          Text(heading, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 8),
+          SelectableText(text, style: const TextStyle(height: 1.65, fontSize: 15)),
         ],
       ),
     );
@@ -84,68 +101,90 @@ class DevotionalsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final repo = ContentRepository(Supabase.instance.client);
-    return ContentListPage(
-      title: 'Daily Devotionals',
-      loader: repo.devotionals,
-      emptyMessage: 'No published devotionals yet.',
-      itemBuilder: (context, item) {
-        final theme = item['theme']?.toString().trim() ?? '';
-        final reference = item['bible_reference']?.toString().trim() ?? '';
-        final message = item['message']?.toString().trim() ?? '';
-        final date = _dateLabel(item['published_at']);
-        return Card(
-          margin: const EdgeInsets.only(bottom: 14),
-          clipBehavior: Clip.antiAlias,
-          child: ExpansionTile(
-            tilePadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-            childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
-            leading: const CircleAvatar(
-              backgroundColor: Color(0xFFFFF8E1),
-              child: Icon(Icons.menu_book_rounded, color: Color(0xFF9A7410)),
-            ),
-            title: Text(
-              item['title']?.toString() ?? 'Daily Devotional',
-              style: const TextStyle(fontWeight: FontWeight.w800),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (date.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(date),
-                ],
-                if (theme.isNotEmpty) ...[
-                  const SizedBox(height: 5),
-                  Text(theme, maxLines: 2, overflow: TextOverflow.ellipsis),
-                ],
-              ],
-            ),
-            children: [
-              if (reference.isNotEmpty) ...[
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    reference,
-                    style: const TextStyle(
-                      color: Color(0xFF0B5ED7),
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
-              if (message.isNotEmpty)
-                SelectableText(message, style: const TextStyle(height: 1.65))
-              else
-                const Text('The devotional message is not available.'),
-              _optionalSection('Life Application', item['life_application']),
-              _optionalSection('Memory Verse', item['memory_verse']),
-              _optionalSection('Prayer', item['prayer']),
-            ],
+    final today = DateTime.now();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Daily Devotional'),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh today’s reading',
+            onPressed: refresh,
+            icon: const Icon(Icons.refresh_rounded),
           ),
-        );
-      },
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: refresh,
+        child: FutureBuilder<Map<String, dynamic>?>(
+          future: future,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+              return ListView(children: const [
+                SizedBox(height: 220),
+                Center(child: CircularProgressIndicator()),
+              ]);
+            }
+            final item = snapshot.data;
+            if (item == null) {
+              return ListView(
+                padding: const EdgeInsets.all(24),
+                children: [
+                  const SizedBox(height: 110),
+                  const Icon(Icons.menu_book_rounded, size: 58, color: Color(0xFF0B5ED7)),
+                  const SizedBox(height: 18),
+                  const Text('Today’s devotional is not available yet.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 8),
+                  Text(_dateLabel(today),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  const SizedBox(height: 12),
+                  const Text('Please check again later or refresh this page.',
+                      textAlign: TextAlign.center),
+                ],
+              );
+            }
+            final theme = item['theme']?.toString().trim() ?? '';
+            final reference = item['bible_reference']?.toString().trim() ?? '';
+            final message = item['message']?.toString().trim() ?? '';
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 36),
+              children: [
+                Text(_dateLabel(today),
+                    style: const TextStyle(color: Color(0xFF0B5ED7), fontWeight: FontWeight.w800)),
+                const SizedBox(height: 12),
+                Text(item['title']?.toString() ?? 'Daily Devotional',
+                    style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w900, height: 1.2)),
+                if (theme.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(theme, style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                ],
+                const SizedBox(height: 22),
+                if (reference.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0B5ED7).withValues(alpha: .08),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Text(reference,
+                        style: const TextStyle(color: Color(0xFF0B5ED7), fontWeight: FontWeight.w900)),
+                  ),
+                const SizedBox(height: 18),
+                SelectableText(
+                  message.isEmpty ? 'The devotional message is not available.' : message,
+                  style: const TextStyle(height: 1.7, fontSize: 16),
+                ),
+                _section('Life Application', item['life_application']),
+                _section('Memory Verse', item['memory_verse']),
+                _section('Prayer', item['prayer']),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 }
