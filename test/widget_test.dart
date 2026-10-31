@@ -36,6 +36,6 @@ void main() {
     expect(find.text('Bible'), findsOneWidget);
     expect(find.text('Media'), findsOneWidget);
     expect(find.text('Events'), findsWidgets);
-    expect(find.text('More'), findsOneWidget);
+    expect(find.text('Community'), findsOneWidget);
   });
 }
