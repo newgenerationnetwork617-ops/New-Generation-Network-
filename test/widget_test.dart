@@ -25,12 +25,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1900));
     await tester.pumpAndSettle();
 
-    expect(find.text('NEW GENERATION'), findsOneWidget);
-    expect(find.text('NETWORK'), findsOneWidget);
+    expect(find.text('NEW GENERATION NETWORK'), findsOneWidget);
     expect(find.text('Daily Bible Verse'), findsOneWidget);
     expect(find.text('Teachings'), findsOneWidget);
     expect(find.text('Bible Studies'), findsOneWidget);
-    expect(find.text('Daily Devotional'), findsOneWidget);
+    expect(find.text('Devotional'), findsOneWidget);
     expect(find.text('Latest Uploads'), findsOneWidget);
     expect(find.text('Announcements'), findsOneWidget);
     expect(find.text('Home'), findsOneWidget);
