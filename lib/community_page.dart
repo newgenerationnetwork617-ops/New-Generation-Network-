@@ -90,13 +90,12 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
     } on AuthException catch (joinError) {
       if (mounted) {
         setState(() => error =
-            'Guest access is not enabled yet. Please contact the N.G.N. administrator. ' +
-            joinError.message);
+            'Guest access is not enabled yet. Please contact the N.G.N. administrator. ${joinError.message}');
       }
     } on PostgrestException catch (dbError) {
       if (mounted) setState(() => error = dbError.message);
     } catch (joinError) {
-      if (mounted) setState(() => error = 'Could not join the Community: ' + joinError.toString());
+      if (mounted) setState(() => error = 'Could not join the Community: ${joinError.toString()}');
     } finally {
       if (mounted) setState(() => joining = false);
     }
