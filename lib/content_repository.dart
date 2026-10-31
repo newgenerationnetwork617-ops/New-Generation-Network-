@@ -67,9 +67,12 @@ class ContentRepository {
       _fetchList('devotionals', 'ngn_devotionals', 'published_at');
 
   Future<Map<String, dynamic>?> devotionalForDate(DateTime date) async {
+    // Devotionals follow Nigeria time (Africa/Lagos, UTC+1) for every user.
+    final lagosDate = date.toUtc().add(const Duration(hours: 1));
     final keyDate =
-        '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    final start = DateTime(date.year, date.month, date.day);
+        '${lagosDate.year.toString().padLeft(4, '0')}-${lagosDate.month.toString().padLeft(2, '0')}-${lagosDate.day.toString().padLeft(2, '0')}';
+    final start = DateTime.utc(lagosDate.year, lagosDate.month, lagosDate.day)
+        .subtract(const Duration(hours: 1));
     final end = start.add(const Duration(days: 1));
     try {
       final rows = await client
@@ -101,11 +104,12 @@ class ContentRepository {
       }
       final cached = await _cachedList('ngn_devotionals');
       for (final item in cached) {
-        final published = DateTime.tryParse(item['published_at']?.toString() ?? '')?.toLocal();
+        final publishedUtc = DateTime.tryParse(item['published_at']?.toString() ?? '')?.toUtc();
+        final published = publishedUtc?.add(const Duration(hours: 1));
         if (published != null &&
-            published.year == date.year &&
-            published.month == date.month &&
-            published.day == date.day) {
+            published.year == lagosDate.year &&
+            published.month == lagosDate.month &&
+            published.day == lagosDate.day) {
           return item;
         }
       }
@@ -124,7 +128,7 @@ class ContentRepository {
 
   Future<Map<String, dynamic>?> dailyVerse() async {
     try {
-      final today = DateTime.now().toIso8601String().substring(0, 10);
+      final today = DateTime.now().toUtc().add(const Duration(hours: 1)).toIso8601String().substring(0, 10);
       final row = await client
           .from('daily_bible_verses')
           .select()
@@ -138,7 +142,7 @@ class ContentRepository {
       }
     } catch (_) {}
 
-    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final today = DateTime.now().toUtc().add(const Duration(hours: 1)).toIso8601String().substring(0, 10);
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString('ngn_daily_verse_$today') ??
         prefs.getString('ngn_daily_verse');
