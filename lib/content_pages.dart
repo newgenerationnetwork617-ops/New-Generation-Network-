@@ -163,7 +163,7 @@ class AnnouncementsPage extends StatelessWidget {
       emptyMessage: 'No published announcements yet.',
       itemBuilder: (_, item) => Card(
         child: ListTile(
-          leading: const Icon(Icons.campaign_rounded),
+          leading: const CircleAvatar(backgroundColor: Color(0xFFFFF8E1), child: Icon(Icons.campaign_rounded, color: Color(0xFF9A7410))),
           title: Text(item['title']?.toString() ?? 'Announcement'),
           subtitle: Text(item['body']?.toString() ?? ''),
         ),
@@ -184,7 +184,7 @@ class EventsPage extends StatelessWidget {
       emptyMessage: 'No upcoming events yet.',
       itemBuilder: (_, item) => Card(
         child: ListTile(
-          leading: const Icon(Icons.event_rounded),
+          leading: const CircleAvatar(backgroundColor: Color(0xFFEAF5EC), child: Icon(Icons.event_rounded, color: Color(0xFF2E7D32))),
           title: Text(item['title']?.toString() ?? 'Event'),
           subtitle: Text(
             '${item['venue']?.toString() ?? ''}\n${item['starts_at']?.toString() ?? ''}',
