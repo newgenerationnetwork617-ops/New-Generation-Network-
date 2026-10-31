@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'content_repository.dart';
 import 'offline_media_service.dart';
@@ -208,11 +209,33 @@ class _TeachingCardState extends State<_TeachingCard> {
   String? localPath;
 
   String get id => widget.item['id']?.toString() ?? widget.item['title']?.toString() ?? 'teaching';
+  String get youtubeUrl => widget.item['youtube_url']?.toString().trim() ?? '';
+  String get thumbnailUrl => widget.item['thumbnail_url']?.toString().trim() ?? '';
   String get mediaUrl {
     final direct = widget.item['media_url']?.toString().trim() ?? '';
     if (direct.isNotEmpty) return direct;
-    final audio = widget.item['audio_url']?.toString().trim() ?? '';
-    return audio;
+    return widget.item['audio_url']?.toString().trim() ?? '';
+  }
+
+  String? get youtubeId {
+    if (youtubeUrl.isEmpty) return null;
+    final uri = Uri.tryParse(youtubeUrl);
+    if (uri == null) return null;
+    if (uri.host.contains('youtu.be') && uri.pathSegments.isNotEmpty) return uri.pathSegments.first;
+    if (uri.host.contains('youtube.com')) {
+      if (uri.queryParameters['v']?.isNotEmpty == true) return uri.queryParameters['v'];
+      final i = uri.pathSegments.indexOf('shorts');
+      if (i >= 0 && i + 1 < uri.pathSegments.length) return uri.pathSegments[i + 1];
+      final e = uri.pathSegments.indexOf('embed');
+      if (e >= 0 && e + 1 < uri.pathSegments.length) return uri.pathSegments[e + 1];
+    }
+    return null;
+  }
+
+  String get displayThumbnail {
+    if (thumbnailUrl.isNotEmpty) return thumbnailUrl;
+    final videoId = youtubeId;
+    return videoId == null ? '' : 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
   }
 
   @override
@@ -221,6 +244,14 @@ class _TeachingCardState extends State<_TeachingCard> {
   Future<void> load() async {
     final saved = await offline.saved();
     if (mounted) setState(() => localPath = saved[id]);
+  }
+
+  Future<void> watch() async {
+    if (youtubeUrl.isEmpty) return;
+    final ok = await launchUrl(Uri.parse(youtubeUrl), mode: LaunchMode.externalApplication);
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not open this teaching video.')));
+    }
   }
 
   Future<void> download() async {
@@ -249,27 +280,42 @@ class _TeachingCardState extends State<_TeachingCard> {
 
   @override
   Widget build(BuildContext context) {
+    final description = widget.item['description']?.toString().trim() ?? '';
+    final speaker = widget.item['speaker']?.toString().trim() ?? '';
+    final image = displayThumbnail;
     return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        leading: const Icon(Icons.play_circle_fill_rounded),
-        title: Text(widget.item['title']?.toString() ?? 'Teaching'),
-        subtitle: Text('${widget.item['speaker']?.toString() ?? ''}${localPath == null ? '' : '\nAvailable offline'}'),
-        trailing: busy
-            ? const SizedBox(width: 24,height: 24,child: CircularProgressIndicator(strokeWidth: 2))
-            : PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'download') download();
-                  if (value == 'open' && localPath != null) offline.open(localPath!);
-                  if (value == 'remove') remove();
-                },
-                itemBuilder: (_) => [
-                  if (localPath == null) const PopupMenuItem(value: 'download', child: Text('Download for offline')),
-                  if (localPath != null) const PopupMenuItem(value: 'open', child: Text('Open offline copy')),
-                  if (localPath != null) const PopupMenuItem(value: 'remove', child: Text('Remove download')),
-                ],
+      margin: const EdgeInsets.only(bottom: 16),
+      clipBehavior: Clip.antiAlias,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (image.isNotEmpty)
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Image.network(
+              image,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: const Center(child: Icon(Icons.ondemand_video_rounded, size: 52)),
               ),
-      ),
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(widget.item['title']?.toString() ?? 'Teaching', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            if (speaker.isNotEmpty) ...[const SizedBox(height: 5), Text(speaker, style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF0B5ED7)))],
+            if (description.isNotEmpty) ...[const SizedBox(height: 9), Text(description, maxLines: 3, overflow: TextOverflow.ellipsis)],
+            if (localPath != null) ...[const SizedBox(height: 8), const Row(children: [Icon(Icons.download_done_rounded, size: 17), SizedBox(width: 5), Text('Available offline')])],
+            const SizedBox(height: 14),
+            Row(children: [
+              if (youtubeUrl.isNotEmpty) Expanded(child: FilledButton.icon(onPressed: watch, icon: const Icon(Icons.play_arrow_rounded), label: const Text('Watch'))),
+              if (youtubeUrl.isNotEmpty && mediaUrl.isNotEmpty) const SizedBox(width: 8),
+              if (mediaUrl.isNotEmpty) Expanded(child: OutlinedButton.icon(onPressed: busy ? null : (localPath == null ? download : () => offline.open(localPath!)), icon: Icon(localPath == null ? Icons.download_rounded : Icons.play_circle_outline_rounded), label: Text(localPath == null ? 'Offline' : 'Open'))),
+              if (localPath != null) IconButton(onPressed: remove, tooltip: 'Remove offline copy', icon: const Icon(Icons.delete_outline_rounded)),
+            ]),
+          ]),
+        ),
+      ]),
     );
   }
 }
