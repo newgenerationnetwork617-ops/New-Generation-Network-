@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -67,54 +68,29 @@ class ContentRepository {
       _fetchList('devotionals', 'ngn_devotionals', 'published_at');
 
   Future<Map<String, dynamic>?> devotionalForDate(DateTime date) async {
-    // Devotionals follow Nigeria time (Africa/Lagos, UTC+1) for every user.
+    // Daily devotionals are bundled in the app and work without a network.
+    // NGN uses Nigeria time (UTC+1) to select the correct calendar reading.
     final lagosDate = date.toUtc().add(const Duration(hours: 1));
     final keyDate =
         '${lagosDate.year.toString().padLeft(4, '0')}-${lagosDate.month.toString().padLeft(2, '0')}-${lagosDate.day.toString().padLeft(2, '0')}';
-    final start = DateTime.utc(lagosDate.year, lagosDate.month, lagosDate.day)
-        .subtract(const Duration(hours: 1));
-    final end = start.add(const Duration(days: 1));
+    final monthAsset =
+        'assets/devotionals/spurgeon-morning/${keyDate.substring(0, 7)}.json';
     try {
-      final rows = await client
-          .from('devotionals')
-          .select()
-          .gte('published_at', start.toUtc().toIso8601String())
-          .lt('published_at', end.toUtc().toIso8601String())
-          .order('published_at');
-      final data = List<Map<String, dynamic>>.from(
-        (rows as List).map((row) => Map<String, dynamic>.from(row)),
-      );
-      final prefs = await SharedPreferences.getInstance();
-      if (data.isEmpty) {
-        final saved = prefs.getString('ngn_devotional_day_$keyDate');
-        if (saved != null) {
-          try { return Map<String, dynamic>.from(jsonDecode(saved) as Map); } catch (_) {}
+      final raw = await rootBundle.loadString(monthAsset);
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      final entries = decoded['entries'] as List<dynamic>? ?? const [];
+      for (final value in entries) {
+        if (value is Map) {
+          final item = Map<String, dynamic>.from(value);
+          if ((item['published_at']?.toString() ?? '').startsWith(keyDate)) {
+            return item;
+          }
         }
-        return null;
       }
-      await prefs.setString('ngn_devotional_day_$keyDate', jsonEncode(data.first));
-      return data.first;
     } catch (_) {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString('ngn_devotional_day_$keyDate');
-      if (raw != null) {
-        try {
-          return Map<String, dynamic>.from(jsonDecode(raw) as Map);
-        } catch (_) {}
-      }
-      final cached = await _cachedList('ngn_devotionals');
-      for (final item in cached) {
-        final publishedUtc = DateTime.tryParse(item['published_at']?.toString() ?? '')?.toUtc();
-        final published = publishedUtc?.add(const Duration(hours: 1));
-        if (published != null &&
-            published.year == lagosDate.year &&
-            published.month == lagosDate.month &&
-            published.day == lagosDate.day) {
-          return item;
-        }
-      }
-      return null;
+      // The selected date may be outside the range bundled in this app.
     }
+    return null;
   }
 
   Future<List<Map<String, dynamic>>> teachings() =>
