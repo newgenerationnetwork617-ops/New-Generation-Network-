@@ -47,6 +47,25 @@ jobs:
           p.write_text(s)
           PY
 
+      - name: Install N.G.N. Android app icon
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          src = Image.open("assets/branding/ngn_app_icon.png").convert("RGB")
+          sizes = {"mipmap-mdpi":48,"mipmap-hdpi":72,"mipmap-xhdpi":96,"mipmap-xxhdpi":144,"mipmap-xxxhdpi":192}
+          base = Path("android/app/src/main/res")
+          for folder, size in sizes.items():
+              out = base / folder
+              out.mkdir(parents=True, exist_ok=True)
+              icon = src.copy()
+              icon.thumbnail((size, size), Image.Resampling.LANCZOS)
+              canvas = Image.new("RGB", (size, size), "white")
+              canvas.paste(icon, ((size-icon.width)//2, (size-icon.height)//2))
+              canvas.save(out / "ic_launcher.png", "PNG")
+          PY
+
       - name: Prepare Bible data
         run: bash scripts/prepare_bible_data.sh
 
