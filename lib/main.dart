@@ -169,54 +169,73 @@ class HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repo = ContentRepository(Supabase.instance.client);
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: () async => repo.dailyVerse(),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 30),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           children: [
-            const Row(children: [
-              Text('N', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: NewGenerationNetworkApp.primaryBlue)),
-              SizedBox(width: 12),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('NEW GENERATION NETWORK', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-                Text('Raising a Righteous Generation for Christ', style: TextStyle(fontSize: 12)),
+            Row(children: [
+              Container(
+                width: 48, height: 48,
+                decoration: BoxDecoration(
+                  color: NewGenerationNetworkApp.primaryBlue,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                alignment: Alignment.center,
+                child: const Text('NGN', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: .6)),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('NEW GENERATION NETWORK', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: .25)),
+                SizedBox(height: 2),
+                Text('Raising a Righteous Generation for Christ', style: TextStyle(fontSize: 11.5, color: Color(0xFF667085))),
               ])),
             ]),
-            const SizedBox(height: 24),
+            const SizedBox(height: 22),
             FutureBuilder<Map<String, dynamic>?>(
               future: repo.dailyVerse(),
               builder: (context, snapshot) {
                 final verse = snapshot.data;
                 return Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0B5ED7),
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: const [BoxShadow(color: Color(0x220B5ED7), blurRadius: 18, offset: Offset(0, 8))],
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [BoxShadow(color: Color(0x240B5ED7), blurRadius: 24, offset: Offset(0, 10))],
                   ),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Row(children: [
-                      Icon(Icons.auto_stories_rounded, color: NewGenerationNetworkApp.accentGold),
-                      SizedBox(width: 10),
-                      Text('Daily Bible Verse', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                    Row(children: [
+                      Container(
+                        width: 38, height: 38,
+                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: .12), borderRadius: BorderRadius.circular(11)),
+                        child: const Icon(Icons.auto_stories_rounded, color: NewGenerationNetworkApp.accentGold, size: 21),
+                      ),
+                      const SizedBox(width: 11),
+                      const Expanded(child: Text('WORD FOR TODAY', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
                     ]),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
                     if (snapshot.connectionState == ConnectionState.waiting)
                       const LinearProgressIndicator()
                     else if (verse == null)
-                      const Text('Your daily verse will appear here when published by N.G.N.', style: TextStyle(color: Colors.white, height: 1.5))
+                      const Text('Your daily Bible verse will appear here when published by N.G.N.', style: TextStyle(color: Colors.white, height: 1.55))
                     else ...[
-                      Text('“${verse['verse_text']?.toString() ?? ''}”', style: const TextStyle(color: Colors.white, fontSize: 17, height: 1.55)),
-                      const SizedBox(height: 10),
-                      Text(verse['reference']?.toString() ?? '', style: const TextStyle(color: NewGenerationNetworkApp.accentGold, fontWeight: FontWeight.w800)),
+                      Text('“${verse['verse_text']?.toString() ?? ''}”', style: const TextStyle(color: Colors.white, fontSize: 18, height: 1.55, fontWeight: FontWeight.w500)),
+                      const SizedBox(height: 12),
+                      Text(verse['reference']?.toString() ?? '', style: const TextStyle(color: NewGenerationNetworkApp.accentGold, fontSize: 14, fontWeight: FontWeight.w900)),
                     ],
+                    const SizedBox(height: 16),
+                    Container(width: 42, height: 3, decoration: BoxDecoration(color: NewGenerationNetworkApp.accentGold, borderRadius: BorderRadius.circular(99))),
                   ]),
                 );
               },
             ),
             const SizedBox(height: 28),
-            const Text('Explore', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              const Text('Explore N.G.N.', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
+              Text('Ministry Hub', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: dark ? const Color(0xFFD4AF37) : NewGenerationNetworkApp.primaryBlue)),
+            ]),
             const SizedBox(height: 14),
             GridView.count(
               crossAxisCount: 2,
@@ -224,15 +243,29 @@ class HomeContent extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 1.35,
+              childAspectRatio: 1.28,
               children: const [
-                _HomeFeatureCard(icon: Icons.play_circle_outline_rounded, title: 'Teachings', page: TeachingsPage()),
-                _HomeFeatureCard(icon: Icons.menu_book_outlined, title: 'Bible Studies', page: BiblePage()),
-                _HomeFeatureCard(icon: Icons.favorite_border_rounded, title: 'Devotional', page: DevotionalsPage()),
-                _HomeFeatureCard(icon: Icons.upload_file_outlined, title: 'Latest Uploads', page: TeachingsPage()),
-                _HomeFeatureCard(icon: Icons.calendar_month_outlined, title: 'Events', page: EventsPage()),
-                _HomeFeatureCard(icon: Icons.campaign_outlined, title: 'Announcements', page: AnnouncementsPage()),
+                _HomeFeatureCard(icon: Icons.play_circle_outline_rounded, title: 'Teachings', subtitle: 'Watch & listen', page: TeachingsPage()),
+                _HomeFeatureCard(icon: Icons.auto_stories_outlined, title: 'Holy Bible', subtitle: 'Read the Word', page: BiblePage()),
+                _HomeFeatureCard(icon: Icons.favorite_border_rounded, title: 'Devotional', subtitle: 'Grow daily', page: DevotionalsPage()),
+                _HomeFeatureCard(icon: Icons.groups_outlined, title: 'Community', subtitle: 'Connect together', page: CommunityPage()),
+                _HomeFeatureCard(icon: Icons.calendar_month_outlined, title: 'Events', subtitle: 'Stay connected', page: EventsPage()),
+                _HomeFeatureCard(icon: Icons.campaign_outlined, title: 'Announcements', subtitle: 'Latest updates', page: AnnouncementsPage()),
               ],
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              decoration: BoxDecoration(
+                color: dark ? const Color(0xFF162238) : const Color(0xFFFFFBEE),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: NewGenerationNetworkApp.accentGold.withValues(alpha: .38)),
+              ),
+              child: const Row(children: [
+                Icon(Icons.church_outlined, color: NewGenerationNetworkApp.accentGold),
+                SizedBox(width: 12),
+                Expanded(child: Text('Faith • Hope • Righteous Living', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: .2))),
+              ]),
             ),
           ],
         ),
@@ -242,9 +275,10 @@ class HomeContent extends StatelessWidget {
 }
 
 class _HomeFeatureCard extends StatelessWidget {
-  const _HomeFeatureCard({required this.icon, required this.title, required this.page});
+  const _HomeFeatureCard({required this.icon, required this.title, required this.subtitle, required this.page});
   final IconData icon;
   final String title;
+  final String subtitle;
   final Widget page;
 
   @override
@@ -254,19 +288,22 @@ class _HomeFeatureCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: dark ? const Color(0xFF162238) : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: dark ? const Color(0xFF26364F) : const Color(0xFFE2E8F0)),
+          border: Border.all(color: dark ? const Color(0xFF26364F) : const Color(0xFFE7EAF0)),
         ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Container(
             width: 40, height: 40,
-            decoration: BoxDecoration(color: const Color(0xFF0B5ED7).withValues(alpha: .10), borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: NewGenerationNetworkApp.primaryBlue),
+            decoration: BoxDecoration(color: const Color(0xFF0B5ED7).withValues(alpha: .09), borderRadius: BorderRadius.circular(11)),
+            child: Icon(icon, color: NewGenerationNetworkApp.primaryBlue, size: 22),
           ),
-          Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+          const Spacer(),
+          Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 3),
+          Text(subtitle, style: TextStyle(fontSize: 11.5, color: dark ? const Color(0xFFADB8CA) : const Color(0xFF667085))),
         ]),
       ),
     );
