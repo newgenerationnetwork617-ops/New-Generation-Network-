@@ -212,11 +212,20 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     ];
     return Scaffold(
       body: IndexedStack(index: index, children: pages),
-      floatingActionButton: FloatingActionButton.small(
-        tooltip: 'More, Settings & Admin',
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MorePage())),
-        child: const Icon(Icons.menu_rounded),
-      ),
+      // Keep the menu floating clear of the bottom navigation and chat composer.
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: index == 4
+          ? null
+          : FloatingActionButton.small(
+              tooltip: 'More, Settings & Admin',
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MorePage()),
+              ),
+              backgroundColor: NewGenerationNetworkApp.primaryBlue,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.menu_rounded),
+            ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: (value) => setState(() => index = value),
