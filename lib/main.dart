@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'in_app_notifications.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,6 +20,7 @@ const supabasePublishableKey =
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabasePublishableKey);
+  await InAppNotificationService.instance.initialize();
   runApp(const NewGenerationNetworkApp());
 }
 
@@ -127,6 +129,48 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
   }
 }
 
+class _NotificationBadgeIcon extends StatelessWidget {
+  const _NotificationBadgeIcon({
+    required this.icon,
+    required this.unread,
+    this.color,
+  });
+
+  final IconData icon;
+  final ValueListenable<int> unread;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<int>(
+        valueListenable: unread,
+        builder: (context, count, child) => Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Icon(icon, color: color),
+            if (count > 0)
+              Positioned(
+                top: -9,
+                right: -12,
+                child: Container(
+                  constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD32F2F),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Theme.of(context).colorScheme.surface, width: 1.5),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    count > 500 ? '500+' : count.toString(),
+                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+}
+
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -161,7 +205,17 @@ class _MainShellState extends State<MainShell> {
           NavigationDestination(icon: Icon(Icons.auto_stories_outlined), selectedIcon: Icon(Icons.auto_stories_rounded), label: 'Bible'),
           NavigationDestination(icon: Icon(Icons.play_circle_outline_rounded), selectedIcon: Icon(Icons.play_circle_fill_rounded), label: 'Media'),
           NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event_rounded), label: 'Events'),
-          NavigationDestination(icon: Icon(Icons.groups_outlined), selectedIcon: Icon(Icons.groups_rounded), label: 'Community'),
+          NavigationDestination(
+            icon: _NotificationBadgeIcon(
+              icon: Icons.groups_outlined,
+              unread: InAppNotificationService.instance.communityUnread,
+            ),
+            selectedIcon: _NotificationBadgeIcon(
+              icon: Icons.groups_rounded,
+              unread: InAppNotificationService.instance.communityUnread,
+            ),
+            label: 'Community',
+          ),
         ],
       ),
     );
@@ -291,7 +345,7 @@ class _HomeFeatureCard extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
+      onTap: () {\n        if (page is AnnouncementsPage) {\n          InAppNotificationService.instance.markAnnouncementsRead();\n        }\n        Navigator.push(context, MaterialPageRoute(builder: (_) => page));\n      },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -328,9 +382,9 @@ class MorePage extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(18),
           children: [
-          _MoreTile(icon: Icons.campaign_rounded, title: 'Announcements', onTap: () => open(context, const AnnouncementsPage())),
+          _MoreTile(icon: Icons.campaign_rounded, title: 'Announcements', badge: InAppNotificationService.instance.announcementsUnread, onTap: () { InAppNotificationService.instance.markAnnouncementsRead(); open(context, const AnnouncementsPage()); }),
           _MoreTile(icon: Icons.event_rounded, title: 'Upcoming Events', onTap: () => open(context, const EventsPage())),
-          _MoreTile(icon: Icons.groups_rounded, title: 'Community', onTap: () => open(context, const CommunityPage())),
+          _MoreTile(icon: Icons.groups_rounded, title: 'Community', badge: InAppNotificationService.instance.communityUnread, onTap: () => open(context, const CommunityPage())),
           _MoreTile(icon: Icons.settings_rounded, title: 'Settings', onTap: () => open(context, SettingsPage(currentMode: context.findAncestorStateOfType<_NewGenerationNetworkAppState>()?.themeMode ?? ThemeMode.system, onThemeChanged: (mode) => context.findAncestorStateOfType<_NewGenerationNetworkAppState>()?.changeTheme(mode)))),
             _MoreTile(icon: Icons.admin_panel_settings_rounded, title: 'Administrator', onTap: () => open(context, const AdminLoginPage())),
           ],
@@ -352,7 +406,7 @@ class _MoreTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-        leading: Icon(icon, color: NewGenerationNetworkApp.primaryBlue),
+        leading: badge == null\n            ? Icon(icon, color: NewGenerationNetworkApp.primaryBlue)\n            : _NotificationBadgeIcon(icon: icon, unread: badge!, color: NewGenerationNetworkApp.primaryBlue),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: onTap,
