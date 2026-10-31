@@ -50,8 +50,43 @@ class _AdminStoragePageState extends State<AdminStoragePage> {
   }
 
   Future<void> deleteFile(String name) async {
-    await client.storage.from('ngn-media').remove([name]);
-    await refresh();
+    try {
+      final references = await client
+          .from('teachings')
+          .select('id')
+          .ilike('media_url', '%$name%')
+          .limit(1);
+      if ((references as List).isNotEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('This file is linked to a teaching book or resource. Archive the teaching instead; its stored file is being protected.')),
+          );
+        }
+        return;
+      }
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Permanently delete file?'),
+          content: const Text('This file is not linked to a teaching record. Deleting it cannot be undone and may break any external links using it.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Delete permanently')),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      await client.storage.from('ngn-media').remove([name]);
+      await refresh();
+    } on PostgrestException catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not check file references: ${e.message}')),
+      );
+    } on StorageException catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not delete file: ${e.message}')),
+      );
+    }
   }
 
   void copyUrl(String name) {
