@@ -341,6 +341,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     if (!mounted) return;
 
     final file = picked.files.single;
+    const maxBookBytes = 25 * 1024 * 1024;
+    if (file.size <= 0 || file.size > maxBookBytes) {
+      notice('Choose a teaching book or document smaller than 25 MB.');
+      return;
+    }
     final extension = file.extension?.toLowerCase() ?? '';
     final baseName = extension.isEmpty
         ? file.name
@@ -387,7 +392,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     }
 
     final safeName = file.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
-    final storagePath = 'teaching-books/${DateTime.now().millisecondsSinceEpoch}_$safeName';
+    // Keep teaching files at the bucket root so the Media Storage manager can list them.
+    final storagePath = 'teaching_${DateTime.now().millisecondsSinceEpoch}_$safeName';
     final mime = switch (extension) {
       'pdf' => 'application/pdf',
       'doc' => 'application/msword',
@@ -605,6 +611,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             title: 'Teachings & Sermons',
             icon: Icons.play_circle_fill_rounded,
             onTap: addTeaching,
+          ),
+          _AdminAction(
+            title: 'Upload Teaching Book',
+            icon: Icons.menu_book_rounded,
+            onTap: addTeachingBook,
           ),
           _AdminAction(
             title: 'Announcements',
