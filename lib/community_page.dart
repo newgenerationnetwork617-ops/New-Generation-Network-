@@ -26,6 +26,7 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
   final name = TextEditingController();
   bool loading = true;
   bool joining = false;
+  bool joined = false;
   String? error;
 
   @override
@@ -49,10 +50,10 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
       final displayName = profile?['display_name']?.toString().trim() ?? '';
       if (!mounted) return;
       if (displayName.length >= 2) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const CommunityChatPage()),
-        );
+        setState(() {
+          joined = true;
+          loading = false;
+        });
         return;
       }
     } catch (_) {
@@ -85,10 +86,7 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
         'display_name': displayName,
       });
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const CommunityChatPage()),
-      );
+      setState(() => joined = true);
     } on AuthException catch (joinError) {
       if (mounted) {
         setState(() => error =
@@ -111,7 +109,9 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    if (joined) return const CommunityChatPage();
+    return Scaffold(
         appBar: AppBar(title: const Text('N.G.N. Community')),
         body: Center(
           child: loading
@@ -166,6 +166,7 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
                 ),
         ),
       );
+  }
 }
 
 class CommunityChatPage extends StatefulWidget{const CommunityChatPage({super.key});@override State<CommunityChatPage> createState()=>_CommunityChatPageState();}
