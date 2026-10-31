@@ -31,9 +31,10 @@ jobs:
       - name: Restore project files overwritten by flutter create
         run: git checkout -- analysis_options.yaml test/widget_test.dart
 
-      - name: Enable Android internet access
+      - name: Set Android permissions and HOLY WORLD display name
         run: |
           python3 - <<'PY'
+          import re
           from pathlib import Path
           p = Path("android/app/src/main/AndroidManifest.xml")
           s = p.read_text()
@@ -43,7 +44,10 @@ jobs:
           ]
           for permission in permissions:
               if permission not in s:
-                  s = s.replace('<manifest xmlns:android="http://schemas.android.com/apk/res/android">', '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n    ' + permission)
+                  s = s.replace('<manifest xmlns:android="http://schemas.android.com/apk/res/android">', '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\\n    ' + permission)
+          s, count = re.subn(r'android:label="[^"]*"', 'android:label="HOLY WORLD"', s, count=1)
+          if count == 0:
+              s = s.replace('<application', '<application\\n        android:label="HOLY WORLD"', 1)
           p.write_text(s)
           PY
 
