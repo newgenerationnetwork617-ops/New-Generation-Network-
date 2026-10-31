@@ -5,13 +5,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'bible_repository.dart';
 import 'bible_saved_page.dart';
 
-class BiblePage extends StatelessWidget {
+class BiblePage extends StatefulWidget {
   const BiblePage({super.key});
+
+  @override
+  State<BiblePage> createState() => _BiblePageState();
+}
+
+class _BiblePageState extends State<BiblePage> {
+  int section = 0;
 
   @override
   Widget build(BuildContext context) {
     final repository = BibleRepository();
     final books = repository.bookNames;
+    final visibleBooks = section == 0 ? books.take(39).toList() : books.skip(39).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -19,54 +27,141 @@ class BiblePage extends StatelessWidget {
         actions: [
           IconButton(
             tooltip: 'Saved Bible',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const BibleSavedPage()),
-            ),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BibleSavedPage())),
             icon: const Icon(Icons.bookmarks_rounded),
           ),
           IconButton(
             tooltip: 'Search Bible',
-            onPressed: () => showSearch(
-              context: context,
-              delegate: BibleSearchDelegate(repository),
-            ),
+            onPressed: () => showSearch(context: context, delegate: BibleSearchDelegate(repository)),
             icon: const Icon(Icons.search_rounded),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const Card(
-            child: ListTile(
-              leading: CircleAvatar(backgroundColor: Color(0xFFE8F0FE), child: Icon(Icons.offline_bolt_rounded, color: Color(0xFF0B5ED7))),
-              title: Text('Offline Bible'),
-              subtitle: Text(
-                'World English Bible (WEB) • 66 books • stored locally',
-              ),
+      body: Column(children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+          child: SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 0, icon: Icon(Icons.history_edu_rounded), label: Text('Old')),
+                ButtonSegment(value: 1, icon: Icon(Icons.auto_stories_rounded), label: Text('New')),
+                ButtonSegment(value: 2, icon: Icon(Icons.edit_note_rounded), label: Text('Notes')),
+              ],
+              selected: {section},
+              onSelectionChanged: (value) => setState(() => section = value.first),
+              showSelectedIcon: false,
             ),
           ),
-          const SizedBox(height: 12),
-          const Text(
-            'Old Testament',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        if (section == 2)
+          Expanded(child: _BibleNotesPanel(onChanged: () => setState(() {})))
+        else
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              children: [
+                Card(
+                  child: ListTile(
+                    leading: const CircleAvatar(backgroundColor: Color(0xFFE8F0FE), child: Icon(Icons.offline_bolt_rounded, color: Color(0xFF0B5ED7))),
+                    title: Text(section == 0 ? 'Old Testament' : 'New Testament'),
+                    subtitle: Text(section == 0 ? '39 books • available offline' : '27 books • available offline'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...visibleBooks.map((book) => _BookTile(repository: repository, book: book)),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          ...books.take(39).map(
-                (book) => _BookTile(repository: repository, book: book),
-              ),
-          const SizedBox(height: 16),
-          const Text(
-            'New Testament',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          ...books.skip(39).map(
-                (book) => _BookTile(repository: repository, book: book),
-              ),
+      ]),
+    );
+  }
+}
+
+class _BibleNotesPanel extends StatefulWidget {
+  const _BibleNotesPanel({required this.onChanged});
+  final VoidCallback onChanged;
+  @override
+  State<_BibleNotesPanel> createState() => _BibleNotesPanelState();
+}
+
+class _BibleNotesPanelState extends State<_BibleNotesPanel> {
+  Map<String, String> notes = const {};
+
+  @override
+  void initState() { super.initState(); load(); }
+
+  String reference(String key) {
+    final p = key.split('|');
+    return p.length == 3 ? '${p[0]} ${p[1]}:${p[2]}' : key;
+  }
+
+  Future<void> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final found = <String, String>{};
+    for (final key in prefs.getKeys()) {
+      if (key.startsWith('bible_note_')) {
+        final value = prefs.getString(key);
+        if (value != null && value.trim().isNotEmpty) found[key.substring('bible_note_'.length)] = value;
+      }
+    }
+    if (mounted) setState(() => notes = found);
+  }
+
+  Future<void> edit(String key, String current) async {
+    final controller = TextEditingController(text: current);
+    final value = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Note • ${reference(key)}'),
+        content: TextField(controller: controller, autofocus: true, minLines: 4, maxLines: 8, decoration: const InputDecoration(hintText: 'Write your personal note...')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Save')),
         ],
       ),
+    );
+    controller.dispose();
+    if (value == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (value.isEmpty) {
+      await prefs.remove('bible_note_$key');
+    } else {
+      await prefs.setString('bible_note_$key', value);
+    }
+    await load();
+    widget.onChanged();
+  }
+
+  Future<void> remove(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('bible_note_$key');
+    await load();
+    widget.onChanged();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final keys = notes.keys.toList()..sort((a, b) => reference(a).compareTo(reference(b)));
+    if (keys.isEmpty) {
+      return const Center(child: Padding(padding: EdgeInsets.all(28), child: Text('No Bible notes yet.\n\nOpen a Bible chapter, use the menu beside a verse, and choose “Write a note”. Your notes are stored on this phone.', textAlign: TextAlign.center)));
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
+      itemCount: keys.length,
+      itemBuilder: (context, index) {
+        final key = keys[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 10),
+          child: ListTile(
+            leading: const CircleAvatar(backgroundColor: Color(0xFFE8F0FE), child: Icon(Icons.edit_note_rounded, color: Color(0xFF0B5ED7))),
+            title: Text(reference(key), style: const TextStyle(fontWeight: FontWeight.w800)),
+            subtitle: Text(notes[key] ?? ''),
+            onTap: () => edit(key, notes[key] ?? ''),
+            trailing: IconButton(tooltip: 'Delete note', onPressed: () => remove(key), icon: const Icon(Icons.delete_outline_rounded)),
+          ),
+        );
+      },
     );
   }
 }
