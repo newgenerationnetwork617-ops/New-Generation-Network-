@@ -56,6 +56,7 @@ class _AdminStoragePageState extends State<AdminStoragePage> {
           .select('id')
           .ilike('media_url', '%$name%')
           .limit(1);
+      if (!mounted) return;
       if ((references as List).isNotEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -79,13 +80,17 @@ class _AdminStoragePageState extends State<AdminStoragePage> {
       await client.storage.from('ngn-media').remove([name]);
       await refresh();
     } on PostgrestException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not check file references: ${e.message}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not check file references: ${e.message}')),
+        );
+      }
     } on StorageException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete file: ${e.message}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not delete file: ${e.message}')),
+        );
+      }
     }
   }
 
