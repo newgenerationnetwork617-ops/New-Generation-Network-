@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'in_app_notifications.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'content_repository.dart';
@@ -291,8 +292,19 @@ class _TeachingsPageState extends State<TeachingsPage> {
   }
 }
 
-class AnnouncementsPage extends StatelessWidget {
+class AnnouncementsPage extends StatefulWidget {
   const AnnouncementsPage({super.key});
+
+  @override
+  State<AnnouncementsPage> createState() => _AnnouncementsPageState();
+}
+
+class _AnnouncementsPageState extends State<AnnouncementsPage> {
+  @override
+  void initState() {
+    super.initState();
+    InAppNotificationService.instance.markAnnouncementsRead();
+  }
 
   @override
   Widget build(BuildContext context) {
