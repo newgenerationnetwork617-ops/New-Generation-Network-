@@ -100,21 +100,35 @@ class _AdminContentManagerPageState extends State<AdminContentManagerPage> {
     if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled for ${when.toString().substring(0,16)}.')));
   }
 
-  Future<void> delete(Map<String,dynamic> row) async {
+  Future<void> setArchived(Map<String,dynamic> row, bool archived) async {
+    final action = archived ? 'archive' : 'restore';
     final yes = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete content?'),
-        content: const Text('This will permanently remove this item from N.G.N.'),
+        title: Text(archived ? 'Archive content?' : 'Restore content?'),
+        content: Text(archived
+            ? 'This will hide the item from public listings. Copies already synced to users’ phones will remain available.'
+            : 'This will make the item visible in public listings again when its publication date is reached.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context,false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context,true), child: const Text('Delete')),
+          FilledButton(onPressed: () => Navigator.pop(context,true), child: Text(archived ? 'Archive' : 'Restore')),
         ],
       ),
     );
     if (yes != true) return;
-    await client.from(table).delete().eq('id', row['id']);
-    await refresh();
+    try {
+      await client.from(table).update({'is_archived': archived}).eq('id', row['id']);
+      await refresh();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(archived ? 'Content archived safely.' : 'Content restored.')),
+        );
+      }
+    } on PostgrestException catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not $action content: ${e.message}')),
+      );
+    }
   }
 
   @override
@@ -150,13 +164,13 @@ class _AdminContentManagerPageState extends State<AdminContentManagerPage> {
                                 margin: const EdgeInsets.only(bottom: 10),
                                 child: ListTile(
                                   title: Text(title.toString(), style: const TextStyle(fontWeight: FontWeight.w600)),
-                                  subtitle: scheduleText.isEmpty ? null : Text('Publish: $scheduleText'),
+                                  subtitle: Column(\n                                    crossAxisAlignment: CrossAxisAlignment.start,\n                                    children: [\n                                      if (scheduleText.isNotEmpty) Text('Publish: $scheduleText'),\n                                      if (row['is_archived'] == true) const Text('Archived — hidden from public', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w700)),\n                                    ],\n                                  ),
                                   trailing: PopupMenuButton<String>(
-                                    onSelected: (v) { if (v == 'edit') edit(row); if (v == 'schedule') schedule(row); if (v == 'delete') delete(row); },
+                                    onSelected: (v) { if (v == 'edit') edit(row); if (v == 'schedule') schedule(row); if (v == 'archive') setArchived(row, true); if (v == 'restore') setArchived(row, false); },
                                     itemBuilder: (_) => [
                                       const PopupMenuItem(value: 'edit', child: Text('Edit')),
                                       if (table != 'daily_bible_verses') const PopupMenuItem(value: 'schedule', child: Text('Schedule publication')),
-                                      const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                                      if (row['is_archived'] == true) const PopupMenuItem(value: 'restore', child: Text('Restore to public')) else const PopupMenuItem(value: 'archive', child: Text('Archive (keep safe')),
                                     ],
                                   ),
                                 ),
