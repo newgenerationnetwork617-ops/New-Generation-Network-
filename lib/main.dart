@@ -362,7 +362,19 @@ class _HomeFeatureCard extends StatelessWidget {
           Container(
             width: 40, height: 40,
             decoration: BoxDecoration(color: const Color(0xFF0B5ED7).withValues(alpha: .09), borderRadius: BorderRadius.circular(11)),
-            child: Icon(icon, color: NewGenerationNetworkApp.primaryBlue, size: 22),
+            child: title == 'Community'
+                ? _NotificationBadgeIcon(
+                    icon: icon,
+                    unread: InAppNotificationService.instance.communityUnread,
+                    color: NewGenerationNetworkApp.primaryBlue,
+                  )
+                : title == 'Announcements'
+                    ? _NotificationBadgeIcon(
+                        icon: icon,
+                        unread: InAppNotificationService.instance.announcementsUnread,
+                        color: NewGenerationNetworkApp.primaryBlue,
+                      )
+                    : Icon(icon, color: NewGenerationNetworkApp.primaryBlue, size: 22),
           ),
           const Spacer(),
           Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
