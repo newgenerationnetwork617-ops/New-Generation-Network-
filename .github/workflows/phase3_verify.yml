@@ -47,35 +47,6 @@ jobs:
           p.write_text(s)
           PY
 
-      - name: Install icon image tooling
-        run: python3 -m pip install --quiet Pillow
-
-      - name: Apply N.G.N. Android app icon
-        run: |
-          python3 - <<'PY'
-          from PIL import Image, ImageFile
-          from pathlib import Path
-          ImageFile.LOAD_TRUNCATED_IMAGES = True
-          src = Image.open("assets/branding/app_icon.jpg").convert("RGB")
-          # Crop once from the original master so Android never stretches the logo.
-          side = min(src.size)
-          left = (src.width - side) // 2
-          top = (src.height - side) // 2
-          src = src.crop((left, top, left + side, top + side))
-          sizes = {
-              "mipmap-mdpi": 48,
-              "mipmap-hdpi": 72,
-              "mipmap-xhdpi": 96,
-              "mipmap-xxhdpi": 144,
-              "mipmap-xxxhdpi": 192,
-          }
-          for folder, size in sizes.items():
-              out = Path("android/app/src/main/res") / folder
-              out.mkdir(parents=True, exist_ok=True)
-              icon = src.resize((size, size), Image.Resampling.LANCZOS)
-              icon.save(out / "ic_launcher.png", "PNG", optimize=True)
-          PY
-
       - name: Prepare Bible data
         run: bash scripts/prepare_bible_data.sh
 
