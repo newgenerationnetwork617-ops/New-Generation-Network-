@@ -125,9 +125,11 @@ class _AdminContentManagerPageState extends State<AdminContentManagerPage> {
         );
       }
     } on PostgrestException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not $action content: ${e.message}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not $action content: ${e.message}')),
+        );
+      }
     }
   }
 
