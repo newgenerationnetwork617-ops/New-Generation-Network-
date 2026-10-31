@@ -228,6 +228,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final bible = TextEditingController();
     final message = TextEditingController();
     final application = TextEditingController();
+    final memoryVerse = TextEditingController();
+    final prayer = TextEditingController();
 
     await showDialog(
       context: context,
@@ -241,6 +243,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               TextField(controller: bible, decoration: const InputDecoration(labelText: 'Bible verse')),
               TextField(controller: message, maxLines: 5, decoration: const InputDecoration(labelText: 'Devotional message')),
               TextField(controller: application, maxLines: 4, decoration: const InputDecoration(labelText: 'Life application')),
+              TextField(controller: memoryVerse, maxLines: 3, decoration: const InputDecoration(labelText: 'Memory verse (optional)')),
+              TextField(controller: prayer, maxLines: 3, decoration: const InputDecoration(labelText: 'Prayer (optional)')),
             ],
           ),
         ),
@@ -255,6 +259,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 'bible_reference': bible.text.trim(),
                 'message': message.text.trim(),
                 'life_application': application.text.trim(),
+                'memory_verse': memoryVerse.text.trim(),
+                'prayer': prayer.text.trim(),
                 'published_at': DateTime.now().toIso8601String(),
               });
               }, 'Devotional published.');
@@ -271,6 +277,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     bible.dispose();
     message.dispose();
     application.dispose();
+    memoryVerse.dispose();
+    prayer.dispose();
   }
 
   Future<void> addTeaching() async {
