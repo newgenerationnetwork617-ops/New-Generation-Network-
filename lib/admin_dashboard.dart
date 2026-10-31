@@ -330,6 +330,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'],
     );
     if (picked == null || picked.files.single.path == null) return;
+    if (!mounted) return;
 
     final file = picked.files.single;
     final extension = file.extension?.toLowerCase() ?? '';
@@ -378,8 +379,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     }
 
     final safeName = file.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
-    final storagePath = 'teaching-books/' +
-        DateTime.now().millisecondsSinceEpoch.toString() + '_' + safeName;
+    final storagePath = 'teaching-books/${DateTime.now().millisecondsSinceEpoch}_$safeName';
     final mime = switch (extension) {
       'pdf' => 'application/pdf',
       'doc' => 'application/msword',
