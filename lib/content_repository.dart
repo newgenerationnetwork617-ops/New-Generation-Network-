@@ -81,8 +81,14 @@ class ContentRepository {
       final data = List<Map<String, dynamic>>.from(
         (rows as List).map((row) => Map<String, dynamic>.from(row)),
       );
-      if (data.isEmpty) return null;
       final prefs = await SharedPreferences.getInstance();
+      if (data.isEmpty) {
+        final saved = prefs.getString('ngn_devotional_day_$keyDate');
+        if (saved != null) {
+          try { return Map<String, dynamic>.from(jsonDecode(saved) as Map); } catch (_) {}
+        }
+        return null;
+      }
       await prefs.setString('ngn_devotional_day_$keyDate', jsonEncode(data.first));
       return data.first;
     } catch (_) {
