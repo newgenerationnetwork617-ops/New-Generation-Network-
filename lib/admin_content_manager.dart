@@ -27,7 +27,7 @@ class _AdminContentManagerPageState extends State<AdminContentManagerPage> {
   Future<void> refresh() async {
     setState(() => loading = true);
     try {
-      final data = await client.from(table).select().limit(100);
+      final data = await client.from(table).select().limit(1000);
       if (mounted) setState(() => rows = List<Map<String,dynamic>>.from(data));
     } on PostgrestException catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
