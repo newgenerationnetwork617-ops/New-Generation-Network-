@@ -34,7 +34,7 @@ class _AdminStoragePageState extends State<AdminStoragePage> {
   }
 
   Future<void> upload() async {
-    final picked = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['jpg','jpeg','png','webp','mp3','m4a','wav','mp4','pdf']);
+    final picked = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['jpg','jpeg','png','webp','mp3','m4a','wav','mp4','pdf','doc','docx','txt','rtf','odt']);
     if (picked == null || picked.files.single.path == null) return;
     final item = picked.files.single;
     final safeName = item.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
