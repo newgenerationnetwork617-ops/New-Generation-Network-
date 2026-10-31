@@ -366,7 +366,7 @@ class _TeachingCardState extends State<_TeachingCard> {
     if (mediaUrl.isEmpty) return;
     final uri = Uri.parse(mediaUrl);
     final storedName = uri.pathSegments.isEmpty ? 'teaching.pdf' : uri.pathSegments.last;
-    final extension = storedName.contains('.') ? '.' + storedName.split('.').last : '';
+    final extension = storedName.contains('.') ? '.${storedName.split('.').last}' : '';
     final safeTitle = (widget.item['title']?.toString() ?? 'teaching_book')
         .replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
     final downloadUri = uri.replace(queryParameters: {
