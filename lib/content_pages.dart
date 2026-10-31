@@ -83,6 +83,7 @@ class _TeachingsPageState extends State<TeachingsPage> {
   final search = TextEditingController();
   late Future<List<Map<String,dynamic>>> future;
   String query = '';
+  int section = 0;
 
   @override
   void initState() { super.initState(); future = repo.teachings(); }
@@ -96,12 +97,17 @@ class _TeachingsPageState extends State<TeachingsPage> {
   }
 
   bool matches(Map<String,dynamic> item) {
+    final type = item['content_type']?.toString().toLowerCase() ?? '';
+    final youtube = item['youtube_url']?.toString().trim() ?? '';
+    final audio = item['audio_url']?.toString().trim() ?? '';
+    final media = item['media_url']?.toString().trim() ?? '';
+    final isVideo = type.contains('video') || youtube.isNotEmpty || media.toLowerCase().endsWith('.mp4');
+    final isAudio = type.contains('audio') || audio.isNotEmpty || ['.mp3', '.m4a', '.wav'].any(media.toLowerCase().endsWith);
+    final sectionMatch = section == 0 ? isVideo : section == 1 ? isAudio : (!isVideo && !isAudio) || type.contains('study') || type.contains('pdf') || type.contains('teaching');
+    if (!sectionMatch) return false;
     if (query.trim().isEmpty) return true;
     final q = query.toLowerCase();
-    final text = [
-      item['title'], item['speaker'], item['description'],
-      item['series_name'], item['content_type'],
-    ].where((v) => v != null).join(' ').toLowerCase();
+    final text = [item['title'], item['speaker'], item['description'], item['series_name'], item['content_type']].where((v) => v != null).join(' ').toLowerCase();
     return text.contains(q);
   }
 
@@ -130,6 +136,20 @@ class _TeachingsPageState extends State<TeachingsPage> {
                       icon: const Icon(Icons.clear_rounded),
                     ),
                     border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<int>(
+                    segments: const [
+                      ButtonSegment(value: 0, icon: Icon(Icons.ondemand_video_rounded), label: Text('Videos')),
+                      ButtonSegment(value: 1, icon: Icon(Icons.headphones_rounded), label: Text('Audios')),
+                      ButtonSegment(value: 2, icon: Icon(Icons.description_outlined), label: Text('Teachings')),
+                    ],
+                    selected: {section},
+                    onSelectionChanged: (value) => setState(() => section = value.first),
+                    showSelectedIcon: false,
                   ),
                 ),
                 const SizedBox(height: 16),
