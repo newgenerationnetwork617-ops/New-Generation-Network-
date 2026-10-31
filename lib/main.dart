@@ -148,6 +148,11 @@ class _MainShellState extends State<MainShell> {
     ];
     return Scaffold(
       body: IndexedStack(index: index, children: pages),
+      floatingActionButton: FloatingActionButton.small(
+        tooltip: 'More, Settings & Admin',
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MorePage())),
+        child: const Icon(Icons.menu_rounded),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: (value) => setState(() => index = value),
@@ -322,7 +327,9 @@ class MorePage extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(18),
         children: [
-          const Text('More', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+          const Text('N.G.N. Menu', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 6),
+          const Text('Ministry information, settings and administration', style: TextStyle(color: Color(0xFF667085))),
           const SizedBox(height: 18),
           _MoreTile(icon: Icons.campaign_rounded, title: 'Announcements', onTap: () => open(context, const AnnouncementsPage())),
           _MoreTile(icon: Icons.event_rounded, title: 'Upcoming Events', onTap: () => open(context, const EventsPage())),
