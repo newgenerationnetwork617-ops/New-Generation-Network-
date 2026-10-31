@@ -17,7 +17,7 @@ class _AdminCommunityPageState extends State<AdminCommunityPage>{
       supabase.from('community_reports').select('id,reporter_id,message_id,reason,created_at').order('created_at',ascending:false).limit(200),
     ]);
     final settingValue=setting?['value'];
-    final mode=settingValue is Map<String,dynamic>?settingValue['mode']?.toString():null;
+    final mode=settingValue?['mode']?.toString();
     if(!mounted)return;setState((){communityMode=mode??'open';profiles=List<Map<String,dynamic>>.from(results[0]);messages=List<Map<String,dynamic>>.from(results[1]);reports=List<Map<String,dynamic>>.from(results[2]);loading=false;});
   }
   @override void initState(){super.initState();load();}
