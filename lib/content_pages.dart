@@ -362,6 +362,25 @@ class _TeachingCardState extends State<_TeachingCard> {
     }
   }
 
+  Future<void> downloadBookToDevice() async {
+    if (mediaUrl.isEmpty) return;
+    final uri = Uri.parse(mediaUrl);
+    final storedName = uri.pathSegments.isEmpty ? 'teaching.pdf' : uri.pathSegments.last;
+    final extension = storedName.contains('.') ? '.' + storedName.split('.').last : '';
+    final safeTitle = (widget.item['title']?.toString() ?? 'teaching_book')
+        .replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+    final downloadUri = uri.replace(queryParameters: {
+      ...uri.queryParameters,
+      'download': safeTitle + extension,
+    });
+    final ok = await launchUrl(downloadUri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not start the document download.')),
+      );
+    }
+  }
+
   Future<void> download() async {
     if (mediaUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('This teaching does not have a downloadable media file yet.')));
@@ -418,7 +437,9 @@ class _TeachingCardState extends State<_TeachingCard> {
             Row(children: [
               if (youtubeUrl.isNotEmpty) Expanded(child: FilledButton.icon(onPressed: watch, icon: const Icon(Icons.play_arrow_rounded), label: const Text('Watch'))),
               if (youtubeUrl.isNotEmpty && mediaUrl.isNotEmpty) const SizedBox(width: 8),
-              if (mediaUrl.isNotEmpty) Expanded(child: OutlinedButton.icon(onPressed: busy ? null : (localPath == null ? download : () => offline.open(localPath!)), icon: Icon(localPath == null ? Icons.download_rounded : Icons.open_in_new_rounded), label: Text(localPath == null ? (isBook ? 'Download' : 'Offline') : (isBook ? 'Open book' : 'Open')))),
+              if (mediaUrl.isNotEmpty && isBook) Expanded(child: FilledButton.icon(onPressed: downloadBookToDevice, icon: const Icon(Icons.download_rounded), label: const Text('Download'))),
+              if (mediaUrl.isNotEmpty && isBook) const SizedBox(width: 8),
+              if (mediaUrl.isNotEmpty) Expanded(child: OutlinedButton.icon(onPressed: busy ? null : (localPath == null ? download : () => offline.open(localPath!)), icon: Icon(localPath == null ? Icons.save_alt_rounded : Icons.open_in_new_rounded), label: Text(localPath == null ? (isBook ? 'Save offline' : 'Offline') : (isBook ? 'Open book' : 'Open')))),
               if (localPath != null) IconButton(onPressed: remove, tooltip: 'Remove offline copy', icon: const Icon(Icons.delete_outline_rounded)),
             ]),
           ]),
