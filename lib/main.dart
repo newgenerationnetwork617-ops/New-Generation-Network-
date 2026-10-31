@@ -395,10 +395,11 @@ class MorePage extends StatelessWidget {
 }
 
 class _MoreTile extends StatelessWidget {
-  const _MoreTile({required this.icon, required this.title, required this.onTap});
+  const _MoreTile({required this.icon, required this.title, required this.onTap, this.badge});
   final IconData icon;
   final String title;
   final VoidCallback onTap;
+  final ValueListenable<int>? badge;
 
   @override
   Widget build(BuildContext context) {
