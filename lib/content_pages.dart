@@ -179,9 +179,12 @@ class _TeachingsPageState extends State<TeachingsPage> {
     final youtube = item['youtube_url']?.toString().trim() ?? '';
     final audio = item['audio_url']?.toString().trim() ?? '';
     final media = item['media_url']?.toString().trim() ?? '';
-    final isVideo = type.contains('video') || youtube.isNotEmpty || media.toLowerCase().endsWith('.mp4');
-    final isAudio = type.contains('audio') || audio.isNotEmpty || ['.mp3', '.m4a', '.wav'].any(media.toLowerCase().endsWith);
-    final sectionMatch = section == 0 ? isVideo : section == 1 ? isAudio : (!isVideo && !isAudio) || type.contains('study') || type.contains('pdf') || type.contains('teaching');
+    final lowerMedia = media.toLowerCase().split('?').first;
+    final isVideo = type.contains('video') || youtube.isNotEmpty || lowerMedia.endsWith('.mp4') || lowerMedia.endsWith('.mov');
+    final isAudio = type.contains('audio') || audio.isNotEmpty || ['.mp3', '.m4a', '.wav', '.aac', '.ogg'].any(lowerMedia.endsWith);
+    final isBook = type.contains('book') || type.contains('document') || type.contains('pdf') ||
+        ['.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt'].any(lowerMedia.endsWith);
+    final sectionMatch = section == 0 ? isVideo : section == 1 ? isAudio : isBook;
     if (!sectionMatch) return false;
     if (query.trim().isEmpty) return true;
     final q = query.toLowerCase();
@@ -192,7 +195,7 @@ class _TeachingsPageState extends State<TeachingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Teachings & Sermons')),
+      appBar: AppBar(title: const Text('Teachings')),
       body: RefreshIndicator(
         onRefresh: refresh,
         child: FutureBuilder<List<Map<String,dynamic>>>(
@@ -223,7 +226,7 @@ class _TeachingsPageState extends State<TeachingsPage> {
                     segments: const [
                       ButtonSegment(value: 0, icon: Icon(Icons.ondemand_video_rounded), label: Text('Videos')),
                       ButtonSegment(value: 1, icon: Icon(Icons.headphones_rounded), label: Text('Audios')),
-                      ButtonSegment(value: 2, icon: Icon(Icons.description_outlined), label: Text('Teachings')),
+                      ButtonSegment(value: 2, icon: Icon(Icons.menu_book_rounded), label: Text('Books')),
                     ],
                     selected: {section},
                     onSelectionChanged: (value) => setState(() => section = value.first),
@@ -236,7 +239,7 @@ class _TeachingsPageState extends State<TeachingsPage> {
                 else if (items.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 100),
-                    child: Center(child: Text(query.isEmpty ? 'No published teachings yet.' : 'No teachings match your search.')),
+                    child: Center(child: Text(query.isEmpty ? 'No published resources in this section yet.' : 'No teachings match your search.')),
                   )
                 else
                   ...items.map((item) => _TeachingCard(item: item)),
@@ -313,6 +316,13 @@ class _TeachingCardState extends State<_TeachingCard> {
     final direct = widget.item['media_url']?.toString().trim() ?? '';
     if (direct.isNotEmpty) return direct;
     return widget.item['audio_url']?.toString().trim() ?? '';
+  }
+
+  bool get isBook {
+    final type = widget.item['content_type']?.toString().toLowerCase() ?? '';
+    final path = mediaUrl.toLowerCase().split('?').first;
+    return type.contains('book') || type.contains('document') || type.contains('pdf') ||
+        ['.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt'].any(path.endsWith);
   }
 
   String? get youtubeId {
@@ -408,7 +418,7 @@ class _TeachingCardState extends State<_TeachingCard> {
             Row(children: [
               if (youtubeUrl.isNotEmpty) Expanded(child: FilledButton.icon(onPressed: watch, icon: const Icon(Icons.play_arrow_rounded), label: const Text('Watch'))),
               if (youtubeUrl.isNotEmpty && mediaUrl.isNotEmpty) const SizedBox(width: 8),
-              if (mediaUrl.isNotEmpty) Expanded(child: OutlinedButton.icon(onPressed: busy ? null : (localPath == null ? download : () => offline.open(localPath!)), icon: Icon(localPath == null ? Icons.download_rounded : Icons.play_circle_outline_rounded), label: Text(localPath == null ? 'Offline' : 'Open'))),
+              if (mediaUrl.isNotEmpty) Expanded(child: OutlinedButton.icon(onPressed: busy ? null : (localPath == null ? download : () => offline.open(localPath!)), icon: Icon(localPath == null ? Icons.download_rounded : Icons.open_in_new_rounded), label: Text(localPath == null ? (isBook ? 'Download' : 'Offline') : (isBook ? 'Open book' : 'Open')))),
               if (localPath != null) IconButton(onPressed: remove, tooltip: 'Remove offline copy', icon: const Icon(Icons.delete_outline_rounded)),
             ]),
           ]),
