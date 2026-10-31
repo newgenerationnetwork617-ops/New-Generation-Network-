@@ -144,7 +144,7 @@ class _MainShellState extends State<MainShell> {
       BiblePage(),
       TeachingsPage(),
       EventsPage(),
-      MorePage(),
+      CommunityPage(),
     ];
     return Scaffold(
       body: IndexedStack(index: index, children: pages),
@@ -156,7 +156,7 @@ class _MainShellState extends State<MainShell> {
           NavigationDestination(icon: Icon(Icons.auto_stories_outlined), selectedIcon: Icon(Icons.auto_stories_rounded), label: 'Bible'),
           NavigationDestination(icon: Icon(Icons.play_circle_outline_rounded), selectedIcon: Icon(Icons.play_circle_fill_rounded), label: 'Media'),
           NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event_rounded), label: 'Events'),
-          NavigationDestination(icon: Icon(Icons.more_horiz_rounded), label: 'More'),
+          NavigationDestination(icon: Icon(Icons.groups_outlined), selectedIcon: Icon(Icons.groups_rounded), label: 'Community'),
         ],
       ),
     );
@@ -329,5 +329,5 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() { super.initState(); Future.delayed(const Duration(milliseconds: 1800), widget.onDone); }
   @override
-  Widget build(BuildContext context) => Scaffold(body: Center(child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [Image.asset('assets/branding/team_logo.jpg', width: 150, height: 150, fit: BoxFit.contain), const SizedBox(height: 24), const Text('NEW GENERATION NETWORK', textAlign: TextAlign.center, style: TextStyle(fontSize: 23, fontWeight: FontWeight.w900)), const SizedBox(height: 8), const Text('Raising a Righteous Generation for Christ', textAlign: TextAlign.center)]))));
+  Widget build(BuildContext context) => Scaffold(body: Center(child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [Image.asset('assets/branding/app_icon.jpg', width: 168, height: 168, fit: BoxFit.contain), const SizedBox(height: 24), const Text('NEW GENERATION NETWORK', textAlign: TextAlign.center, style: TextStyle(fontSize: 23, fontWeight: FontWeight.w900)), const SizedBox(height: 8), const Text('Raising a Righteous Generation for Christ', textAlign: TextAlign.center)]))));
 }
