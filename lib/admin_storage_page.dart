@@ -171,6 +171,7 @@ class _AdminStoragePageState extends State<AdminStoragePage> {
           .select('id')
           .eq('file_path', path);
       final count = (attachments as List).length;
+      if (!mounted) return;
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
