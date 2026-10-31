@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -11,20 +10,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  String language = 'English';
-  @override
-  void initState() {
-    super.initState();
-    SharedPreferences.getInstance().then((p) {
-      if (mounted) setState(() => language = p.getString('ngn_language') ?? 'English');
-    });
-  }
-
-  Future<void> saveLanguage(String value) async {
-    final p = await SharedPreferences.getInstance();
-    await p.setString('ngn_language', value);
-    if (mounted) setState(() => language = value);
-  }
 
   Future<void> openLink(String url) async {
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
@@ -61,27 +46,16 @@ class _SettingsPageState extends State<SettingsPage> {
               ]),
             ),
           ]),
-          section('Language', [
-            ListTile(
-              leading: const Icon(Icons.language_rounded),
-              title: const Text('App language'),
-              subtitle: Text(language == 'English' ? 'English' : '$language (preference saved; translation coming soon)'),
-              trailing: DropdownButton<String>(
-                value: language,
-                underline: const SizedBox.shrink(),
-                items: const ['English', 'Yoruba', 'Hausa', 'Igbo'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
-                onChanged: (v) { if (v != null) saveLanguage(v); },
-              ),
-            ),
-          ]),
           section('About N.G.N.', const [
             ListTile(leading: Icon(Icons.church_rounded), title: Text('NEW GENERATION NETWORK'), subtitle: Text('Raising a Righteous Generation for Christ')),
             Padding(padding: EdgeInsets.fromLTRB(18, 4, 18, 16), child: Text('Our mission is to spread the Gospel of Jesus Christ, inspire lives, strengthen faith, and bring hope to people around the world through impactful Christian content.', style: TextStyle(height: 1.5))),
           ]),
           section('Contact & Socials', [
-            const ListTile(leading: Icon(Icons.chat_rounded), title: Text('WhatsApp / Phone'), subtitle: Text('+234 915 994 2740\n+234 701 818 4333\n+234 906 632 8985\n+234 704 684 7936')),
-            const ListTile(leading: Icon(Icons.email_rounded), title: Text('Email'), subtitle: Text('newgenerationnetwork617@gmail.com')),
-            const ListTile(leading: Icon(Icons.play_circle_rounded), title: Text('YouTube'), subtitle: Text('@NGNOfficialTV')),
+            ListTile(leading: const Icon(Icons.chat_rounded), title: const Text('WhatsApp'), subtitle: const Text('+234 915 994 2740'), trailing: const Icon(Icons.open_in_new_rounded), onTap: () => openLink('https://wa.me/2349159942740')),
+            ListTile(leading: const Icon(Icons.phone_rounded), title: const Text('Call N.G.N.'), subtitle: const Text('+234 701 818 4333'), trailing: const Icon(Icons.call_rounded), onTap: () => openLink('tel:+2347018184333')),
+            const ListTile(leading: Icon(Icons.phone_outlined), title: Text('Other contact numbers'), subtitle: Text('+234 906 632 8985\n+234 704 684 7936')),
+            ListTile(leading: const Icon(Icons.email_rounded), title: const Text('Email'), subtitle: const Text('newgenerationnetwork617@gmail.com'), trailing: const Icon(Icons.open_in_new_rounded), onTap: () => openLink('mailto:newgenerationnetwork617@gmail.com')),
+            ListTile(leading: const Icon(Icons.play_circle_rounded), title: const Text('YouTube'), subtitle: const Text('@NGNOfficialTV'), trailing: const Icon(Icons.open_in_new_rounded), onTap: () => openLink('https://www.youtube.com/@NGNOfficialTV')),
             ListTile(leading: const Icon(Icons.facebook_rounded), title: const Text('Facebook'), subtitle: const Text('NEW GENERATION NETWORK'), trailing: const Icon(Icons.open_in_new_rounded), onTap: () => openLink('https://www.facebook.com/61563641344316/')),
           ]),
           const SizedBox(height: 8),
