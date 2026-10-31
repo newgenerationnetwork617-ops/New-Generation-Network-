@@ -21,7 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Padding(padding: const EdgeInsets.fromLTRB(18, 12, 18, 6), child: Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800))),
+          Padding(padding: const EdgeInsets.fromLTRB(18, 12, 18, 6), child: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: .2))),
           ...children,
         ]),
       ),
@@ -33,7 +33,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         children: [
           section('Appearance', [
             RadioGroup<ThemeMode>(
