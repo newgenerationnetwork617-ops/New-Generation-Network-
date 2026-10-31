@@ -407,7 +407,13 @@ class _MoreTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-        leading: badge == null\n            ? Icon(icon, color: NewGenerationNetworkApp.primaryBlue)\n            : _NotificationBadgeIcon(icon: icon, unread: badge!, color: NewGenerationNetworkApp.primaryBlue),
+        leading: badge == null
+            ? Icon(icon, color: NewGenerationNetworkApp.primaryBlue)
+            : _NotificationBadgeIcon(
+                icon: icon,
+                unread: badge!,
+                color: NewGenerationNetworkApp.primaryBlue,
+              ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: onTap,
