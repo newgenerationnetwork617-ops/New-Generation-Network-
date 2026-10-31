@@ -5,52 +5,174 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'in_app_notifications.dart';
 
 class CommunityPage extends StatelessWidget {
   const CommunityPage({super.key});
+
   @override
-  Widget build(BuildContext context) => Supabase.instance.client.auth.currentUser == null ? const CommunityAuthPage() : const CommunityChatPage();
+  Widget build(BuildContext context) => const CommunityJoinPage();
 }
-class CommunityAuthPage extends StatefulWidget {
-  const CommunityAuthPage({super.key});
-  @override State<CommunityAuthPage> createState()=>_CommunityAuthPageState();
+
+class CommunityJoinPage extends StatefulWidget {
+  const CommunityJoinPage({super.key});
+
+  @override
+  State<CommunityJoinPage> createState() => _CommunityJoinPageState();
 }
-class _CommunityAuthPageState extends State<CommunityAuthPage>{
-  final supabase=Supabase.instance.client,name=TextEditingController(),email=TextEditingController(),password=TextEditingController();
-  bool createAccount=false,loading=false; String? error;
-  Future<void> submit()async{
-    if(email.text.trim().isEmpty||password.text.length<6||(createAccount&&name.text.trim().length<2)){setState(()=>error='Enter a valid email, a password of at least 6 characters, and any required display name.');return;}
-    setState((){loading=true;error=null;});
-    try{
-      if(createAccount){
-        final result=await supabase.auth.signUp(email:email.text.trim(),password:password.text);final user=result.user;if(user==null)throw const AuthException('Could not create account.');
-        if(result.session==null){if(mounted)setState(()=>error='Account created. Check your email to confirm it, then sign in.');return;}
-        await supabase.from('profiles').upsert({'id':user.id,'display_name':name.text.trim()});
-      }else{
-        final result=await supabase.auth.signInWithPassword(email:email.text.trim(),password:password.text);final user=result.user!;
-        final profile=await supabase.from('profiles').select('id').eq('id',user.id).maybeSingle();
-        if(profile==null){var fallback=email.text.split('@').first;if(fallback.length>40)fallback=fallback.substring(0,40);if(fallback.length<2)fallback='N.G.N. Member';await supabase.from('profiles').insert({'id':user.id,'display_name':fallback});}
-      }
-      if(!mounted)return;Navigator.pushReplacement(context,MaterialPageRoute(builder:(_)=>const CommunityChatPage()));
-    }on AuthException catch(e){if(mounted)setState(()=>error=e.message);}on PostgrestException catch(e){if(mounted)setState(()=>error=e.message);}finally{if(mounted)setState(()=>loading=false);}
+
+class _CommunityJoinPageState extends State<CommunityJoinPage> {
+  final supabase = Supabase.instance.client;
+  final name = TextEditingController();
+  bool loading = true;
+  bool joining = false;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkExistingProfile();
   }
-  @override void dispose(){name.dispose();email.dispose();password.dispose();super.dispose();}
-  @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('N.G.N. Community')),body:ListView(padding:const EdgeInsets.all(20),children:[
-    const CircleAvatar(radius:34,backgroundColor:Color(0xFFE8F0FE),child:Icon(Icons.groups_rounded,size:38,color:Color(0xFF0B5ED7))),const SizedBox(height:16),Text(createAccount?'Join the Community':'Community Sign In',textAlign:TextAlign.center,style:const TextStyle(fontSize:24,fontWeight:FontWeight.w800)),
-    const SizedBox(height:8),const Text('Only Community requires an account. The rest of N.G.N. remains open to everyone.',textAlign:TextAlign.center),const SizedBox(height:24),
-    if(createAccount)TextField(controller:name,maxLength:40,decoration:const InputDecoration(labelText:'Display name',border:OutlineInputBorder())),if(createAccount)const SizedBox(height:12),
-    TextField(controller:email,keyboardType:TextInputType.emailAddress,decoration:const InputDecoration(labelText:'Email',border:OutlineInputBorder())),const SizedBox(height:12),
-    TextField(controller:password,obscureText:true,decoration:const InputDecoration(labelText:'Password',border:OutlineInputBorder())),
-    if(error!=null)Padding(padding:const EdgeInsets.only(top:12),child:Text(error!,style:TextStyle(color:Theme.of(context).colorScheme.error))),const SizedBox(height:18),
-    FilledButton(onPressed:loading?null:submit,child:Text(loading?'Please wait...':(createAccount?'Create account':'Sign in'))),
-    TextButton(onPressed:loading?null:()=>setState((){createAccount=!createAccount;error=null;}),child:Text(createAccount?'Already have an account? Sign in':'New here? Create a Community account'))
-  ]));
+
+  Future<void> _checkExistingProfile() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      if (mounted) setState(() => loading = false);
+      return;
+    }
+    try {
+      final profile = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', user.id)
+          .maybeSingle();
+      final displayName = profile?['display_name']?.toString().trim() ?? '';
+      if (!mounted) return;
+      if (displayName.length >= 2) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const CommunityChatPage()),
+        );
+        return;
+      }
+    } catch (_) {
+      if (mounted) error = 'Could not load your Community profile. Please try again.';
+    }
+    if (mounted) setState(() => loading = false);
+  }
+
+  Future<void> _join() async {
+    final displayName = name.text.trim();
+    if (displayName.length < 2 || displayName.length > 40) {
+      setState(() => error = 'Enter a name between 2 and 40 characters.');
+      return;
+    }
+    setState(() {
+      joining = true;
+      error = null;
+    });
+    try {
+      var user = supabase.auth.currentUser;
+      if (user == null) {
+        final result = await supabase.auth.signInAnonymously();
+        user = result.user;
+      }
+      if (user == null) {
+        throw const AuthException('A guest session could not be created.');
+      }
+      await supabase.from('profiles').upsert({
+        'id': user.id,
+        'display_name': displayName,
+      });
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const CommunityChatPage()),
+      );
+    } on AuthException catch (joinError) {
+      if (mounted) {
+        setState(() => error =
+            'Guest access is not enabled yet. Please contact the N.G.N. administrator. ' +
+            joinError.message);
+      }
+    } on PostgrestException catch (dbError) {
+      if (mounted) setState(() => error = dbError.message);
+    } catch (joinError) {
+      if (mounted) setState(() => error = 'Could not join the Community: ' + joinError.toString());
+    } finally {
+      if (mounted) setState(() => joining = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    name.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text('N.G.N. Community')),
+        body: Center(
+          child: loading
+              ? const CircularProgressIndicator()
+              : ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(24),
+                  children: [
+                    const CircleAvatar(
+                      radius: 38,
+                      backgroundColor: Color(0xFFE8F0FE),
+                      child: Icon(Icons.groups_rounded,
+                          size: 42, color: Color(0xFF0B5ED7)),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Welcome to the Community',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 23, fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 9),
+                    const Text(
+                      'Enter the name you want other members to see. No email, password or registration is required.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(height: 1.5),
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: name,
+                      maxLength: 40,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: const InputDecoration(
+                        labelText: 'Your Community name',
+                        hintText: 'Enter your name',
+                        border: OutlineInputBorder(),
+                      ),
+                      onSubmitted: (_) => joining ? null : _join(),
+                    ),
+                    if (error != null) ...[
+                      const SizedBox(height: 8),
+                      Text(error!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.error)),
+                    ],
+                    const SizedBox(height: 14),
+                    FilledButton(
+                      onPressed: joining ? null : _join,
+                      child: Text(joining ? 'Joining...' : 'Enter Community'),
+                    ),
+                  ],
+                ),
+        ),
+      );
 }
+
 class CommunityChatPage extends StatefulWidget{const CommunityChatPage({super.key});@override State<CommunityChatPage> createState()=>_CommunityChatPageState();}
 class _CommunityChatPageState extends State<CommunityChatPage>{
   final supabase=Supabase.instance.client,message=TextEditingController(),recorder=AudioRecorder(),player=AudioPlayer(),chatScroll=ScrollController();
   bool recording=false,sending=false;int recordSeconds=0;Timer? timer;String? playingId;Map<String,dynamic>? replyingTo;String? myName;String communityMode='open';
-  @override void initState(){super.initState();_loadMyName();_loadCommunityMode();}
+  @override void initState(){super.initState();InAppNotificationService.instance.markCommunityRead();_loadMyName();_loadCommunityMode();}
   Future<void> _loadCommunityMode()async{final r=await supabase.from('app_settings').select('value').eq('id','community_chat').maybeSingle();final value=r?['value'];final mode=value?['mode']?.toString();if(mounted)setState(()=>communityMode=mode??'open');}
   Future<void> _loadMyName()async{final user=supabase.auth.currentUser;if(user==null)return;final r=await supabase.from('profiles').select('display_name').eq('id',user.id).maybeSingle();if(!mounted)return;setState(()=>myName=r?['display_name']?.toString());if((myName??'').trim().isEmpty)WidgetsBinding.instance.addPostFrameCallback((_)=>_editMyName(required:true));}
   Future<void> _editMyName({bool required=false})async{final user=supabase.auth.currentUser;if(user==null)return;final c=TextEditingController(text:myName??'');final value=await showDialog<String>(context:context,barrierDismissible:!required,builder:(context)=>PopScope(canPop:!required,child:AlertDialog(title:const Text('Your Community name'),content:TextField(controller:c,autofocus:true,maxLength:40,decoration:const InputDecoration(hintText:'Enter the name people will see',border:OutlineInputBorder())),actions:[if(!required)TextButton(onPressed:()=>Navigator.pop(context),child:const Text('Cancel')),FilledButton(onPressed:()=>Navigator.pop(context,c.text.trim()),child:const Text('Save name'))])));c.dispose();if(value==null||value.trim().length<2){if(required&&mounted)_editMyName(required:true);return;}await supabase.from('profiles').update({'display_name':value.trim()}).eq('id',user.id);if(mounted)setState(()=>myName=value.trim());}
@@ -63,9 +185,8 @@ class _CommunityChatPageState extends State<CommunityChatPage>{
   Future<void> playVoice(Map<String,dynamic> row)async{final path=row['voice_path']?.toString();if(path==null)return;if(playingId==row['id']){await player.stop();if(mounted)setState(()=>playingId=null);return;}final url=await supabase.storage.from('community-voice').createSignedUrl(path,3600);await player.play(UrlSource(url));if(mounted)setState(()=>playingId=row['id']?.toString());}
   Future<void> deleteOwn(Map<String,dynamic> row)async{final path=row['voice_path']?.toString();await supabase.from('community_messages').delete().eq('id',row['id']);if(path!=null)await supabase.storage.from('community-voice').remove([path]);}
   Future<void> report(Map<String,dynamic> row)async{final user=supabase.auth.currentUser;if(user==null)return;await supabase.from('community_reports').insert({'reporter_id':user.id,'message_id':row['id'],'reason':'Reported from community chat'});if(mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Message reported to N.G.N. administrators.')));}
-  Future<void> signOut()async{await supabase.auth.signOut();if(!mounted)return;Navigator.pushReplacement(context,MaterialPageRoute(builder:(_)=>const CommunityAuthPage()));}
   @override void dispose(){timer?.cancel();message.dispose();recorder.dispose();player.dispose();super.dispose();}
-  @override Widget build(BuildContext context){final me=supabase.auth.currentUser?.id;return Scaffold(appBar:AppBar(title:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('N.G.N. Community'),if(myName!=null)Text(myName!,style:const TextStyle(fontSize:11,fontWeight:FontWeight.normal))]),actions:[IconButton(onPressed:()=>_editMyName(),tooltip:'Change my Community name',icon:const Icon(Icons.badge_outlined)),IconButton(onPressed:signOut,tooltip:'Community sign out',icon:const Icon(Icons.logout_rounded))]),body:Column(children:[
+  @override Widget build(BuildContext context){final me=supabase.auth.currentUser?.id;return Scaffold(appBar:AppBar(title:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('N.G.N. Community'),if(myName!=null)Text(myName!,style:const TextStyle(fontSize:11,fontWeight:FontWeight.normal))]),actions:[IconButton(onPressed:()=>_editMyName(),tooltip:'Change my Community name',icon:const Icon(Icons.badge_outlined))]),body:Column(children:[
     Container(width:double.infinity,padding:const EdgeInsets.symmetric(horizontal:16,vertical:9),color:const Color(0xFFD4AF37).withValues(alpha:.12),child:Text(communityMode=='locked'?'Community chat is currently closed. You can read previous messages and check back for the next N.G.N. session.':communityMode=='meeting'?'N.G.N. Community meeting is now open • Fellowship with kindness':'Fellowship with kindness • Messages are automatically removed after 30 days',textAlign:TextAlign.center,style:const TextStyle(fontSize:12))),
     Expanded(child:StreamBuilder<List<Map<String,dynamic>>>(stream:messages,builder:(context,snapshot){if(!snapshot.hasData)return const Center(child:CircularProgressIndicator());final rows=snapshot.data!;if(rows.isEmpty)return const Center(child:Text('Start the conversation. 👋'));scrollToLatest();return ListView.builder(controller:chatScroll,padding:const EdgeInsets.all(14),itemCount:rows.length,itemBuilder:(context,index){final row=rows[index],mine=row['author_id']==me;return FutureBuilder<String>(future:displayName(row['author_id'].toString()),builder:(context,n)=>Align(alignment:mine?Alignment.centerRight:Alignment.centerLeft,child:GestureDetector(onLongPress:()=>showModalBottomSheet(context:context,builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[ListTile(leading:const Icon(Icons.reply_rounded),title:const Text('Reply'),onTap:(){Navigator.pop(context);setState(()=>replyingTo=row);}),if(mine)ListTile(leading:const Icon(Icons.delete_outline),title:const Text('Delete my message'),onTap:(){Navigator.pop(context);deleteOwn(row);}),if(!mine)ListTile(leading:const Icon(Icons.flag_outlined),title:const Text('Report to admin'),onTap:(){Navigator.pop(context);report(row);})]))),child:Container(constraints:const BoxConstraints(maxWidth:310),margin:const EdgeInsets.only(bottom:10),padding:const EdgeInsets.all(13),decoration:BoxDecoration(color:mine?const Color(0xFF0B5ED7):Theme.of(context).cardColor,borderRadius:BorderRadius.circular(16),border:mine?null:Border.all(color:Theme.of(context).dividerColor)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[if(row['reply_to_id']!=null)Container(margin:const EdgeInsets.only(bottom:7),padding:const EdgeInsets.symmetric(horizontal:8,vertical:5),decoration:BoxDecoration(color:(mine?Colors.white:const Color(0xFF0B5ED7)).withValues(alpha:.12),borderRadius:BorderRadius.circular(8)),child:const Row(mainAxisSize:MainAxisSize.min,children:[Icon(Icons.reply_rounded,size:14),SizedBox(width:5),Text('Reply to a message',style:TextStyle(fontSize:11,fontStyle:FontStyle.italic))])),Text(n.data??'N.G.N. Member',style:TextStyle(fontSize:11,fontWeight:FontWeight.w700,color:mine?const Color(0xFFD4AF37):const Color(0xFF0B5ED7))),const SizedBox(height:5),if(row['message_type']=='voice')InkWell(onTap:()=>playVoice(row),child:Row(mainAxisSize:MainAxisSize.min,children:[Icon(playingId==row['id']?Icons.stop_circle_outlined:Icons.play_circle_outline,color:mine?Colors.white:const Color(0xFF0B5ED7)),const SizedBox(width:8),Text('Voice note • ${row['voice_duration_seconds']??0}s',style:TextStyle(color:mine?Colors.white:null))]))else Text(row['body']?.toString()??'',style:TextStyle(color:mine?Colors.white:null,height:1.35))])))));});})),
     SafeArea(top:false,child:Column(mainAxisSize:MainAxisSize.min,children:[if(replyingTo!=null)Container(margin:const EdgeInsets.fromLTRB(10,6,10,0),padding:const EdgeInsets.symmetric(horizontal:12,vertical:7),decoration:BoxDecoration(color:Theme.of(context).colorScheme.surfaceContainerHighest,borderRadius:BorderRadius.circular(12)),child:Row(children:[const Icon(Icons.reply_rounded,size:18),const SizedBox(width:8),Expanded(child:Text(replyingTo!['message_type']=='voice'?'Replying to voice note':(replyingTo!['body']?.toString()??'Replying to message'),maxLines:1,overflow:TextOverflow.ellipsis)),IconButton(onPressed:()=>setState(()=>replyingTo=null),icon:const Icon(Icons.close_rounded),visualDensity:VisualDensity.compact)])),Padding(padding:const EdgeInsets.fromLTRB(10,8,10,10),child:Row(children:[IconButton.filledTonal(onPressed:sending||communityMode=='locked'?null:toggleRecording,icon:Icon(recording?Icons.stop_rounded:Icons.mic_none_rounded),tooltip:recording?'Stop voice note':'Record voice note'),const SizedBox(width:8),Expanded(child:TextField(controller:message,enabled:!recording&&communityMode!='locked',maxLength:2000,minLines:1,maxLines:4,decoration:InputDecoration(counterText:'',hintText:communityMode=='locked'?'Community chat is closed':recording?'Recording… $recordSeconds/120s':'Message the community',border:OutlineInputBorder(borderRadius:BorderRadius.circular(22))))),const SizedBox(width:8),IconButton.filled(onPressed:sending||recording||communityMode=='locked'?null:sendText,icon:sending?const SizedBox(width:18,height:18,child:CircularProgressIndicator(strokeWidth:2)):const Icon(Icons.send_rounded))]))]))
