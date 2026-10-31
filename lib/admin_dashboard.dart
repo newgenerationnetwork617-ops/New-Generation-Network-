@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -319,6 +322,305 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     description.dispose();
     url.dispose();
     mediaUrl.dispose();
+  }
+
+  Future<void> addTeachingBook() async {
+    final picked = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'],
+    );
+    if (picked == null || picked.files.single.path == null) return;
+    final file = picked.files.single;
+    final extension = file.extension?.toLowerCase() ?? '';
+    final title = TextEditingController(text: file.name.replaceFirst(RegExp(r'\\.[^.]+
+    final title = TextEditingController();
+    final body = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Add Announcement'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
+            TextField(controller: body, maxLines: 4, decoration: const InputDecoration(labelText: 'Message')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              final ok = await runSave(() async {
+                await supabase.from('announcements').insert({
+                'title': title.text.trim(),
+                'body': body.text.trim(),
+                'published_at': DateTime.now().toIso8601String(),
+              });
+              }, 'Announcement published.');
+              if (ok && mounted) Navigator.pop(context);
+            },
+            child: const Text('Publish'),
+          ),
+        ],
+      ),
+    );
+
+    title.dispose();
+    body.dispose();
+  }
+
+  Future<void> addEvent() async {
+    final title = TextEditingController();
+    final description = TextEditingController();
+    final venue = TextEditingController();
+    DateTime startsAt = DateTime.now().add(const Duration(days: 1));
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Add Event'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: title, decoration: const InputDecoration(labelText: 'Event title')),
+                TextField(controller: description, maxLines: 3, decoration: const InputDecoration(labelText: 'Description')),
+                TextField(controller: venue, decoration: const InputDecoration(labelText: 'Venue')),
+                const SizedBox(height: 14),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.calendar_month_rounded),
+                  title: const Text('Event date & time'),
+                  subtitle: Text(startsAt.toString().substring(0, 16)),
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: startsAt,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 3650)),
+                    );
+                    if (date == null || !context.mounted) return;
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(startsAt),
+                    );
+                    if (time == null) return;
+                    setDialogState(() {
+                      startsAt = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+            FilledButton(
+              onPressed: () async {
+                final ok = await runSave(() async {
+                  await supabase.from('events').insert({
+                    'title': title.text.trim(),
+                    'description': description.text.trim(),
+                    'venue': venue.text.trim(),
+                    'starts_at': startsAt.toUtc().toIso8601String(),
+                    'published': true,
+                    'published_at': DateTime.now().toUtc().toIso8601String(),
+                  });
+                }, 'Event published.');
+                if (ok && dialogContext.mounted) Navigator.pop(dialogContext);
+              },
+              child: const Text('Publish'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    title.dispose();
+    description.dispose();
+    venue.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (checking) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (!allowed) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Admin Access')),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'This account is not authorized as an N.G.N. administrator.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('N.G.N. Admin Dashboard'),
+        actions: [
+          IconButton(onPressed: signOut, icon: const Icon(Icons.logout)),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const Text(
+            'Content Management',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          const Text('Manage N.G.N. content from inside the app.'),
+          const SizedBox(height: 24),
+          _AdminAction(
+            title: 'Manage Existing Content',
+            icon: Icons.edit_note_rounded,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminContentManagerPage())),
+          ),
+          _AdminAction(
+            title: 'Community Moderation',
+            icon: Icons.groups_rounded,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminCommunityPage())),
+          ),
+          _AdminAction(
+            title: 'Media Storage',
+            icon: Icons.cloud_rounded,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminStoragePage())),
+          ),
+          const SizedBox(height: 8),
+          _AdminAction(
+            title: 'Daily Bible Verse',
+            icon: Icons.menu_book_rounded,
+            onTap: addBibleVerse,
+          ),
+          _AdminAction(
+            title: 'Daily Devotional',
+            icon: Icons.auto_stories_rounded,
+            onTap: addDevotional,
+          ),
+          _AdminAction(
+            title: 'Video & Audio Teachings',
+            icon: Icons.play_circle_fill_rounded,
+            onTap: addTeaching,
+          ),
+          _AdminAction(
+            title: 'Upload Teaching Book (PDF / Document)',
+            icon: Icons.menu_book_rounded,
+            onTap: addTeachingBook,
+          ),
+          _AdminAction(
+            title: 'Announcements',
+            icon: Icons.campaign_rounded,
+            onTap: addAnnouncement,
+          ),
+          _AdminAction(
+            title: 'Events',
+            icon: Icons.event_rounded,
+            onTap: addEvent,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdminAction extends StatelessWidget {
+  const _AdminAction({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(title),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+), '').replaceAll('_', ' '));
+    final speaker = TextEditingController();
+    final description = TextEditingController();
+    final details = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Add Teaching Book'),
+        content: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text(file.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 12),
+            TextField(controller: title, decoration: const InputDecoration(labelText: 'Book / teaching title')),
+            TextField(controller: speaker, decoration: const InputDecoration(labelText: 'Author / speaker (optional)')),
+            TextField(controller: description, maxLines: 3, decoration: const InputDecoration(labelText: 'Description (optional)')),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Upload & publish')),
+        ],
+      ),
+    );
+    if (details != true || !mounted) {
+      title.dispose(); speaker.dispose(); description.dispose();
+      return;
+    }
+    if (title.text.trim().isEmpty) {
+      notice('Please enter a title for this teaching book.');
+      title.dispose(); speaker.dispose(); description.dispose();
+      return;
+    }
+    final safeName = file.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+    final storagePath = 'teaching-books/${DateTime.now().millisecondsSinceEpoch}_$safeName';
+    final mime = switch (extension) {
+      'pdf' => 'application/pdf',
+      'doc' => 'application/msword',
+      'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'txt' => 'text/plain',
+      'rtf' => 'application/rtf',
+      'odt' => 'application/vnd.oasis.opendocument.text',
+      _ => 'application/octet-stream',
+    };
+    try {
+      await supabase.storage.from('ngn-media').upload(
+        storagePath,
+        File(file.path!),
+        fileOptions: FileOptions(contentType: mime, upsert: false),
+      );
+      final publicUrl = supabase.storage.from('ngn-media').getPublicUrl(storagePath);
+      await supabase.from('teachings').insert({
+        'title': title.text.trim(),
+        'speaker': speaker.text.trim().isEmpty ? null : speaker.text.trim(),
+        'description': description.text.trim().isEmpty ? null : description.text.trim(),
+        'content_type': 'book',
+        'media_url': publicUrl,
+        'published_at': DateTime.now().toUtc().toIso8601String(),
+      });
+      notice('Teaching book uploaded and published.');
+    } catch (e) {
+      try { await supabase.storage.from('ngn-media').remove([storagePath]); } catch (_) {}
+      notice('Could not upload teaching book: $e');
+    } finally {
+      title.dispose(); speaker.dispose(); description.dispose();
+    }
   }
 
   Future<void> addAnnouncement() async {
