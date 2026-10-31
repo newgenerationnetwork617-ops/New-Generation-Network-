@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'bible_repository.dart';
@@ -208,6 +209,16 @@ class _BibleChapterPageState extends State<BibleChapterPage> {
     await prefs.setStringList('bible_bookmarks', _bookmarks.toList());
   }
 
+  Future<void> _copyVerse(BibleVerse verse) async {
+    final reference = '${widget.book} ${widget.chapter}:${verse.number}';
+    await Clipboard.setData(ClipboardData(text: '$reference — ${verse.text}'));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$reference copied.')),
+      );
+    }
+  }
+
   Future<void> _editNote(BibleVerse verse) async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'bible_note_${_key(verse.number)}';
@@ -302,8 +313,17 @@ class _BibleChapterPageState extends State<BibleChapterPage> {
                         onSelected: (value) {
                           if (value == 'bookmark') _toggleBookmark(verse);
                           if (value == 'note') _editNote(verse);
+                          if (value == 'copy') _copyVerse(verse);
                         },
                         itemBuilder: (_) => [
+                          const PopupMenuItem(
+                            value: 'copy',
+                            child: ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: Icon(Icons.copy_rounded),
+                              title: Text('Copy verse'),
+                            ),
+                          ),
                           PopupMenuItem(
                             value: 'bookmark',
                             child: ListTile(
@@ -380,6 +400,15 @@ class BibleSearchDelegate extends SearchDelegate<String?> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(row['text']?.toString() ?? ''),
+                trailing: IconButton(
+                  tooltip: 'Copy verse',
+                  icon: const Icon(Icons.copy_rounded),
+                  onPressed: () async {
+                    final reference = "${row['book']} ${row['chapter']}:${row['verse']}";
+                    await Clipboard.setData(ClipboardData(text: "$reference — ${row['text'] ?? ''}"));
+                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$reference copied.')));
+                  },
+                ),
               ),
             );
           },
