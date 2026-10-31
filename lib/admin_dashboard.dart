@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'admin_content_manager.dart';
 import 'admin_storage_page.dart';
+import 'admin_community_page.dart';
 
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({super.key});
@@ -473,6 +474,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             title: 'Manage Existing Content',
             icon: Icons.edit_note_rounded,
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminContentManagerPage())),
+          ),
+          _AdminAction(
+            title: 'Community Moderation',
+            icon: Icons.groups_rounded,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminCommunityPage())),
           ),
           _AdminAction(
             title: 'Media Storage',
