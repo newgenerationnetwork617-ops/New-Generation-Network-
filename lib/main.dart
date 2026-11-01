@@ -222,7 +222,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    const pages = <Widget>[
+    final pages = <Widget>[
       HomeContent(key: ValueKey(DateTime.now().toLocal().toIso8601String().substring(0, 10))),
       BiblePage(),
       TeachingsPage(),

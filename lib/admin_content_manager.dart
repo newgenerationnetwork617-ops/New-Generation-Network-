@@ -138,10 +138,10 @@ class _AdminContentManagerPageState extends State<AdminContentManagerPage> {
 
     try {
       if (table == 'teachings') {
-        final paths = <String>{
+        final paths = <String>[
           _storagePathFromPublicUrl(row['media_url']),
           _storagePathFromPublicUrl(row['thumbnail_url']),
-        }.whereType<String>().toList();
+        ].whereType<String>().toList();
         if (paths.isNotEmpty) {
           await client.storage.from('ngn-media').remove(paths);
         }
