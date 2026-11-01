@@ -3,7 +3,6 @@ import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'bible_repository.dart';
 
 class ContentRepository {
   ContentRepository(this.client);
@@ -105,8 +104,8 @@ class ContentRepository {
 
 
   Future<Map<String, dynamic>?> wordForDate(DateTime date) async {
-    // Select the daily word using Nigeria time, then read its Scripture from
-    // the Bible bundled with the app. No network request is required.
+    // The daily word, meaning, and full Scripture text are bundled locally.
+    // Nigeria time (UTC+1) determines which date is displayed.
     final nigeriaDate = date.toUtc().add(const Duration(hours: 1));
     final keyDate =
         '${nigeriaDate.year.toString().padLeft(4, '0')}-${nigeriaDate.month.toString().padLeft(2, '0')}-${nigeriaDate.day.toString().padLeft(2, '0')}';
@@ -114,30 +113,16 @@ class ContentRepository {
       final raw = await rootBundle.loadString('assets/word_of_day/word_of_day.json');
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
       final entries = decoded['entries'] as List<dynamic>? ?? const [];
-      Map<String, dynamic>? selected;
       for (final value in entries) {
         if (value is Map && value['date']?.toString() == keyDate) {
-          selected = Map<String, dynamic>.from(value);
-          break;
-        }
-      }
-      if (selected == null) return null;
-      final reference = selected['reference']?.toString() ?? '';
-      final match = RegExp(r'^(.+) ([0-9]+):([0-9]+)$').firstMatch(reference);
-      if (match == null) return null;
-      final book = match.group(1)!;
-      final chapter = int.parse(match.group(2)!);
-      final verseNumber = int.parse(match.group(3)!);
-      final verses = await BibleRepository().verses(book, chapter);
-      for (final verse in verses) {
-        if (verse.number == verseNumber) {
-          selected['verse_text'] = verse.text;
-          selected['translation'] = BibleRepository.translation;
-          return selected;
+          final selected = Map<String, dynamic>.from(value);
+          selected['translation'] = decoded['translation'] ?? 'World English Bible (WEB)';
+          if ((selected['verse_text']?.toString() ?? '').isNotEmpty) return selected;
+          return null;
         }
       }
     } catch (_) {
-      // The bundled word or Bible text could not be read.
+      // The bundled daily reading could not be read.
     }
     return null;
   }
