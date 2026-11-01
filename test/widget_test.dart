@@ -22,8 +22,11 @@ void main() {
       findsOneWidget,
     );
 
+    // The app contains repeating animations, so pump a fixed duration rather
+    // than waiting for every animation to settle indefinitely.
     await tester.pump(const Duration(milliseconds: 1900));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('NEW GENERATION NETWORK'), findsOneWidget);
     expect(find.text('WORD FOR TODAY'), findsOneWidget);
