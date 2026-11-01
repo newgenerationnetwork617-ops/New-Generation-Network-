@@ -123,35 +123,7 @@ class ContentRepository {
       }
       if (selected == null) return null;
       final reference = selected['reference']?.toString() ?? '';
-      final match = RegExp(r'^(.+) (\\d+):(\\d+)
-    try {
-      final today = DateTime.now().toUtc().add(const Duration(hours: 1)).toIso8601String().substring(0, 10);
-      final row = await client
-          .from('daily_bible_verses')
-          .select()
-          .eq('verse_date', today)
-          .maybeSingle();
-      if (row != null) {
-        final data = Map<String, dynamic>.from(row);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('ngn_daily_verse_$today', jsonEncode(data));
-        return data;
-      }
-    } catch (_) {}
-
-    final today = DateTime.now().toUtc().add(const Duration(hours: 1)).toIso8601String().substring(0, 10);
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString('ngn_daily_verse_$today') ??
-        prefs.getString('ngn_daily_verse');
-    if (raw == null) return null;
-    try {
-      return Map<String, dynamic>.from(jsonDecode(raw) as Map);
-    } catch (_) {
-      return null;
-    }
-  }
-}
-).firstMatch(reference);
+      final match = RegExp(r'^(.+) ([0-9]+):([0-9]+)$').firstMatch(reference);
       if (match == null) return null;
       final book = match.group(1)!;
       final chapter = int.parse(match.group(2)!);
