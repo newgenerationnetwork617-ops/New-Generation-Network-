@@ -316,6 +316,8 @@ class HomeContent extends StatelessWidget {
                       Text('“${verse['verse_text']?.toString() ?? ''}”', style: const TextStyle(color: Colors.white, fontSize: 17, height: 1.5, fontWeight: FontWeight.w500)),
                       const SizedBox(height: 10),
                       Text(verse['reference']?.toString() ?? '', style: const TextStyle(color: NewGenerationNetworkApp.accentGold, fontSize: 14, fontWeight: FontWeight.w900)),
+                      const SizedBox(height: 5),
+                      Text(verse['translation']?.toString() ?? 'World English Bible (WEB)', style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w600)),
                     ],
                     const SizedBox(height: 16),
                     Container(width: 42, height: 3, decoration: BoxDecoration(color: NewGenerationNetworkApp.accentGold, borderRadius: BorderRadius.circular(99))),
