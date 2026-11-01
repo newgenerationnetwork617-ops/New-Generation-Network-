@@ -100,34 +100,75 @@ class _AdminContentManagerPageState extends State<AdminContentManagerPage> {
     if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled for ${when.toString().substring(0,16)}.')));
   }
 
-  Future<void> setArchived(Map<String,dynamic> row, bool archived) async {
-    final action = archived ? 'archive' : 'restore';
-    final yes = await showDialog<bool>(
+  String? _storagePathFromPublicUrl(dynamic value) {
+    final raw = value?.toString() ?? '';
+    if (raw.isEmpty) return null;
+    final uri = Uri.tryParse(raw);
+    if (uri == null) return null;
+    const marker = '/storage/v1/object/public/ngn-media/';
+    final index = uri.path.indexOf(marker);
+    if (index < 0) return null;
+    final objectPath = Uri.decodeComponent(uri.path.substring(index + marker.length));
+    return objectPath.isEmpty ? null : objectPath;
+  }
+
+  Future<void> deleteContent(Map<String,dynamic> row) async {
+    final title = (row['title'] ?? row['reference'] ?? 'this content').toString();
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(archived ? 'Archive content?' : 'Restore content?'),
-        content: Text(archived
-            ? 'This will hide the item from public listings. Copies already synced to users’ phones will remain available.'
-            : 'This will make the item visible in public listings again when its publication date is reached.'),
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete permanently?'),
+        content: Text(
+          '“$title” will be deleted from the N.G.N. database. Any linked teaching files stored in Supabase will also be removed. This cannot be undone.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context,false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context,true), child: Text(archived ? 'Archive' : 'Restore')),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete permanently'),
+          ),
         ],
       ),
     );
-    if (yes != true) return;
+    if (confirmed != true) return;
+
     try {
-      await client.from(table).update({'is_archived': archived}).eq('id', row['id']);
+      if (table == 'teachings') {
+        final paths = <String>{
+          _storagePathFromPublicUrl(row['media_url']),
+          _storagePathFromPublicUrl(row['thumbnail_url']),
+        }.whereType<String>().toList();
+        if (paths.isNotEmpty) {
+          await client.storage.from('ngn-media').remove(paths);
+        }
+      }
+      await client.from(table).delete().eq('id', row['id']);
       await refresh();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(archived ? 'Content archived safely.' : 'Content restored.')),
+          const SnackBar(content: Text('Content deleted permanently.')),
         );
       }
     } on PostgrestException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not $action content: ${e.message}')),
+          SnackBar(content: Text('Could not delete content: ${e.message}')),
+        );
+      }
+    } on StorageException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not delete linked media: ${e.message}. The database record was kept.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not delete content: $e')),
         );
       }
     }
@@ -170,15 +211,21 @@ class _AdminContentManagerPageState extends State<AdminContentManagerPage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       if (scheduleText.isNotEmpty) Text('Publish: $scheduleText'),
-                                      if (row['is_archived'] == true) const Text('Archived — hidden from public', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w700)),
                                     ],
                                   ),
                                   trailing: PopupMenuButton<String>(
-                                    onSelected: (v) { if (v == 'edit') edit(row); if (v == 'schedule') schedule(row); if (v == 'archive') setArchived(row, true); if (v == 'restore') setArchived(row, false); },
+                                    onSelected: (v) {
+                                      if (v == 'edit') edit(row);
+                                      if (v == 'schedule') schedule(row);
+                                      if (v == 'delete') deleteContent(row);
+                                    },
                                     itemBuilder: (_) => [
                                       const PopupMenuItem(value: 'edit', child: Text('Edit')),
                                       if (table != 'daily_bible_verses') const PopupMenuItem(value: 'schedule', child: Text('Schedule publication')),
-                                      if (row['is_archived'] == true) const PopupMenuItem(value: 'restore', child: Text('Restore to public')) else const PopupMenuItem(value: 'archive', child: Text('Archive (keep safe)')),
+                                      const PopupMenuItem(
+                                        value: 'delete',
+                                        child: Text('Delete permanently', style: TextStyle(color: Colors.red)),
+                                      ),
                                     ],
                                   ),
                                 ),

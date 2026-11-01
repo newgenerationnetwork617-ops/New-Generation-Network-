@@ -41,19 +41,10 @@ class ContentRepository {
         (rows as List).map((row) => Map<String, dynamic>.from(row)),
       );
 
-      // Keep previously synced items on this phone even if an administrator
-      // later archives them. The server no longer sends archived items to new
-      // installs, but a successful refresh must not erase an existing copy.
-      final byId = <String, Map<String, dynamic>>{};
-      for (final item in cached) {
-        final id = item['id']?.toString();
-        if (id != null) byId[id] = item;
-      }
-      for (final item in remote) {
-        final id = item['id']?.toString();
-        if (id != null) byId[id] = item;
-      }
-      final data = byId.values.toList()
+      // A successful server refresh is authoritative: deleted content must
+      // disappear from this device's synced cache. If offline, _fetchList
+      // still returns the last cached copy from the catch block.
+      final data = remote
         ..sort((a, b) => (b[orderColumn]?.toString() ?? '')
             .compareTo(a[orderColumn]?.toString() ?? ''));
       final prefs = await SharedPreferences.getInstance();
@@ -69,10 +60,10 @@ class ContentRepository {
 
   Future<Map<String, dynamic>?> devotionalForDate(DateTime date) async {
     // Daily devotionals are bundled in the app and work without a network.
-    // NGN uses Nigeria time (UTC+1) to select the correct calendar reading.
-    final lagosDate = date.toUtc().add(const Duration(hours: 1));
+    // Use the device's local calendar date and time zone. This works offline.
+    final localDate = date.toLocal();
     final keyDate =
-        '${lagosDate.year.toString().padLeft(4, '0')}-${lagosDate.month.toString().padLeft(2, '0')}-${lagosDate.day.toString().padLeft(2, '0')}';
+        '${localDate.year.toString().padLeft(4, '0')}-${localDate.month.toString().padLeft(2, '0')}-${localDate.day.toString().padLeft(2, '0')}';
     final monthAsset =
         'assets/devotionals/spurgeon-morning/${keyDate.substring(0, 7)}.json';
     try {
@@ -105,10 +96,11 @@ class ContentRepository {
 
   Future<Map<String, dynamic>?> wordForDate(DateTime date) async {
     // The daily word, meaning, and full Scripture text are bundled locally.
-    // Nigeria time (UTC+1) determines which date is displayed.
-    final nigeriaDate = date.toUtc().add(const Duration(hours: 1));
+    // Use the device's local calendar date and time zone. The bundled
+    // word, meaning, and Scripture remain available completely offline.
+    final localDate = date.toLocal();
     final keyDate =
-        '${nigeriaDate.year.toString().padLeft(4, '0')}-${nigeriaDate.month.toString().padLeft(2, '0')}-${nigeriaDate.day.toString().padLeft(2, '0')}';
+        '${localDate.year.toString().padLeft(4, '0')}-${localDate.month.toString().padLeft(2, '0')}-${localDate.day.toString().padLeft(2, '0')}';
     try {
       final raw = await rootBundle.loadString('assets/word_of_day/word_of_day.json');
       final decoded = jsonDecode(raw) as Map<String, dynamic>;

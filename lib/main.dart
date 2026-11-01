@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'in_app_notifications.dart';
@@ -181,30 +182,48 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   int index = 0;
+  Timer? _dayRefreshTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scheduleLocalMidnightRefresh();
+  }
+
+  void _scheduleLocalMidnightRefresh() {
+    _dayRefreshTimer?.cancel();
+    final now = DateTime.now();
+    final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+    _dayRefreshTimer = Timer(nextMidnight.difference(now), () {
+      if (!mounted) return;
+      setState(() {});
+      _scheduleLocalMidnightRefresh();
+    });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       InAppNotificationService.instance.refreshCounts();
+      if (mounted) {
+        setState(() {});
+        _scheduleLocalMidnightRefresh();
+      }
     }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _dayRefreshTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     const pages = <Widget>[
-      HomeContent(),
+      HomeContent(key: ValueKey(DateTime.now().toLocal().toIso8601String().substring(0, 10))),
       BiblePage(),
       TeachingsPage(),
       EventsPage(),

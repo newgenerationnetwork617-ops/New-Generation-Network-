@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'in_app_notifications.dart';
@@ -60,14 +61,44 @@ class DevotionalsPage extends StatefulWidget {
   State<DevotionalsPage> createState() => _DevotionalsPageState();
 }
 
-class _DevotionalsPageState extends State<DevotionalsPage> {
+class _DevotionalsPageState extends State<DevotionalsPage> with WidgetsBindingObserver {
   final repo = ContentRepository(Supabase.instance.client);
   late Future<Map<String, dynamic>?> future;
+
+  Timer? _dayRefreshTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     future = repo.devotionalForDate(DateTime.now());
+    _scheduleLocalMidnightRefresh();
+  }
+
+  void _scheduleLocalMidnightRefresh() {
+    _dayRefreshTimer?.cancel();
+    final now = DateTime.now();
+    final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+    _dayRefreshTimer = Timer(nextMidnight.difference(now), () {
+      if (!mounted) return;
+      refresh();
+      _scheduleLocalMidnightRefresh();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      refresh();
+      _scheduleLocalMidnightRefresh();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _dayRefreshTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> refresh() async {
@@ -102,7 +133,7 @@ class _DevotionalsPageState extends State<DevotionalsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final today = DateTime.now().toUtc().add(const Duration(hours: 1));
+    final today = DateTime.now();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daily Devotional'),
