@@ -224,10 +224,10 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final pages = <Widget>[
       HomeContent(key: ValueKey(DateTime.now().toLocal().toIso8601String().substring(0, 10))),
-      BiblePage(),
-      TeachingsPage(),
-      EventsPage(),
-      CommunityPage(),
+      const BiblePage(),
+      const TeachingsPage(),
+      const EventsPage(),
+      const CommunityPage(),
     ];
     return Scaffold(
       body: IndexedStack(index: index, children: pages),
