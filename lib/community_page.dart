@@ -24,79 +24,98 @@ class CommunityJoinPage extends StatefulWidget {
 
 class _CommunityJoinPageState extends State<CommunityJoinPage> {
   final supabase = Supabase.instance.client;
-  final name = TextEditingController();
   bool loading = true;
   bool joining = false;
   bool joined = false;
   String? error;
+  StreamSubscription<AuthState>? _authSubscription;
 
   @override
   void initState() {
     super.initState();
+    _authSubscription = supabase.auth.onAuthStateChange.listen((state) {
+      final user = state.session?.user;
+      if (state.event == AuthChangeEvent.signedIn &&
+          user != null &&
+          !user.isAnonymous) {
+        _saveGoogleProfile(user);
+      }
+    });
     _checkExistingProfile();
   }
 
   Future<void> _checkExistingProfile() async {
     final user = supabase.auth.currentUser;
-    if (user == null) {
+    if (user == null || user.isAnonymous) {
       if (mounted) setState(() => loading = false);
       return;
     }
+    await _saveGoogleProfile(user);
+  }
+
+  Future<void> _saveGoogleProfile(User user) async {
     try {
+      final metadata = user.userMetadata ?? const <String, dynamic>{};
       final profile = await supabase
           .from('profiles')
           .select('display_name')
           .eq('id', user.id)
           .maybeSingle();
-      final displayName = profile?['display_name']?.toString().trim() ?? '';
-      if (!mounted) return;
-      if (displayName.length >= 2 && displayName != 'N.G.N. Member') {
+      final existingName = profile?['display_name']?.toString().trim() ?? '';
+      final googleName = (metadata['full_name'] ??
+              metadata['name'] ??
+              user.email?.split('@').first ??
+              'N.G.N. Member')
+          .toString()
+          .trim();
+      final displayName = existingName.length >= 2 &&
+              existingName != 'N.G.N. Member'
+          ? existingName
+          : googleName;
+      final avatar = (metadata['avatar_url'] ?? metadata['picture'] ?? '')
+          .toString()
+          .trim();
+      await supabase.from('profiles').upsert({
+        'id': user.id,
+        'display_name': displayName.isEmpty ? 'N.G.N. Member' : displayName,
+        'avatar_url': avatar.isEmpty ? null : avatar,
+      });
+      if (mounted) {
         setState(() {
           joined = true;
           loading = false;
+          joining = false;
+          error = null;
         });
-        return;
       }
-    } catch (_) {
-      if (mounted) error = 'Could not load your Community profile. Please try again.';
+    } catch (saveError) {
+      if (mounted) {
+        setState(() {
+          loading = false;
+          joining = false;
+          error = 'Your Google account was signed in, but your Community profile could not be saved: $saveError';
+        });
+      }
     }
-    if (mounted) setState(() => loading = false);
   }
 
-  Future<void> _join() async {
-    final displayName = name.text.trim();
-    if (displayName.length < 2 || displayName.length > 40) {
-      setState(() => error = 'Enter a name between 2 and 40 characters.');
-      return;
-    }
+  Future<void> _signInWithGoogle() async {
     setState(() {
       joining = true;
       error = null;
     });
     try {
-      var user = supabase.auth.currentUser;
-      if (user == null) {
-        final result = await supabase.auth.signInAnonymously();
-        user = result.user;
+      if (supabase.auth.currentUser?.isAnonymous ?? false) {
+        await supabase.auth.signOut();
       }
-      if (user == null) {
-        throw const AuthException('A guest session could not be created.');
-      }
-      await supabase.from('profiles').upsert({
-        'id': user.id,
-        'display_name': displayName,
-      });
-      if (!mounted) return;
-      setState(() => joined = true);
-    } on AuthException catch (joinError) {
-      if (mounted) {
-        setState(() => error =
-            'Guest access is not enabled yet. Please contact the N.G.N. administrator. ${joinError.message}');
-      }
-    } on PostgrestException catch (dbError) {
-      if (mounted) setState(() => error = dbError.message);
-    } catch (joinError) {
-      if (mounted) setState(() => error = 'Could not join the Community: ${joinError.toString()}');
+      await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'ngncommunity://login-callback',
+      );
+    } on AuthException catch (authError) {
+      if (mounted) setState(() => error = authError.message);
+    } catch (signInError) {
+      if (mounted) setState(() => error = 'Google sign-in could not start: $signInError');
     } finally {
       if (mounted) setState(() => joining = false);
     }
@@ -104,7 +123,7 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
 
   @override
   void dispose() {
-    name.dispose();
+    _authSubscription?.cancel();
     super.dispose();
   }
 
@@ -134,21 +153,15 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
                     ),
                     const SizedBox(height: 9),
                     const Text(
-                      'Enter the name you want other members to see. No email, password or registration is required.',
+                      'Sign in securely with Google to join the conversation. Your Google name and profile photo will identify your messages.',
                       textAlign: TextAlign.center,
                       style: TextStyle(height: 1.5),
                     ),
                     const SizedBox(height: 24),
-                    TextField(
-                      controller: name,
-                      maxLength: 40,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Your Community name',
-                        hintText: 'Enter your name',
-                        border: OutlineInputBorder(),
-                      ),
-                      onSubmitted: (_) => joining ? null : _join(),
+                    FilledButton.icon(
+                      onPressed: joining ? null : _signInWithGoogle,
+                      icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                      label: Text(joining ? 'Opening Google...' : 'Continue with Google'),
                     ),
                     if (error != null) ...[
                       const SizedBox(height: 8),
@@ -172,15 +185,15 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
 class CommunityChatPage extends StatefulWidget{const CommunityChatPage({super.key});@override State<CommunityChatPage> createState()=>_CommunityChatPageState();}
 class _CommunityChatPageState extends State<CommunityChatPage>{
   final supabase=Supabase.instance.client,message=TextEditingController(),recorder=AudioRecorder(),player=AudioPlayer(),chatScroll=ScrollController();
-  bool recording=false,sending=false;int recordSeconds=0;Timer? timer;String? playingId;Map<String,dynamic>? replyingTo;String? myName;String communityMode='open';
+  bool recording=false,sending=false;int recordSeconds=0;Timer? timer;String? playingId;Map<String,dynamic>? replyingTo;String? myName;String? myAvatarUrl;String communityMode='open';
   @override void initState(){super.initState();InAppNotificationService.instance.markCommunityRead();_loadMyName();_loadCommunityMode();}
   Future<void> _loadCommunityMode()async{final r=await supabase.from('app_settings').select('value').eq('id','community_chat').maybeSingle();final value=r?['value'];final mode=value?['mode']?.toString();if(mounted)setState(()=>communityMode=mode??'open');}
-  Future<void> _loadMyName()async{final user=supabase.auth.currentUser;if(user==null)return;final r=await supabase.from('profiles').select('display_name').eq('id',user.id).maybeSingle();if(!mounted)return;setState(()=>myName=r?['display_name']?.toString());if((myName??'').trim().isEmpty)WidgetsBinding.instance.addPostFrameCallback((_)=>_editMyName(required:true));}
+  Future<void> _loadMyName()async{final user=supabase.auth.currentUser;if(user==null||user.isAnonymous)return;final r=await supabase.from('profiles').select('display_name,avatar_url').eq('id',user.id).maybeSingle();if(!mounted)return;setState(()=>{myName=r?['display_name']?.toString(),myAvatarUrl=r?['avatar_url']?.toString()});if((myName??'').trim().isEmpty)WidgetsBinding.instance.addPostFrameCallback((_)=>_editMyName(required:true));}
   Future<void> _editMyName({bool required=false})async{final user=supabase.auth.currentUser;if(user==null)return;final c=TextEditingController(text:myName??'');final value=await showDialog<String>(context:context,barrierDismissible:!required,builder:(context)=>PopScope(canPop:!required,child:AlertDialog(title:const Text('Your Community name'),content:TextField(controller:c,autofocus:true,maxLength:40,decoration:const InputDecoration(hintText:'Enter the name people will see',border:OutlineInputBorder())),actions:[if(!required)TextButton(onPressed:()=>Navigator.pop(context),child:const Text('Cancel')),FilledButton(onPressed:()=>Navigator.pop(context,c.text.trim()),child:const Text('Save name'))])));c.dispose();if(value==null||value.trim().length<2){if(required&&mounted)_editMyName(required:true);return;}await supabase.from('profiles').update({'display_name':value.trim()}).eq('id',user.id);if(mounted)setState(()=>myName=value.trim());}
   Stream<List<Map<String,dynamic>>> get messages=>supabase.from('community_messages').stream(primaryKey:['id']).order('created_at', ascending: true).limit(100).map((rows)=>rows.map((r)=>Map<String,dynamic>.from(r)).toList());
   void scrollToLatest(){WidgetsBinding.instance.addPostFrameCallback((_){if(chatScroll.hasClients)chatScroll.animateTo(chatScroll.position.maxScrollExtent,duration:const Duration(milliseconds:280),curve:Curves.easeOut);});}
   Map<String,dynamic>? replyTarget(List<Map<String,dynamic>> rows,dynamic replyToId){if(replyToId==null)return null;for(final row in rows){if(row['id']==replyToId)return row;}return null;}
-  Future<String> displayName(String id)async{final r=await supabase.from('profiles').select('display_name').eq('id',id).maybeSingle();return r?['display_name']?.toString()??'N.G.N. Member';}
+  Future<Map<String,dynamic>?> profileFor(String id)async{final r=await supabase.from('profiles').select('display_name,avatar_url').eq('id',id).maybeSingle();return r==null?null:Map<String,dynamic>.from(r);}
   Future<void> sendText()async{if(communityMode=='locked')return;final text=message.text.trim(),user=supabase.auth.currentUser;if(text.isEmpty||user==null||sending)return;setState(()=>sending=true);try{await supabase.from('community_messages').insert({'author_id':user.id,'message_type':'text','body':text,'reply_to_id':replyingTo?['id']});message.clear();if(mounted)setState(()=>replyingTo=null);}on PostgrestException catch(e){if(mounted)ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.message)));}finally{if(mounted)setState(()=>sending=false);}}
   Future<void> toggleRecording()async{if(communityMode=='locked')return;if(recording){await finishRecording();return;}if(!await recorder.hasPermission()){if(mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Microphone permission is needed for voice notes.')));return;}final dir=await getTemporaryDirectory(),path='${dir.path}/ngn_${DateTime.now().millisecondsSinceEpoch}.m4a';await recorder.start(const RecordConfig(encoder:AudioEncoder.aacLc,bitRate:48000,sampleRate:24000,numChannels:1,noiseSuppress:true),path:path);setState((){recording=true;recordSeconds=0;});timer=Timer.periodic(const Duration(seconds:1),(t){if(!mounted)return;setState(()=>recordSeconds++);if(recordSeconds>=120)finishRecording();});}
   Future<void> finishRecording()async{timer?.cancel();final seconds=recordSeconds.clamp(1,120),path=await recorder.stop();if(mounted)setState(()=>recording=false);if(path==null)return;final user=supabase.auth.currentUser;if(user==null)return;setState(()=>sending=true);final storagePath='${user.id}/${DateTime.now().millisecondsSinceEpoch}.m4a';try{await supabase.storage.from('community-voice').upload(storagePath,File(path),fileOptions:const FileOptions(contentType:'audio/mp4'));try{await supabase.from('community_messages').insert({'author_id':user.id,'message_type':'voice','voice_path':storagePath,'voice_duration_seconds':seconds,'reply_to_id':replyingTo?['id']});if(mounted)setState(()=>replyingTo=null);}catch(_){await supabase.storage.from('community-voice').remove([storagePath]);rethrow;}}catch(e){if(mounted)ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('Voice note could not be sent: $e')));}finally{try{await File(path).delete();}catch(_){}if(mounted)setState(()=>sending=false);}}
@@ -194,7 +207,7 @@ class _CommunityChatPageState extends State<CommunityChatPage>{
   @override void dispose(){timer?.cancel();message.dispose();recorder.dispose();player.dispose();super.dispose();}
   @override Widget build(BuildContext context){final me=supabase.auth.currentUser?.id;return Scaffold(appBar:AppBar(title:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('N.G.N. Community'),if(myName!=null)Text(myName!,style:const TextStyle(fontSize:11,fontWeight:FontWeight.normal))]),actions:[IconButton(onPressed:()=>_editMyName(),tooltip:'Change my Community name',icon:const Icon(Icons.badge_outlined))]),body:Column(children:[
     Container(width:double.infinity,padding:const EdgeInsets.symmetric(horizontal:16,vertical:9),color:const Color(0xFFD4AF37).withValues(alpha:.12),child:Text(communityMode=='locked'?'Community chat is currently closed. You can read previous messages and check back for the next N.G.N. session.':communityMode=='meeting'?'N.G.N. Community meeting is now open • Fellowship with kindness':'Fellowship with kindness • Messages are automatically removed after 30 days',textAlign:TextAlign.center,style:const TextStyle(fontSize:12))),
-    Expanded(child:StreamBuilder<List<Map<String,dynamic>>>(stream:messages,builder:(context,snapshot){if(snapshot.hasData){InAppNotificationService.instance.markCommunityRead();}if(!snapshot.hasData)return const Center(child:CircularProgressIndicator());final rows=snapshot.data!;if(rows.isEmpty)return const Center(child:Text('Start the conversation. 👋'));scrollToLatest();return ListView.builder(controller:chatScroll,padding:const EdgeInsets.all(14),itemCount:rows.length,itemBuilder:(context,index){final row=rows[index],mine=row['author_id']==me;return FutureBuilder<String>(future:displayName(row['author_id'].toString()),builder:(context,n)=>Align(alignment:mine?Alignment.centerRight:Alignment.centerLeft,child:GestureDetector(onLongPress:()=>showModalBottomSheet(context:context,builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[ListTile(leading:const Icon(Icons.reply_rounded),title:const Text('Reply'),onTap:(){Navigator.pop(context);setState(()=>replyingTo=row);}),if(mine)ListTile(leading:const Icon(Icons.delete_outline),title:const Text('Delete my message'),onTap:(){Navigator.pop(context);deleteOwn(row);}),if(!mine)ListTile(leading:const Icon(Icons.flag_outlined),title:const Text('Report to admin'),onTap:(){Navigator.pop(context);report(row);})]))),child:Container(constraints:const BoxConstraints(maxWidth:310),margin:const EdgeInsets.only(bottom:10),padding:const EdgeInsets.all(13),decoration:BoxDecoration(color:mine?const Color(0xFF0B5ED7):Theme.of(context).cardColor,borderRadius:BorderRadius.circular(16),border:mine?null:Border.all(color:Theme.of(context).dividerColor)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[if(row['reply_to_id']!=null)Builder(builder:(context){final target=replyTarget(rows,row['reply_to_id']);final preview=target==null?'Original message unavailable':target['message_type']=='voice'?'Voice note':target['message_type']=='file'?'File: ${target['file_name']??'Attachment'}':(target['body']?.toString()??'Message');return Container(width:double.infinity,margin:const EdgeInsets.only(bottom:8),padding:const EdgeInsets.symmetric(horizontal:9,vertical:7),decoration:BoxDecoration(color:(mine?Colors.white:const Color(0xFF0B5ED7)).withValues(alpha:.12),borderRadius:BorderRadius.circular(9),border:Border(left:BorderSide(color:mine?const Color(0xFFD4AF37):const Color(0xFF0B5ED7),width:3))),child:Row(children:[const Icon(Icons.reply_rounded,size:14),const SizedBox(width:6),Expanded(child:Text(preview,maxLines:2,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:11,fontStyle:FontStyle.italic)))]));}),Text(n.data??'N.G.N. Member',style:TextStyle(fontSize:11,fontWeight:FontWeight.w700,color:mine?const Color(0xFFD4AF37):const Color(0xFF0B5ED7))),const SizedBox(height:5),if(row['message_type']=='voice')InkWell(onTap:()=>playVoice(row),child:Row(mainAxisSize:MainAxisSize.min,children:[Icon(playingId==row['id']?Icons.stop_circle_outlined:Icons.play_circle_outline,color:mine?Colors.white:const Color(0xFF0B5ED7)),const SizedBox(width:8),Text('Voice note • ${row['voice_duration_seconds']??0}s',style:TextStyle(color:mine?Colors.white:null))]))else if(row['message_type']=='file')fileAttachment(row,mine)else Text(row['body']?.toString()??'',style:TextStyle(color:mine?Colors.white:null,height:1.35))])))));});})),
+    Expanded(child:StreamBuilder<List<Map<String,dynamic>>>(stream:messages,builder:(context,snapshot){if(snapshot.hasData){InAppNotificationService.instance.markCommunityRead();}if(!snapshot.hasData)return const Center(child:CircularProgressIndicator());final rows=snapshot.data!;if(rows.isEmpty)return const Center(child:Text('Start the conversation. 👋'));scrollToLatest();return ListView.builder(controller:chatScroll,padding:const EdgeInsets.all(14),itemCount:rows.length,itemBuilder:(context,index){final row=rows[index],mine=row['author_id']==me;return FutureBuilder<Map<String,dynamic>?>(future:profileFor(row['author_id'].toString()),builder:(context,n)=>Align(alignment:mine?Alignment.centerRight:Alignment.centerLeft,child:GestureDetector(onLongPress:()=>showModalBottomSheet(context:context,builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[ListTile(leading:const Icon(Icons.reply_rounded),title:const Text('Reply'),onTap:(){Navigator.pop(context);setState(()=>replyingTo=row);}),if(mine)ListTile(leading:const Icon(Icons.delete_outline),title:const Text('Delete my message'),onTap:(){Navigator.pop(context);deleteOwn(row);}),if(!mine)ListTile(leading:const Icon(Icons.flag_outlined),title:const Text('Report to admin'),onTap:(){Navigator.pop(context);report(row);})]))),child:Container(constraints:const BoxConstraints(maxWidth:310),margin:const EdgeInsets.only(bottom:10),padding:const EdgeInsets.all(13),decoration:BoxDecoration(color:mine?const Color(0xFF0B5ED7):Theme.of(context).cardColor,borderRadius:BorderRadius.circular(16),border:mine?null:Border.all(color:Theme.of(context).dividerColor)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[if(row['reply_to_id']!=null)Builder(builder:(context){final target=replyTarget(rows,row['reply_to_id']);final preview=target==null?'Original message unavailable':target['message_type']=='voice'?'Voice note':target['message_type']=='file'?'File: ${target['file_name']??'Attachment'}':(target['body']?.toString()??'Message');return Container(width:double.infinity,margin:const EdgeInsets.only(bottom:8),padding:const EdgeInsets.symmetric(horizontal:9,vertical:7),decoration:BoxDecoration(color:(mine?Colors.white:const Color(0xFF0B5ED7)).withValues(alpha:.12),borderRadius:BorderRadius.circular(9),border:Border(left:BorderSide(color:mine?const Color(0xFFD4AF37):const Color(0xFF0B5ED7),width:3))),child:Row(children:[const Icon(Icons.reply_rounded,size:14),const SizedBox(width:6),Expanded(child:Text(preview,maxLines:2,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:11,fontStyle:FontStyle.italic)))]));}),Row(children:[CircleAvatar(radius:12,backgroundImage:(n.data?['avatar_url']?.toString().isNotEmpty??false)?NetworkImage(n.data!['avatar_url'].toString()):null,child:(n.data?['avatar_url']?.toString().isNotEmpty??false)?null:const Icon(Icons.person_rounded,size:14)),const SizedBox(width:7),Expanded(child:Text(n.data?['display_name']?.toString()??'N.G.N. Member',style:TextStyle(fontSize:11,fontWeight:FontWeight.w700,color:mine?const Color(0xFFD4AF37):const Color(0xFF0B5ED7))))]),const SizedBox(height:5),if(row['message_type']=='voice')InkWell(onTap:()=>playVoice(row),child:Row(mainAxisSize:MainAxisSize.min,children:[Icon(playingId==row['id']?Icons.stop_circle_outlined:Icons.play_circle_outline,color:mine?Colors.white:const Color(0xFF0B5ED7)),const SizedBox(width:8),Text('Voice note • ${row['voice_duration_seconds']??0}s',style:TextStyle(color:mine?Colors.white:null))]))else if(row['message_type']=='file')fileAttachment(row,mine)else Text(row['body']?.toString()??'',style:TextStyle(color:mine?Colors.white:null,height:1.35))])))));});})),
     SafeArea(top:false,child:Column(mainAxisSize:MainAxisSize.min,children:[if(replyingTo!=null)Container(margin:const EdgeInsets.fromLTRB(10,6,10,0),padding:const EdgeInsets.symmetric(horizontal:12,vertical:7),decoration:BoxDecoration(color:Theme.of(context).colorScheme.surfaceContainerHighest,borderRadius:BorderRadius.circular(12)),child:Row(children:[const Icon(Icons.reply_rounded,size:18),const SizedBox(width:8),Expanded(child:Text(replyingTo!['message_type']=='voice'?'Replying to voice note':replyingTo!['message_type']=='file'?'Replying to file: ${replyingTo!['file_name']??'Attachment'}':(replyingTo!['body']?.toString()??'Replying to message'),maxLines:1,overflow:TextOverflow.ellipsis)),IconButton(onPressed:()=>setState(()=>replyingTo=null),icon:const Icon(Icons.close_rounded),visualDensity:VisualDensity.compact)])),Padding(padding:const EdgeInsets.fromLTRB(10,8,10,10),child:Row(children:[IconButton.filledTonal(onPressed:sending||communityMode=='locked'?null:toggleRecording,icon:Icon(recording?Icons.stop_rounded:Icons.mic_none_rounded),tooltip:recording?'Stop voice note':'Record voice note'),const SizedBox(width:8),Expanded(child:TextField(controller:message,enabled:!recording&&communityMode!='locked',maxLength:2000,minLines:1,maxLines:4,decoration:InputDecoration(counterText:'',hintText:communityMode=='locked'?'Community chat is closed':recording?'Recording… $recordSeconds/120s':'Message the community',border:OutlineInputBorder(borderRadius:BorderRadius.circular(22))))),const SizedBox(width:8),IconButton.filled(onPressed:sending||recording||communityMode=='locked'?null:sendText,icon:sending?const SizedBox(width:18,height:18,child:CircularProgressIndicator(strokeWidth:2)):const Icon(Icons.send_rounded))]))]))
   ]));}
 }
