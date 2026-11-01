@@ -3,6 +3,7 @@ import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'bible_repository.dart';
 
 class ContentRepository {
   ContentRepository(this.client);
@@ -101,6 +102,73 @@ class ContentRepository {
 
   Future<List<Map<String, dynamic>>> events() =>
       _fetchList('events', 'ngn_events', 'starts_at');
+
+
+  Future<Map<String, dynamic>?> wordForDate(DateTime date) async {
+    // Select the daily word using Nigeria time, then read its Scripture from
+    // the Bible bundled with the app. No network request is required.
+    final nigeriaDate = date.toUtc().add(const Duration(hours: 1));
+    final keyDate =
+        '${nigeriaDate.year.toString().padLeft(4, '0')}-${nigeriaDate.month.toString().padLeft(2, '0')}-${nigeriaDate.day.toString().padLeft(2, '0')}';
+    try {
+      final raw = await rootBundle.loadString('assets/word_of_day/word_of_day.json');
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      final entries = decoded['entries'] as List<dynamic>? ?? const [];
+      Map<String, dynamic>? selected;
+      for (final value in entries) {
+        if (value is Map && value['date']?.toString() == keyDate) {
+          selected = Map<String, dynamic>.from(value);
+          break;
+        }
+      }
+      if (selected == null) return null;
+      final reference = selected['reference']?.toString() ?? '';
+      final match = RegExp(r'^(.+) (\\d+):(\\d+)
+    try {
+      final today = DateTime.now().toUtc().add(const Duration(hours: 1)).toIso8601String().substring(0, 10);
+      final row = await client
+          .from('daily_bible_verses')
+          .select()
+          .eq('verse_date', today)
+          .maybeSingle();
+      if (row != null) {
+        final data = Map<String, dynamic>.from(row);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('ngn_daily_verse_$today', jsonEncode(data));
+        return data;
+      }
+    } catch (_) {}
+
+    final today = DateTime.now().toUtc().add(const Duration(hours: 1)).toIso8601String().substring(0, 10);
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('ngn_daily_verse_$today') ??
+        prefs.getString('ngn_daily_verse');
+    if (raw == null) return null;
+    try {
+      return Map<String, dynamic>.from(jsonDecode(raw) as Map);
+    } catch (_) {
+      return null;
+    }
+  }
+}
+).firstMatch(reference);
+      if (match == null) return null;
+      final book = match.group(1)!;
+      final chapter = int.parse(match.group(2)!);
+      final verseNumber = int.parse(match.group(3)!);
+      final verses = await BibleRepository().verses(book, chapter);
+      for (final verse in verses) {
+        if (verse.number == verseNumber) {
+          selected['verse_text'] = verse.text;
+          selected['translation'] = BibleRepository.translation;
+          return selected;
+        }
+      }
+    } catch (_) {
+      // The bundled word or Bible text could not be read.
+    }
+    return null;
+  }
 
   Future<Map<String, dynamic>?> dailyVerse() async {
     try {
