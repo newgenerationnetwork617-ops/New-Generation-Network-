@@ -24,21 +24,44 @@ class CommunityJoinPage extends StatefulWidget {
 
 class _CommunityJoinPageState extends State<CommunityJoinPage> {
   final supabase = Supabase.instance.client;
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
   bool loading = true;
-  bool joining = false;
+  bool busy = false;
   bool joined = false;
+  bool isSignUp = false;
+  bool isResetRequest = false;
+  bool isPasswordRecovery = false;
+  bool obscurePassword = true;
   String? error;
+  String? notice;
   StreamSubscription<AuthState>? _authSubscription;
+
+  static const callbackUrl = 'ngncommunity://login-callback/';
 
   @override
   void initState() {
     super.initState();
     _authSubscription = supabase.auth.onAuthStateChange.listen((state) {
+      if (state.event == AuthChangeEvent.passwordRecovery) {
+        if (mounted) {
+          setState(() {
+            isPasswordRecovery = true;
+            isResetRequest = false;
+            isSignUp = false;
+            loading = false;
+            error = null;
+            notice = 'Choose a new password for your account.';
+          });
+        }
+        return;
+      }
       final user = state.session?.user;
       if (state.event == AuthChangeEvent.signedIn &&
           user != null &&
           !user.isAnonymous) {
-        _saveGoogleProfile(user);
+        _saveProfile(user);
       }
     });
     _checkExistingProfile();
@@ -50,10 +73,10 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
       if (mounted) setState(() => loading = false);
       return;
     }
-    await _saveGoogleProfile(user);
+    await _saveProfile(user);
   }
 
-  Future<void> _saveGoogleProfile(User user) async {
+  Future<void> _saveProfile(User user) async {
     try {
       final metadata = user.userMetadata ?? const <String, dynamic>{};
       final profile = await supabase
@@ -62,7 +85,7 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
           .eq('id', user.id)
           .maybeSingle();
       final existingName = profile?['display_name']?.toString().trim() ?? '';
-      final googleName = (metadata['full_name'] ??
+      final accountName = (metadata['full_name'] ??
               metadata['name'] ??
               user.email?.split('@').first ??
               'N.G.N. Member')
@@ -71,10 +94,9 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
       final displayName = existingName.length >= 2 &&
               existingName != 'N.G.N. Member'
           ? existingName
-          : googleName;
-      final avatar = (metadata['avatar_url'] ?? metadata['picture'] ?? '')
-          .toString()
-          .trim();
+          : accountName;
+      final avatar =
+          (metadata['avatar_url'] ?? metadata['picture'] ?? '').toString().trim();
       await supabase.from('profiles').upsert({
         'id': user.id,
         'display_name': displayName.isEmpty ? 'N.G.N. Member' : displayName,
@@ -84,100 +106,279 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
         setState(() {
           joined = true;
           loading = false;
-          joining = false;
+          busy = false;
           error = null;
+          notice = null;
         });
       }
     } catch (saveError) {
       if (mounted) {
         setState(() {
           loading = false;
-          joining = false;
-          error = 'Your Google account was signed in, but your Community profile could not be saved: $saveError';
+          busy = false;
+          error = 'Your account is signed in, but your Community profile could not be saved: $saveError';
         });
       }
     }
   }
 
-  Future<void> _signInWithGoogle() async {
+  Future<void> _submit() async {
+    if (busy) return;
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    final confirmation = confirmPasswordController.text;
+
     setState(() {
-      joining = true;
+      busy = true;
       error = null;
+      notice = null;
     });
+
     try {
-      if (supabase.auth.currentUser?.isAnonymous ?? false) {
-        await supabase.auth.signOut();
+      if (isPasswordRecovery) {
+        if (password.length < 8) {
+          throw const AuthException('Your new password must be at least 8 characters.');
+        }
+        if (password != confirmation) {
+          throw const AuthException('The passwords do not match.');
+        }
+        await supabase.auth.updateUser(UserAttributes(password: password));
+        if (mounted) {
+          setState(() {
+            isPasswordRecovery = false;
+            busy = false;
+            notice = 'Your password has been updated. You can now continue to the community.';
+          });
+        }
+        final user = supabase.auth.currentUser;
+        if (user != null) await _saveProfile(user);
+        return;
       }
-      final launched = await supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: 'ngncommunity://login-callback/',
-        authScreenLaunchMode: LaunchMode.externalApplication,
-      );
-      if (!launched && mounted) {
-        setState(() => error = 'Google sign-in could not open the browser. Please check your connection and try again.');
+
+      if (email.isEmpty || !email.contains('@')) {
+        throw const AuthException('Enter a valid email address.');
+      }
+
+      if (isResetRequest) {
+        await supabase.auth.resetPasswordForEmail(
+          email,
+          redirectTo: callbackUrl,
+        );
+        if (mounted) {
+          setState(() {
+            busy = false;
+            notice = 'If an account exists for that email, a password reset link has been sent. Check your inbox.';
+          });
+        }
+        return;
+      }
+
+      if (password.length < 8) {
+        throw const AuthException('Your password must be at least 8 characters.');
+      }
+
+      if (isSignUp) {
+        if (password != confirmation) {
+          throw const AuthException('The passwords do not match.');
+        }
+        final response = await supabase.auth.signUp(
+          email: email,
+          password: password,
+          emailRedirectTo: callbackUrl,
+        );
+        if (response.session != null && response.user != null) {
+          await _saveProfile(response.user!);
+        } else if (mounted) {
+          setState(() {
+            busy = false;
+            notice = 'Account created. Please check your email and confirm your address before signing in.';
+          });
+        }
+      } else {
+        final response = await supabase.auth.signInWithPassword(
+          email: email,
+          password: password,
+        );
+        if (response.user != null) await _saveProfile(response.user!);
       }
     } on AuthException catch (authError) {
-      if (mounted) setState(() => error = authError.message);
-    } catch (signInError) {
-      if (mounted) setState(() => error = 'Google sign-in could not start: $signInError');
+      if (mounted) setState(() {
+        busy = false;
+        error = authError.message;
+      });
+    } catch (submitError) {
+      if (mounted) setState(() {
+        busy = false;
+        error = 'Unable to complete this request: $submitError';
+      });
     } finally {
-      if (mounted) setState(() => joining = false);
+      if (mounted && busy) setState(() => busy = false);
     }
+  }
+
+  void _switchMode({bool signUp = false, bool reset = false}) {
+    setState(() {
+      isSignUp = signUp;
+      isResetRequest = reset;
+      isPasswordRecovery = false;
+      error = null;
+      notice = null;
+      passwordController.clear();
+      confirmPasswordController.clear();
+    });
   }
 
   @override
   void dispose() {
     _authSubscription?.cancel();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (joined) return const CommunityChatPage();
+
+    final title = isPasswordRecovery
+        ? 'Create a new password'
+        : isResetRequest
+            ? 'Reset your password'
+            : isSignUp
+                ? 'Create your community account'
+                : 'Welcome to the Community';
+
     return Scaffold(
-        appBar: AppBar(title: const Text('N.G.N. Community')),
-        body: Center(
-          child: loading
-              ? const CircularProgressIndicator()
-              : ListView(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.all(24),
-                  children: [
-                    const CircleAvatar(
-                      radius: 38,
-                      backgroundColor: Color(0xFFE8F0FE),
-                      child: Icon(Icons.groups_rounded,
-                          size: 42, color: Color(0xFF0B5ED7)),
+      appBar: AppBar(title: const Text('N.G.N. Community')),
+      body: Center(
+        child: loading
+            ? const CircularProgressIndicator()
+            : ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(24),
+                children: [
+                  const CircleAvatar(
+                    radius: 38,
+                    backgroundColor: Color(0xFFE8F0FE),
+                    child: Icon(Icons.groups_rounded,
+                        size: 42, color: Color(0xFF0B5ED7)),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 23, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 9),
+                  Text(
+                    isPasswordRecovery
+                        ? 'Enter and confirm your new password.'
+                        : isResetRequest
+                            ? 'Enter the email address linked to your account. We will send a password reset link.'
+                            : 'Use your email address and password to join the N.G.N. Community.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(height: 1.5),
+                  ),
+                  const SizedBox(height: 24),
+                  if (!isPasswordRecovery)
+                    TextField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      autofillHints: const [AutofillHints.email],
+                      decoration: const InputDecoration(
+                        labelText: 'Email address',
+                        prefixIcon: Icon(Icons.email_outlined),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Welcome to the Community',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 23, fontWeight: FontWeight.w900),
+                  if (!isPasswordRecovery) const SizedBox(height: 14),
+                  if (!isResetRequest)
+                    TextField(
+                      controller: passwordController,
+                      obscureText: obscurePassword,
+                      autofillHints: isPasswordRecovery
+                          ? const [AutofillHints.newPassword]
+                          : const [AutofillHints.password],
+                      decoration: InputDecoration(
+                        labelText: isPasswordRecovery ? 'New password' : 'Password',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(
+                              () => obscurePassword = !obscurePassword),
+                          icon: Icon(obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined),
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 9),
-                    const Text(
-                      'Sign in securely with Google to join the conversation. Your Google name and profile photo will identify your messages.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(height: 1.5),
+                  if (!isResetRequest) const SizedBox(height: 14),
+                  if (isSignUp || isPasswordRecovery)
+                    TextField(
+                      controller: confirmPasswordController,
+                      obscureText: obscurePassword,
+                      autofillHints: const [AutofillHints.newPassword],
+                      decoration: const InputDecoration(
+                        labelText: 'Confirm password',
+                        prefixIcon: Icon(Icons.lock_outline),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
-                    const SizedBox(height: 24),
-                    FilledButton.icon(
-                      onPressed: joining ? null : _signInWithGoogle,
-                      icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
-                      label: Text(joining ? 'Opening Google...' : 'Continue with Google'),
+                  const SizedBox(height: 18),
+                  FilledButton(
+                    onPressed: busy ? null : _submit,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(busy
+                          ? 'Please wait...'
+                          : isPasswordRecovery
+                              ? 'Update password'
+                              : isResetRequest
+                                  ? 'Send reset link'
+                                  : isSignUp
+                                      ? 'Create account'
+                                      : 'Sign in'),
                     ),
-                    if (error != null) ...[
-                      const SizedBox(height: 8),
-                      Text(error!,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.error)),
-                    ],
+                  ),
+                  if (!isPasswordRecovery && !isResetRequest && !isSignUp)
+                    TextButton(
+                      onPressed: busy ? null : () => _switchMode(reset: true),
+                      child: const Text('Forgot password?'),
+                    ),
+                  if (!isPasswordRecovery && !isResetRequest)
+                    TextButton(
+                      onPressed: busy
+                          ? null
+                          : () => _switchMode(signUp: !isSignUp),
+                      child: Text(isSignUp
+                          ? 'Already have an account? Sign in'
+                          : 'New here? Create an account'),
+                    ),
+                  if (isResetRequest)
+                    TextButton(
+                      onPressed: busy ? null : () => _switchMode(),
+                      child: const Text('Back to sign in'),
+                    ),
+                  if (notice != null) ...[
+                    const SizedBox(height: 10),
+                    Text(notice!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary)),
                   ],
-                ),
-        ),
-      );
+                  if (error != null) ...[
+                    const SizedBox(height: 10),
+                    Text(error!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error)),
+                  ],
+                ],
+              ),
+      ),
+    );
   }
 }
 
