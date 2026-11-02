@@ -110,7 +110,7 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
       }
       final launched = await supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'ngncommunity://login-callback',
+        redirectTo: 'ngncommunity://login-callback/',
         authScreenLaunchMode: LaunchMode.externalApplication,
       );
       if (!launched && mounted) {
