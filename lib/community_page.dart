@@ -202,15 +202,19 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
         if (response.user != null) await _saveProfile(response.user!);
       }
     } on AuthException catch (authError) {
-      if (mounted) setState(() {
-        busy = false;
-        error = authError.message;
-      });
+      if (mounted) {
+        setState(() {
+          busy = false;
+          error = authError.message;
+        });
+      }
     } catch (submitError) {
-      if (mounted) setState(() {
-        busy = false;
-        error = 'Unable to complete this request: $submitError';
-      });
+      if (mounted) {
+        setState(() {
+          busy = false;
+          error = 'Unable to complete this request: $submitError';
+        });
+      }
     } finally {
       if (mounted && busy) setState(() => busy = false);
     }
