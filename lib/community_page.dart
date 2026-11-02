@@ -108,10 +108,14 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
       if (supabase.auth.currentUser?.isAnonymous ?? false) {
         await supabase.auth.signOut();
       }
-      await supabase.auth.signInWithOAuth(
+      final launched = await supabase.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: 'ngncommunity://login-callback',
+        authScreenLaunchMode: LaunchMode.externalApplication,
       );
+      if (!launched && mounted) {
+        setState(() => error = 'Google sign-in could not open the browser. Please check your connection and try again.');
+      }
     } on AuthException catch (authError) {
       if (mounted) setState(() => error = authError.message);
     } catch (signInError) {
