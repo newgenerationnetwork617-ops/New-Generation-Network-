@@ -271,8 +271,18 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
                       decoration: BoxDecoration(color: isFound ? const Color(0xFF19A66A).withValues(alpha: .22)
                         : isSelected ? gold.withValues(alpha: .65) : Colors.transparent,
                         borderRadius: BorderRadius.circular(4)),
-                      child: FittedBox(child: Text(puzzle.grid[r][c], style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900,
-                        color: isFound ? const Color(0xFF148451) : (dark ? Colors.white : const Color(0xFF12356D))))));
+                      child: FittedBox(
+                        child: Text(
+                          puzzle.grid[r][c],
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                            color: isFound
+                                ? const Color(0xFF148451)
+                                : (dark ? Colors.white : const Color(0xFF12356D)),
+                          ),
+                        ),
+                      ));
                   }))))),
                 ),
               );
