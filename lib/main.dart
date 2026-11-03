@@ -14,6 +14,7 @@ import 'content_pages.dart';
 import 'content_repository.dart';
 import 'bible_trivia_page.dart';
 import 'bible_word_puzzle_page.dart';
+import 'bible_grid_search_page.dart';
 import 'guess_bible_character_page.dart';
 
 const supabaseUrl = 'https://nlhjxoevyatvxstxgnhs.supabase.co';
@@ -411,8 +412,9 @@ class HomeContent extends StatelessWidget {
                 _HomeFeatureCard(icon: Icons.groups_outlined, title: 'Community', subtitle: 'Connect together', page: CommunityPage()),
                 _HomeFeatureCard(icon: Icons.campaign_outlined, title: 'Announcements', subtitle: 'Latest updates', page: AnnouncementsPage()),
                 _HomeFeatureCard(icon: Icons.quiz_rounded, title: 'Bible Trivia', subtitle: 'Test your Bible knowledge', page: BibleTriviaPage()),
-                _HomeFeatureCard(icon: Icons.extension_rounded, title: 'Bible Word Cookies', subtitle: 'Find Bible-themed words', page: BibleWordPuzzlePage()),
+                _HomeFeatureCard(icon: Icons.extension_rounded, title: 'Bible Word Search', subtitle: 'Type Bible-themed words', page: BibleWordPuzzlePage()),
                 _HomeFeatureCard(icon: Icons.person_search_rounded, title: 'Guess the Bible Character', subtitle: 'Who am I? Bible clues', page: GuessBibleCharacterPage()),
+                _HomeFeatureCard(icon: Icons.grid_on_rounded, title: 'Word Search Puzzle', subtitle: 'Find hidden words in the grid', page: BibleGridSearchPage()),
               ],
             ),
             const SizedBox(height: 24),
