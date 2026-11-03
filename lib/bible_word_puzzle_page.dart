@@ -58,6 +58,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   bool _revealed = false;
   bool _finished = false;
   String? _message;
+  String _scrambledLetters = '';
 
   @override
   void initState() {
@@ -77,10 +78,21 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
     if (mounted) setState(() => _best = prefs.getInt(_bestKey) ?? 0);
   }
 
+  String _makeScramble(String word) {
+    final letters = word.toUpperCase().split('');
+    for (var i = 0; i < 12; i++) {
+      letters.shuffle(_random);
+      if (letters.join() != word.toUpperCase()) break;
+    }
+    return letters.join('  ');
+  }
+
   void _newGame() {
     final list = List<_WordPuzzle>.from(_bank)..shuffle(_random);
+    final nextSession = list.take(10).toList();
     setState(() {
-      _session = list.take(10).toList();
+      _session = nextSession;
+      _scrambledLetters = _makeScramble(nextSession.first.word);
       _index = 0;
       _score = 0;
       _attempts = 0;
@@ -91,15 +103,6 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
     });
   }
 
-  String get _scrambled {
-    final letters = _session[_index].word.toUpperCase().split('');
-    // Avoid showing the original order when a different arrangement is possible.
-    for (var i = 0; i < 12; i++) {
-      letters.shuffle(_random);
-      if (letters.join() != _session[_index].word.toUpperCase()) break;
-    }
-    return letters.join('  ');
-  }
 
   void _checkAnswer() {
     if (_revealed || _finished) return;
@@ -136,6 +139,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
     }
     setState(() {
       _index++;
+      _scrambledLetters = _makeScramble(_session[_index].word);
       _attempts = 0;
       _revealed = false;
       _message = null;
@@ -187,7 +191,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
           ]),
         ),
         const SizedBox(height: 22),
-        Text('CLUE', style: TextStyle(color: _blue, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1)),
+        Text('CLUE', style: const TextStyle(color: _blue, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1)),
         const SizedBox(height: 8),
         Text(puzzle.clue, style: const TextStyle(fontSize: 19, height: 1.45, fontWeight: FontWeight.w700)),
         const SizedBox(height: 22),
@@ -197,7 +201,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
           child: Column(children: [
             const Text('MIXED-UP LETTERS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: _blue)),
             const SizedBox(height: 14),
-            Text(_scrambled, textAlign: TextAlign.center, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w900, letterSpacing: 2.2, color: _blue)),
+            Text(_scrambledLetters, textAlign: TextAlign.center, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w900, letterSpacing: 2.2, color: _blue)),
             const SizedBox(height: 8),
             Text('${puzzle.word.length} letters', style: TextStyle(color: dark ? Colors.white70 : Colors.black54, fontSize: 12)),
           ]),
