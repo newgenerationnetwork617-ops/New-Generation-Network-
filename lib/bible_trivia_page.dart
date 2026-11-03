@@ -95,6 +95,20 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
   };
 
   String _difficulty = 'Easy';
+  String _category = 'All Questions';
+
+  bool _isVerseChallenge(_TriviaQuestion question) =>
+      question.question.startsWith('“');
+
+  int get _normalQuestionCount => _questions.values
+      .expand((items) => items)
+      .where((question) => !_isVerseChallenge(question))
+      .length;
+
+  int get _verseChallengeCount => _questions.values
+      .expand((items) => items)
+      .where(_isVerseChallenge)
+      .length;
   List<_TriviaQuestion> _round = [];
   int _index = 0;
   int _score = 0;
@@ -116,7 +130,13 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
   }
 
   void _startRound() {
-    final pool = List<_TriviaQuestion>.from(_questions[_difficulty]!);
+    final pool = _questions[_difficulty]!
+        .where((question) => _category == 'All Questions' ||
+            (_category == 'Bible Knowledge'
+                ? !_isVerseChallenge(question)
+                : _isVerseChallenge(question)))
+        .toList();
+    if (pool.isEmpty) return;
     pool.shuffle(Random());
     setState(() {
       _round = pool.take(10).toList();
@@ -236,6 +256,32 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
                 : null,
           ),
         ]),
+        const SizedBox(height: 8),
+        Row(children: [
+          const Text('QUESTION TYPE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: .8)),
+          const Spacer(),
+          DropdownButton<String>(
+            value: _category,
+            underline: const SizedBox.shrink(),
+            items: const [
+              DropdownMenuItem(value: 'All Questions', child: Text('All Questions')),
+              DropdownMenuItem(value: 'Bible Knowledge', child: Text('Bible Knowledge')),
+              DropdownMenuItem(value: 'Verse & Chapter', child: Text('Verse & Chapter')),
+            ],
+            onChanged: _index == 0 && !_answered
+                ? (value) {
+                    if (value == null) return;
+                    setState(() => _category = value);
+                    _startRound();
+                  }
+                : null,
+          ),
+        ]),
+        const SizedBox(height: 8),
+        Text(
+          'Question bank: $_normalQuestionCount / 700 Bible knowledge • $_verseChallengeCount / 300 verse & chapter challenges',
+          style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54, height: 1.4),
+        ),
         const SizedBox(height: 14),
         Text(question.question, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, height: 1.3)),
         const SizedBox(height: 20),
