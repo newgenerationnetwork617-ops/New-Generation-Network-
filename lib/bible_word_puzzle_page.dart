@@ -388,8 +388,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
         _found.add(word);
         _score += word.length * 10;
         _message = 'Correct! +${word.length * 10} points';
-        _formed.clear();
-        _answerController.clear();
+            _answerController.clear();
       });
       if (_complete) _finishPuzzle();
     } else if (_found.contains(word)) {
