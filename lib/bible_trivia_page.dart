@@ -124,7 +124,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('Which Roman governor presided over Jesus’ trial before the crucifixion?', ['Felix', 'Festus', 'Pontius Pilate', 'Gallio'], 2, 'Matthew 27:11–26; John 18:28–19:16', 'Pontius Pilate questioned Jesus and handed Him over to be crucified.'),
       _TriviaQuestion('Who was the priest whose sons were Hophni and Phinehas?', ['Eli', 'Samuel', 'Zadok', 'Abiathar'], 0, '1 Samuel 1:3; 2:12', 'Eli served as priest while his sons served at the tabernacle.'),
       _TriviaQuestion('Which king of Salem was both king and priest and blessed Abram?', ['Abimelech', 'Melchizedek', 'Adoni-zedek', 'Pharaoh'], 1, 'Genesis 14:18–20', 'Melchizedek was king of Salem and priest of God Most High.'),
-      _TriviaQuestion('Which prophet was instructed to marry Gomer as a sign to Israel?', ['Amos', 'Hosea', 'Joel', 'Micah'], 1, 'Hosea 1:2–3', 'Hosea’s marriage became a sign concerning Israel’s unfaithfulness.'),
+      _TriviaQuestion('Which prophet urged the returned exiles to give attention to rebuilding the temple?', ['Zechariah', 'Haggai', 'Malachi', 'Obadiah'], 1, 'Haggai 1:1–8', 'Haggai called the people to consider their ways and rebuild the Lord’s house.'),
     ],
   };
 
