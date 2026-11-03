@@ -163,7 +163,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
       final foundWord = match;
       setState(() {
         found.add(foundWord); foundCells.addAll(puzzle.paths[foundWord] ?? selection);
-        score += foundWord.length * 10; message = 'Great find: ' + foundWord + '  +' + (foundWord.length * 10).toString() + ' points';
+        score += foundWord.length * 10; message = 'Great find: $foundWord  +${foundWord.length * 10} points';
       });
       if (found.length == puzzle.words.length) _complete();
     } else {
@@ -197,7 +197,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
     } catch (_) {
       final p = await SharedPreferences.getInstance();
       final q = p.getStringList(queueKey) ?? [];
-      q.add('bible_grid_search|' + score.toString());
+      q.add('bible_grid_search|$score');
       await p.setStringList(queueKey, q);
     }
   }
@@ -238,8 +238,8 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
               Icon(Icons.wifi_off_rounded, color: Colors.white70, size: 16), SizedBox(width: 4),
               Text('OFFLINE', style: TextStyle(color: Colors.white70, fontSize: 10))]),
             const SizedBox(height: 12),
-            Text('Level ' + puzzle.number.toString() + ' of 1,000', style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w900)),
-            Text(puzzle.theme + '  •  Score: ' + score.toString() + '  •  Best: ' + best.toString(), style: const TextStyle(color: Colors.white70)),
+            Text('Level ${puzzle.number} of 1,000', style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w900)),
+            Text('${puzzle.theme}  •  Score: $score  •  Best: $best', style: const TextStyle(color: Colors.white70)),
             const SizedBox(height: 12),
             ClipRRect(borderRadius: BorderRadius.circular(20), child: LinearProgressIndicator(
               value: found.length / puzzle.words.length, minHeight: 8, backgroundColor: Colors.white24,
@@ -250,7 +250,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
           padding: const EdgeInsets.all(12), child: Column(children: [
             Row(children: [const Icon(Icons.touch_app_rounded, color: blue), const SizedBox(width: 8),
               const Expanded(child: Text('Find the hidden words', style: TextStyle(fontWeight: FontWeight.w900))),
-              Text(found.length.toString() + '/' + puzzle.words.length.toString(), style: const TextStyle(color: blue, fontWeight: FontWeight.w900))]),
+              Text('${found.length}/${puzzle.words.length}', style: const TextStyle(color: blue, fontWeight: FontWeight.w900))]),
             const SizedBox(height: 5),
             Text('Drag across a word in a straight line. Words can go forwards, backwards, vertically or diagonally.',
               style: TextStyle(fontSize: 12, color: dark ? Colors.white70 : Colors.black54)),
