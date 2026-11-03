@@ -152,11 +152,18 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
   void _finish() {
     if (selection.isEmpty) return;
     final word = selectedWord, reverse = selectedWord.split('').reversed.join();
-    final match = puzzle.words.where((w) => !found.contains(w) && (w == word || w == reverse)).firstOrNull;
+    String? match;
+    for (final candidate in puzzle.words) {
+      if (!found.contains(candidate) && (candidate == word || candidate == reverse)) {
+        match = candidate;
+        break;
+      }
+    }
     if (match != null) {
+      final foundWord = match;
       setState(() {
-        found.add(match); foundCells.addAll(puzzle.paths[match] ?? selection);
-        score += match.length * 10; message = 'Great find: ' + match + '  +' + (match.length * 10).toString() + ' points';
+        found.add(foundWord); foundCells.addAll(puzzle.paths[foundWord] ?? selection);
+        score += foundWord.length * 10; message = 'Great find: ' + foundWord + '  +' + (foundWord.length * 10).toString() + ' points';
       });
       if (found.length == puzzle.words.length) _complete();
     } else {
