@@ -191,7 +191,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
           ]),
         ),
         const SizedBox(height: 22),
-        const Text('CLUE', style: const TextStyle(color: _blue, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1)),
+        const Text('CLUE', style: TextStyle(color: _blue, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1)),
         const SizedBox(height: 8),
         Text(puzzle.clue, style: const TextStyle(fontSize: 19, height: 1.45, fontWeight: FontWeight.w700)),
         const SizedBox(height: 22),
