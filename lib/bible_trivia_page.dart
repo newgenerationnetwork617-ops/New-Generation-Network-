@@ -262,7 +262,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
   void _startRound() {
     final local = _difficulty == 'All'
         ? _questions.values.expand((items) => items)
-        : _questions[_difficulty]!.asMap().values;
+        : _questions[_difficulty]!;
     final remote = _difficulty == 'All'
         ? _remoteQuestions.values.expand((items) => items)
         : (_remoteQuestions[_difficulty] ?? <_TriviaQuestion>[]);
@@ -288,7 +288,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getInt('ngn_bible_trivia_level') ?? 0;
     await prefs.setInt('ngn_bible_trivia_level',
-        max(saved, _selectedLevel).clamp(0, 14));
+        max(saved, _selectedLevel).clamp(0, 14).toInt());
   }
 
   Future<void> _submitScore() async {
