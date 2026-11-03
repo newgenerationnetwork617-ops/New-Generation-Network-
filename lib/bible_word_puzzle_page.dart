@@ -52,6 +52,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   String _difficulty = 'All';
   String? _message;
   bool _submitted = false;
+  final Set<int> _dragVisited = {};
 
   List<_CookiePuzzle> get _pool => _difficulty == 'All' ? _bank : _bank.where((p) => p.level == _difficulty).toList();
   bool get _complete => _found.length == _puzzle.words.length;
@@ -84,6 +85,47 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   void _addLetter(String letter) {
     if (_complete || _formed.length >= _puzzle.letters.length) return;
     setState(() { _formed.add(letter); _message = null; });
+  }
+
+  void _dragLetter(int index, List<String> letters) {
+    if (index < 0 || index >= letters.length || _dragVisited.contains(index)) return;
+    _dragVisited.add(index);
+    _addLetter(letters[index]);
+  }
+
+  Widget _letterWheel(List<String> letters) {
+    return SizedBox(
+      height: 230,
+      child: LayoutBuilder(builder: (context, constraints) {
+        final center = Offset(constraints.maxWidth / 2, 115);
+        final radius = min(88.0, constraints.maxWidth / 2 - 28);
+        int nearest(Offset point) {
+          var bestIndex = -1;
+          var bestDistance = double.infinity;
+          for (var i = 0; i < letters.length; i++) {
+            final angle = -pi / 2 + (2 * pi * i / letters.length);
+            final target = Offset(center.dx + radius * cos(angle), center.dy + radius * sin(angle));
+            final distance = (point - target).distance;
+            if (distance < bestDistance) { bestDistance = distance; bestIndex = i; }
+          }
+          return bestDistance < 34 ? bestIndex : -1;
+        }
+        return GestureDetector(
+          onPanStart: (details) { _dragVisited.clear(); _dragLetter(nearest(details.localPosition), letters); },
+          onPanUpdate: (details) => _dragLetter(nearest(details.localPosition), letters),
+          onPanEnd: (_) { _submitWord(); _dragVisited.clear(); },
+          child: Stack(children: [
+            Positioned.fill(child: CustomPaint(painter: _WheelGuidePainter(center: center, radius: radius))),
+            for (var i = 0; i < letters.length; i++)
+              Positioned(
+                left: center.dx + radius * cos(-pi / 2 + 2 * pi * i / letters.length) - 22,
+                top: center.dy + radius * sin(-pi / 2 + 2 * pi * i / letters.length) - 22,
+                child: Container(width: 44, height: 44, alignment: Alignment.center, decoration: const BoxDecoration(color: _gold, shape: BoxShape.circle), child: Text(letters[i], style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 17))),
+              ),
+          ]),
+        );
+      }),
+    );
   }
 
   void _removeLetter(int index) {
@@ -204,13 +246,9 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
         Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(children: [
           const Text('LETTER WHEEL', style: TextStyle(color: _blue, fontWeight: FontWeight.w900)),
           const SizedBox(height: 8),
-          Text(_formed.isEmpty ? 'Swipe across the letters or tap them to form a word' : _formed.join(), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 3)),
+          Text(_formed.isEmpty ? 'Swipe across the letters to form a word' : _formed.join(), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 3)),
           const SizedBox(height: 10),
-          Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, children: List.generate(letters.length, (i) => SizedBox(width: 43, height: 43, child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: _gold, foregroundColor: Colors.black87, padding: EdgeInsets.zero, shape: const CircleBorder()),
-            onPressed: () => _addLetter(letters[i]),
-            child: Text(letters[i], style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-          )))),
+          _letterWheel(letters),
           const SizedBox(height: 12),
           Row(children: [
             IconButton(onPressed: _formed.isEmpty ? null : () => _removeLetter(_formed.length - 1), icon: const Icon(Icons.backspace_outlined)),
