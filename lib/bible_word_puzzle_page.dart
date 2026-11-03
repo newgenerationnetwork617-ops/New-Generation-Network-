@@ -187,7 +187,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
             const SizedBox(height: 7),
             Text('Score: $_score', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
             const SizedBox(height: 13),
-            ClipRRect(borderRadius: BorderRadius.circular(20), child: LinearProgressIndicator(value: (_index + 1) / _session.length, minHeight: 7, backgroundColor: Colors.white24, color: _gold)),
+            ClipRRect(borderRadius: const BorderRadius.circular(20), child: LinearProgressIndicator(value: (_index + 1) / _session.length, minHeight: 7, backgroundColor: Colors.white24, color: _gold)),
           ]),
         ),
         const SizedBox(height: 22),
