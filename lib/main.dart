@@ -347,28 +347,71 @@ class HomeContent extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 22),
+            InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DevotionalsPage())),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: dark
+                        ? const [Color(0xFF18345B), Color(0xFF12243D)]
+                        : const [Color(0xFFFFF8E5), Color(0xFFFFFDF7)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: NewGenerationNetworkApp.accentGold.withValues(alpha: .65), width: 1.2),
+                ),
+                child: Row(children: [
+                  Container(
+                    width: 54, height: 54,
+                    decoration: BoxDecoration(color: NewGenerationNetworkApp.accentGold.withValues(alpha: .18), borderRadius: BorderRadius.circular(16)),
+                    child: const Icon(Icons.favorite_rounded, color: NewGenerationNetworkApp.accentGold, size: 29),
+                  ),
+                  const SizedBox(width: 15),
+                  const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('YOUR DAILY DEVOTIONAL', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.05, color: NewGenerationNetworkApp.accentGold)),
+                    SizedBox(height: 5),
+                    Text('Spend time in God’s Word', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+                    SizedBox(height: 4),
+                    Text('Read today’s message and grow in faith.', style: TextStyle(fontSize: 12.5, height: 1.35)),
+                  ])),
+                  const SizedBox(width: 8),
+                  Icon(Icons.arrow_forward_rounded, color: dark ? Colors.white : NewGenerationNetworkApp.primaryBlue),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 24),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              const Text('Explore N.G.N.', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
+              const Text('Explore N.G.N.', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
               Text('Ministry Hub', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: dark ? const Color(0xFFD4AF37) : NewGenerationNetworkApp.primaryBlue)),
             ]),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 9,
+              runSpacing: 9,
+              children: [
+                _HomeQuickLink(icon: Icons.auto_stories_rounded, label: 'Bible', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BiblePage()))),
+                _HomeQuickLink(icon: Icons.play_circle_fill_rounded, label: 'Teachings', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TeachingsPage()))),
+                _HomeQuickLink(icon: Icons.event_rounded, label: 'Events', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsPage()))),
+              ],
+            ),
+            const SizedBox(height: 18),
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 1.28,
+              childAspectRatio: 1.45,
               children: const [
-                _HomeFeatureCard(icon: Icons.play_circle_outline_rounded, title: 'Teachings', subtitle: 'Watch & listen', page: TeachingsPage()),
-                _HomeFeatureCard(icon: Icons.auto_stories_outlined, title: 'Holy Bible', subtitle: 'Read the Word', page: BiblePage()),
-                _HomeFeatureCard(icon: Icons.favorite_border_rounded, title: 'Devotional', subtitle: 'Grow daily', page: DevotionalsPage()),
                 _HomeFeatureCard(icon: Icons.groups_outlined, title: 'Community', subtitle: 'Connect together', page: CommunityPage()),
-                _HomeFeatureCard(icon: Icons.calendar_month_outlined, title: 'Events', subtitle: 'Stay connected', page: EventsPage()),
                 _HomeFeatureCard(icon: Icons.campaign_outlined, title: 'Announcements', subtitle: 'Latest updates', page: AnnouncementsPage()),
                 _HomeFeatureCard(icon: Icons.quiz_rounded, title: 'Bible Trivia', subtitle: 'Test your Bible knowledge', page: BibleTriviaPage()),
-                _HomeFeatureCard(icon: Icons.extension_rounded, title: 'Bible Word Puzzle', subtitle: 'Unscramble Bible words', page: BibleWordPuzzlePage()),
+                _HomeFeatureCard(icon: Icons.extension_rounded, title: 'Bible Word Cookies', subtitle: 'Find Bible-themed words', page: BibleWordPuzzlePage()),
                 _HomeFeatureCard(icon: Icons.person_search_rounded, title: 'Guess the Bible Character', subtitle: 'Who am I? Bible clues', page: GuessBibleCharacterPage()),
               ],
             ),
@@ -389,6 +432,25 @@ class HomeContent extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _HomeQuickLink extends StatelessWidget {
+  const _HomeQuickLink({required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      avatar: Icon(icon, size: 17, color: NewGenerationNetworkApp.primaryBlue),
+      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+      onPressed: onTap,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF162238) : Colors.white,
+      side: BorderSide(color: NewGenerationNetworkApp.primaryBlue.withValues(alpha: .18)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 }
