@@ -51,6 +51,9 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('In which chapter is the Lord’s Prayer recorded in the Gospel of Matthew?', ['Matthew 5', 'Matthew 6', 'Matthew 7', 'Matthew 13'], 1, 'Matthew 6:9–13', 'Matthew records Jesus teaching the Lord’s Prayer in chapter 6.', isVerseChallenge: true),
       _TriviaQuestion('Which reference says, “I can do all things through Christ which strengtheneth me”?', ['Philippians 2:13', 'Philippians 4:13', 'Ephesians 6:10', 'Colossians 3:17'], 1, 'Philippians 4:13', 'Paul writes about finding strength through Christ in Philippians 4:13.', isVerseChallenge: true),
       _TriviaQuestion('Where is the instruction, “Children, obey your parents in the Lord”?', ['Ephesians 4:32', 'Ephesians 5:1', 'Ephesians 6:1', 'Colossians 3:16'], 2, 'Ephesians 6:1', 'The instruction appears at the beginning of Ephesians chapter 6.', isVerseChallenge: true),
+      _TriviaQuestion('What sign did God place in the sky as a reminder of His covenant after the flood?', ['A star', 'A rainbow', 'A cloud', 'A pillar of fire'], 1, 'Genesis 9:12–17', 'God set the rainbow in the cloud as the sign of His covenant with the earth.'),
+      _TriviaQuestion('Who was Isaac’s wife?', ['Rachel', 'Leah', 'Rebekah', 'Keturah'], 2, 'Genesis 24:67', 'Rebekah became Isaac’s wife after Abraham’s servant met her.'),
+      _TriviaQuestion('Which city’s walls fell after Israel marched around them as God instructed?', ['Ai', 'Jericho', 'Bethel', 'Hebron'], 1, 'Joshua 6:1–20', 'The walls of Jericho fell after Israel followed God’s instructions.'),
     ],
     'Medium': const [
       _TriviaQuestion('“Your word is a lamp to my feet.” Where is this verse found?', ['Psalm 119:105', 'Proverbs 4:23', 'Isaiah 40:31', 'John 8:12'], 0, 'Psalm 119:105', 'The psalm describes God’s word as a lamp and a light for our path.', isVerseChallenge: true),
@@ -83,6 +86,9 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('In which chapter does Jesus raise Lazarus from the dead?', ['John 9', 'John 10', 'John 11', 'John 12'], 2, 'John 11:1–44', 'The raising of Lazarus is narrated in John chapter 11.', isVerseChallenge: true),
       _TriviaQuestion('Where is the verse, “Faith without works is dead” found?', ['Hebrews 11:1', 'James 1:5', 'James 2:17', '1 Peter 1:7'], 2, 'James 2:17', 'James explains that genuine faith is demonstrated by action.', isVerseChallenge: true),
       _TriviaQuestion('Which chapter records the fruit of the Spirit?', ['Galatians 3', 'Galatians 4', 'Galatians 5', 'Galatians 6'], 2, 'Galatians 5:22–23', 'The fruit of the Spirit is listed in Galatians chapter 5.', isVerseChallenge: true),
+      _TriviaQuestion('Who was the first high priest of Israel?', ['Moses', 'Aaron', 'Eleazar', 'Joshua'], 1, 'Exodus 28:1; 29:9', 'Aaron and his sons were appointed to the priesthood, with Aaron serving as high priest.'),
+      _TriviaQuestion('Which disciple was also called Didymus?', ['Peter', 'Thomas', 'Matthew', 'Philip'], 1, 'John 11:16; 20:24', 'Didymus means twin and is used of Thomas.'),
+      _TriviaQuestion('Which river did Naaman wash in when he followed Elisha’s instruction?', ['Nile', 'Euphrates', 'Jordan', 'Tigris'], 2, '2 Kings 5:10–14', 'Naaman dipped himself seven times in the Jordan.'),
     ],
     'Hard': const [
       _TriviaQuestion('“The joy of the Lord is your strength.” Where is this verse found?', ['Nehemiah 8:10', 'Habakkuk 3:18', 'Psalm 28:7', 'Isaiah 12:2'], 0, 'Nehemiah 8:10', 'Nehemiah encouraged the people not to grieve, because the Lord’s joy was their strength.', isVerseChallenge: true),
@@ -115,6 +121,10 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('Which chapter records Peter’s sermon on the day of Pentecost?', ['Acts 1', 'Acts 2', 'Acts 4', 'Acts 10'], 1, 'Acts 2:14–41', 'Peter addressed the crowd in Acts chapter 2 after the coming of the Holy Spirit.', isVerseChallenge: true),
       _TriviaQuestion('Which reference says, “Be ye doers of the word, and not hearers only”?', ['James 1:22', 'James 2:14', '1 John 2:5', 'Romans 12:1'], 0, 'James 1:22', 'James urges believers to put the word into practice.', isVerseChallenge: true),
       _TriviaQuestion('In which chapter does Jesus teach the parable of the sower in Matthew?', ['Matthew 10', 'Matthew 12', 'Matthew 13', 'Matthew 18'], 2, 'Matthew 13:1–23', 'The parable of the sower is the first parable in Matthew chapter 13.', isVerseChallenge: true),
+      _TriviaQuestion('Which Roman governor presided over Jesus’ trial before the crucifixion?', ['Felix', 'Festus', 'Pontius Pilate', 'Gallio'], 2, 'Matthew 27:11–26; John 18:28–19:16', 'Pontius Pilate questioned Jesus and handed Him over to be crucified.'),
+      _TriviaQuestion('Who was the priest whose sons were Hophni and Phinehas?', ['Eli', 'Samuel', 'Zadok', 'Abiathar'], 0, '1 Samuel 1:3; 2:12', 'Eli served as priest while his sons served at the tabernacle.'),
+      _TriviaQuestion('Which king of Salem was both king and priest and blessed Abram?', ['Abimelech', 'Melchizedek', 'Adoni-zedek', 'Pharaoh'], 1, 'Genesis 14:18–20', 'Melchizedek was king of Salem and priest of God Most High.'),
+      _TriviaQuestion('Which prophet was instructed to marry Gomer as a sign to Israel?', ['Amos', 'Hosea', 'Joel', 'Micah'], 1, 'Hosea 1:2–3', 'Hosea’s marriage became a sign concerning Israel’s unfaithfulness.'),
     ],
   };
 
