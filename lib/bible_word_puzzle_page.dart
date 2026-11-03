@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'game_leaderboard_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Offline-first Bible Word Search. The bundled pack is always available;
@@ -160,7 +161,13 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('Bible Word Search')),
+      appBar: AppBar(title: const Text('Bible Word Search'), actions: [
+        IconButton(
+          tooltip: 'Leaderboard',
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLeaderboardPage(gameId: 'bible_word_search', gameTitle: 'Bible Word Search'))),
+          icon: const Icon(Icons.leaderboard_rounded),
+        ),
+      ]),
       body: SafeArea(child: ListView(padding: const EdgeInsets.all(14), children: [
         Container(
           padding: const EdgeInsets.all(16),
