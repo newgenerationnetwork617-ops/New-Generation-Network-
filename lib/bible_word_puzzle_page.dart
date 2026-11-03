@@ -266,3 +266,21 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
     );
   }
 }
+
+
+class _WheelGuidePainter extends CustomPainter {
+  const _WheelGuidePainter({required this.center, required this.radius});
+  final Offset center;
+  final double radius;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFD4AF37).withValues(alpha: 0.22)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawCircle(center, radius, paint);
+  }
+  @override
+  bool shouldRepaint(covariant _WheelGuidePainter oldDelegate) =>
+      oldDelegate.center != center || oldDelegate.radius != radius;
+}
