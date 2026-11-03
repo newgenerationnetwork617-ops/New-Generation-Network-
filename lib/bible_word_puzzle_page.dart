@@ -1,250 +1,230 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'game_leaderboard_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'game_leaderboard_page.dart';
 
-/// Offline-first Bible Word Search. The bundled pack is always available;
-/// downloaded packs can be merged into this bank in a later content-sync step.
+/// Offline-first Word Cookies-style Bible word-connect game.
 class BibleWordPuzzlePage extends StatefulWidget {
   const BibleWordPuzzlePage({super.key});
   @override
   State<BibleWordPuzzlePage> createState() => _BibleWordPuzzlePageState();
 }
 
-class _BibleWordSearch {
-  const _BibleWordSearch(this.verse, this.reference, this.words, this.explanation, this.level);
-  final String verse, reference, explanation, level;
+class _CookiePuzzle {
+  const _CookiePuzzle(this.reference, this.letters, this.words, this.clues, this.mode, this.level);
+  final String reference;
+  final String letters;
   final List<String> words;
+  final List<String> clues;
+  final String mode; // verse or theme
+  final String level;
 }
 
 class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   static const _blue = Color(0xFF0B5ED7);
   static const _gold = Color(0xFFD4AF37);
-  static const _bestKey = 'ngn_bible_word_search_best';
-  static const int _size = 12;
-
-  // KJV excerpts are public domain. This starter pack is structured for
-  // expansion to the requested 300 reviewed entries.
-  static const List<_BibleWordSearch> _bank = [
-    _BibleWordSearch('The Lord is my shepherd; I shall not want.', 'Psalm 23:1', ['LORD','SHEPHERD','WANT'], 'David describes the Lord as the shepherd who cares for him.', 'Easy'),
-    _BibleWordSearch('Be still, and know that I am God.', 'Psalm 46:10', ['STILL','KNOW','GOD'], 'This verse calls readers to recognise God above the nations.', 'Easy'),
-    _BibleWordSearch('Thy word is a lamp unto my feet, and a light unto my path.', 'Psalm 119:105', ['WORD','LAMP','FEET','LIGHT','PATH'], 'God’s word gives guidance for the journey of life.', 'Easy'),
-    _BibleWordSearch('I can do all things through Christ which strengtheneth me.', 'Philippians 4:13', ['CHRIST','STRENGTHENETH','THINGS'], 'Paul speaks of finding strength in Christ in every circumstance.', 'Medium'),
-    _BibleWordSearch('Trust in the Lord with all thine heart; and lean not unto thine own understanding.', 'Proverbs 3:5', ['TRUST','LORD','HEART','UNDERSTANDING'], 'Wisdom teaches complete trust in the Lord rather than self-reliance.', 'Medium'),
-    _BibleWordSearch('The joy of the Lord is your strength.', 'Nehemiah 8:10', ['JOY','LORD','STRENGTH'], 'The people were encouraged to rejoice in the Lord.', 'Easy'),
-    _BibleWordSearch('For we walk by faith, not by sight.', '2 Corinthians 5:7', ['WALK','FAITH','SIGHT'], 'Christian life is guided by faith in God.', 'Medium'),
-    _BibleWordSearch('Let all your things be done with charity.', '1 Corinthians 16:14', ['THINGS','DONE','CHARITY'], 'Paul instructs believers to let love shape all they do.', 'Easy'),
-    _BibleWordSearch('Create in me a clean heart, O God; and renew a right spirit within me.', 'Psalm 51:10', ['CREATE','CLEAN','HEART','RENEW','SPIRIT'], 'David asks God for inner renewal and a faithful spirit.', 'Medium'),
-    _BibleWordSearch('The name of the Lord is a strong tower: the righteous runneth into it, and is safe.', 'Proverbs 18:10', ['NAME','LORD','STRONG','TOWER','RIGHTEOUS','SAFE'], 'God is pictured as a secure refuge for those who trust Him.', 'Hard'),
-    _BibleWordSearch('In the beginning God created the heaven and the earth.', 'Genesis 1:1', ['BEGINNING','GOD','CREATED','HEAVEN','EARTH'], 'The Bible opens by declaring God as Creator.', 'Easy'),
-    _BibleWordSearch('The Lord is good, a strong hold in the day of trouble; and he knoweth them that trust in him.', 'Nahum 1:7', ['LORD','GOOD','STRONG','TROUBLE','TRUST'], 'God is good and knows those who take refuge in Him.', 'Hard'),
-    _BibleWordSearch('Let your light so shine before men, that they may see your good works, and glorify your Father.', 'Matthew 5:16', ['LIGHT','SHINE','GOOD','WORKS','GLORIFY','FATHER'], 'Jesus calls His followers to live so their actions point others to God.', 'Hard'),
-    _BibleWordSearch('Blessed are the peacemakers: for they shall be called the children of God.', 'Matthew 5:9', ['BLESSED','PEACEMAKERS','CHILDREN','GOD'], 'Jesus honours those who actively make peace.', 'Medium'),
-    _BibleWordSearch('Jesus Christ the same yesterday, and to day, and for ever.', 'Hebrews 13:8', ['JESUS','CHRIST','SAME','YESTERDAY','EVER'], 'The verse declares the unchanging nature of Jesus Christ.', 'Medium'),
-    _BibleWordSearch('The Lord shall fight for you, and ye shall hold your peace.', 'Exodus 14:14', ['LORD','FIGHT','HOLD','PEACE'], 'Moses reassured Israel as they faced the Red Sea.', 'Medium'),
-    _BibleWordSearch('A soft answer turneth away wrath: but grievous words stir up anger.', 'Proverbs 15:1', ['SOFT','ANSWER','WRATH','WORDS','ANGER'], 'Gentle speech can calm conflict while harsh speech increases it.', 'Hard'),
-    _BibleWordSearch('Let us love one another: for love is of God.', '1 John 4:7', ['LOVE','ANOTHER','GOD'], 'John teaches that genuine love has its source in God.', 'Easy'),
-    _BibleWordSearch('The Lord is nigh unto all them that call upon him, to all that call upon him in truth.', 'Psalm 145:18', ['LORD','NIGH','CALL','TRUTH'], 'God is near to those who sincerely call on Him.', 'Hard'),
-    _BibleWordSearch('But the fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith.', 'Galatians 5:22', ['FRUIT','SPIRIT','LOVE','JOY','PEACE','FAITH'], 'Paul lists qualities produced by the Holy Spirit in a believer’s life.', 'Hard'),
+  static const _bestKey = 'ngn_bible_word_cookies_best';
+  static const _queueKey = 'ngn_game_score_queue';
+  static const List<_CookiePuzzle> _bank = [
+    _CookiePuzzle('John 3:16', 'GODLOVE', ['GOD','LOVE'], ['The One who gave His only begotten Son','The great gift God shows to the world'], 'verse', 'Easy'),
+    _CookiePuzzle('Psalm 23:1', 'SHEPHERD', ['SHEEP','HERD','SHE','RED'], ['Animals cared for by a shepherd','A group of animals under a keeper','A pronoun found in SHEPHERD','A colour hidden in the letters'], 'verse', 'Easy'),
+    _CookiePuzzle('Philippians 4:13', 'CHRISTGIVES', ['CHRIST','GIVES','GIVE','RISE'], ['The title of Jesus in this reference','What Christ does for strength','To present or offer','To get up or stand'], 'verse', 'Medium'),
+    _CookiePuzzle('Proverbs 3:5', 'TRUSTHEART', ['TRUST','HEART','EARTH','TEAR'], ['Rely confidently on God','The inner centre of a person','The world we live on','A drop from the eye'], 'verse', 'Easy'),
+    _CookiePuzzle('Matthew 5:14', 'LIGHTCITY', ['LIGHT','CITY','LIT','TIC'], ['What Jesus calls His followers','A populated place','Past tense of light','A small involuntary movement'], 'verse', 'Medium'),
+    _CookiePuzzle('Galatians 5:22', 'SPIRITJOYLOVEPEACE', ['SPIRIT','JOY','LOVE','PEACE','RICE','LACE'], ['The Holy ___','A fruit of the Spirit','The greatest commandment','Freedom from conflict','A common grain','A cord or fine fabric'], 'verse', 'Hard'),
+    _CookiePuzzle('Genesis 1:1', 'BEGINNING', ['BEGIN','GIN','INN','NINE'], ['To start','A spirit or liquor (short word)','A place to stay','The number after eight'], 'verse', 'Medium'),
+    _CookiePuzzle('Psalm 119:105', 'WORDLAMPFEETPATH', ['WORD','LAMP','FEET','PATH','HEAT','WARM'], ['The message of God','A light source','Body parts used for walking','A way or route','High temperature','Comfortably warm'], 'verse', 'Hard'),
+    _CookiePuzzle('1 Corinthians 13:13', 'FAITHHOPELOVE', ['FAITH','HOPE','LOVE','HEAL','PILE'], ['Trust in God','Confident expectation','Care and devotion','To make well','A stack of things'], 'verse', 'Medium'),
+    _CookiePuzzle('Exodus 14:14', 'LORDFIGHTPEACE', ['LORD','FIGHT','PEACE','RIDE','GIFT'], ['A name used for God','A struggle or battle','Calm and harmony','Travel on a horse','Something freely given'], 'verse', 'Hard'),
+    _CookiePuzzle('Bible places', 'JERUSALEMBETHLEHEM', ['JERUSALEM','BETHLEHEM','SALEM','THEME','REAL'], ['The city where Jesus was crucified and rose','The town where Jesus was born','A name associated with Jerusalem in Genesis 14','The subject of a lesson','Genuine, not imaginary'], 'theme', 'Hard'),
+    _CookiePuzzle('People of faith', 'ABRAHAMMOSESRUTH', ['ABRAHAM','MOSES','RUTH','HAM','MARS'], ['The patriarch who left his homeland by faith','Led Israel out of Egypt','Stayed loyal to Naomi','A son of Noah','A planet (extra challenge word)'], 'theme', 'Medium'),
+    _CookiePuzzle('Books of the Bible', 'MATTHEWMARKLUKEJOHN', ['MATTHEW','MARK','LUKE','JOHN','HARK'], ['First Gospel in the New Testament order','Second Gospel','Third Gospel','Fourth Gospel','Listen carefully'], 'theme', 'Hard'),
+    _CookiePuzzle('Fruit of the Spirit', 'GOODNESSKINDNESS', ['GOODNESS','KINDNESS','GOOD','KIND','NEST'], ['A quality of moral goodness','Being considerate and caring','Opposite of bad','Caring and generous','A bird’s home'], 'theme', 'Medium'),
+    _CookiePuzzle('Acts 1:8', 'POWERSPIRITWITNESS', ['POWER','SPIRIT','WITNESS','WRITE','TIRE'], ['Ability or strength','The Holy ___','One who testifies','Put words on paper','Become weary'], 'verse', 'Hard'),
   ];
 
   final Random _random = Random();
   final Set<String> _found = {};
-  final Set<int> _foundCells = {};
-  final List<int> _selection = [];
-  late _BibleWordSearch _puzzle;
-  late List<List<String>> _grid;
-  int _score = 0, _best = 0, _round = 0;
+  final List<String> _formed = [];
+  late _CookiePuzzle _puzzle;
+  int _index = 0, _score = 0, _best = 0;
   String _difficulty = 'All';
   String? _message;
+  bool _submitted = false;
+
+  List<_CookiePuzzle> get _pool => _difficulty == 'All' ? _bank : _bank.where((p) => p.level == _difficulty).toList();
+  bool get _complete => _found.length == _puzzle.words.length;
 
   @override
   void initState() {
     super.initState();
     _loadBest();
     _newPuzzle();
+    _syncQueuedScores();
   }
 
   Future<void> _loadBest() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (mounted) setState(() => _best = prefs.getInt(_bestKey) ?? 0);
+    final p = await SharedPreferences.getInstance();
+    if (mounted) setState(() => _best = p.getInt(_bestKey) ?? 0);
   }
-
-  List<_BibleWordSearch> get _pool => _difficulty == 'All'
-      ? List.of(_bank)
-      : _bank.where((p) => p.level == _difficulty).toList();
 
   void _newPuzzle() {
     final pool = _pool;
-    pool.shuffle(_random);
-    _puzzle = pool[_round % pool.length];
-    _round++;
+    if (pool.isEmpty) return;
+    _puzzle = pool[_index % pool.length];
+    _index++;
     _found.clear();
-    _foundCells.clear();
-    _selection.clear();
+    _formed.clear();
     _message = null;
-    _grid = List.generate(_size, (_) => List.filled(_size, ''));
-    final words = List<String>.from(_puzzle.words)..sort((a,b) => b.length.compareTo(a.length));
-    for (final word in words) {
-      _placeWord(word);
-    }
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    for (var r=0;r<_size;r++) {
-      for (var c=0;c<_size;c++) {
-        if (_grid[r][c].isEmpty) _grid[r][c] = letters[_random.nextInt(letters.length)];
-      }
-    }
+    _submitted = false;
     if (mounted) setState(() {});
   }
 
-  void _placeWord(String word) {
-    const dirs = [[0,1],[1,0],[1,1],[-1,1]];
-    for (var attempt=0; attempt<180; attempt++) {
-      final d = dirs[_random.nextInt(dirs.length)];
-      final row = _random.nextInt(_size), col = _random.nextInt(_size);
-      final endR = row + d[0]*(word.length-1), endC = col + d[1]*(word.length-1);
-      if (endR<0 || endR>=_size || endC<0 || endC>=_size) continue;
-      var fits = true;
-      for (var i=0;i<word.length;i++) {
-        final existing = _grid[row+d[0]*i][col+d[1]*i];
-        if (existing.isNotEmpty && existing != word[i]) { fits=false; break; }
-      }
-      if (!fits) continue;
-      for (var i=0;i<word.length;i++) {
-        _grid[row+d[0]*i][col+d[1]*i] = word[i];
-      }
-      return;
+  void _addLetter(String letter) {
+    if (_complete || _formed.length >= _puzzle.letters.length) return;
+    setState(() { _formed.add(letter); _message = null; });
+  }
+
+  void _removeLetter(int index) {
+    if (index < 0 || index >= _formed.length) return;
+    setState(() => _formed.removeAt(index));
+  }
+
+  void _submitWord() {
+    if (_formed.isEmpty || _complete) return;
+    final word = _formed.join();
+    if (_puzzle.words.contains(word) && !_found.contains(word)) {
+      setState(() {
+        _found.add(word);
+        _score += word.length * 10;
+        _message = 'Correct! +${word.length * 10} points';
+        _formed.clear();
+      });
+      if (_complete) _finishPuzzle();
+    } else if (_found.contains(word)) {
+      setState(() { _message = 'You have already found that word.'; _formed.clear(); });
+    } else {
+      setState(() { _message = 'Not one of the words in this puzzle. Try another combination.'; _formed.clear(); });
     }
   }
 
-  void _tapCell(int row, int col) {
-    final index = row*_size+col;
-    setState(() {
-      if (_selection.contains(index)) {
-        _selection.clear();
-        _message = 'Selection cleared.';
-        return;
-      }
-      _selection.add(index);
-      final letters = _selection.map((i) => _grid[i~/_size][i%_size]).join();
-      final reverse = letters.split('').reversed.join();
-      String? match;
-      for (final word in _puzzle.words) {
-        if (!_found.contains(word) && (word == letters || word == reverse)) { match = word; break; }
-      }
-      if (match != null) {
-        _found.add(match);
-        _foundCells.addAll(_selection);
-        _score += 10;
-        _selection.clear();
-        _message = 'Found $match! +10 points';
-        _saveBest();
-      } else if (!_puzzle.words.any((w) => !_found.contains(w) && (w.startsWith(letters) || w.endsWith(reverse)))) {
-        _selection.clear();
-        _message = 'Those letters do not form a target word. Try again.';
-      } else {
-        _message = null;
-      }
-    });
+  Future<void> _finishPuzzle() async {
+    final p = await SharedPreferences.getInstance();
+    final nextBest = max(_best, _score);
+    await p.setInt(_bestKey, nextBest);
+    if (mounted) setState(() => _best = nextBest);
+    await _submitScore();
   }
 
-  Future<void> _saveBest() async {
-    final prefs = await SharedPreferences.getInstance();
-    final best = max(_best, _score);
-    await prefs.setInt(_bestKey, best);
-    if (mounted) setState(() => _best = best);
+  Future<void> _submitScore() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null || _submitted) return;
+    _submitted = true;
+    try {
+      await Supabase.instance.client.from('game_scores').insert({
+        'user_id': user.id,
+        'game_id': 'bible_word_search',
+        'score': _score,
+      });
+    } catch (_) {
+      final p = await SharedPreferences.getInstance();
+      final queue = p.getStringList(_queueKey) ?? [];
+      queue.add('bible_word_search|$_score');
+      await p.setStringList(_queueKey, queue);
+    }
   }
 
-  bool get _complete => _found.length == _puzzle.words.length;
+  Future<void> _syncQueuedScores() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    final p = await SharedPreferences.getInstance();
+    final queue = p.getStringList(_queueKey) ?? [];
+    if (queue.isEmpty) return;
+    final remaining = <String>[];
+    for (final item in queue) {
+      final parts = item.split('|');
+      if (parts.length != 2) continue;
+      try {
+        await Supabase.instance.client.from('game_scores').insert({
+          'user_id': user.id, 'game_id': parts[0], 'score': int.parse(parts[1]),
+        });
+      } catch (_) { remaining.add(item); }
+    }
+    await p.setStringList(_queueKey, remaining);
+  }
+
+  void _shuffleLetters() {
+    setState(() { _puzzle = _CookiePuzzle(_puzzle.reference, String.fromCharCodes(_puzzle.letters.runes.toList()..shuffle(_random)), _puzzle.words, _puzzle.clues, _puzzle.mode, _puzzle.level); });
+  }
 
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final letters = _puzzle.letters.split('');
     return Scaffold(
-      appBar: AppBar(title: const Text('Bible Word Search'), actions: [
-        IconButton(
-          tooltip: 'Leaderboard',
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLeaderboardPage(gameId: 'bible_word_search', gameTitle: 'Bible Word Search'))),
-          icon: const Icon(Icons.leaderboard_rounded),
-        ),
+      appBar: AppBar(title: const Text('Bible Word Cookies'), actions: [
+        IconButton(tooltip: 'Leaderboard', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLeaderboardPage(gameId: 'bible_word_search', gameTitle: 'Bible Word Cookies'))), icon: const Icon(Icons.leaderboard_rounded)),
       ]),
-      body: SafeArea(child: ListView(padding: const EdgeInsets.all(14), children: [
+      body: SafeArea(child: ListView(padding: const EdgeInsets.all(16), children: [
         Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: _blue, borderRadius: BorderRadius.circular(18)),
+          padding: const EdgeInsets.all(17),
+          decoration: BoxDecoration(gradient: const LinearGradient(colors: [_blue, Color(0xFF173E80)]), borderRadius: BorderRadius.circular(18)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Row(children: [Icon(Icons.search_rounded,color: _gold), SizedBox(width:8), Text('FIND THE WORDS',style:TextStyle(color:Colors.white,fontWeight:FontWeight.w900)), Spacer(), Icon(Icons.wifi_off,color:Colors.white70,size:16), SizedBox(width:4), Text('OFFLINE',style:TextStyle(color:Colors.white70,fontSize:10))]),
-            const SizedBox(height:10),
-            Text('Score: $_score  •  Best: $_best',style:const TextStyle(color:Colors.white)),
-            const SizedBox(height:8),
-            DropdownButton<String>(
-              value: _difficulty,
-              dropdownColor: Colors.white,
-              style: const TextStyle(color: Colors.black87),
-              items: const ['All','Easy','Medium','Hard'].map((v)=>DropdownMenuItem(value:v,child:Text(v))).toList(),
-              onChanged: (v) { if(v!=null) setState(() { _difficulty=v; _round=0; }); _newPuzzle(); },
-            ),
+            const Row(children: [Icon(Icons.cookie_rounded, color: _gold), SizedBox(width: 8), Text('CONNECT THE BIBLE WORDS', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)), Spacer(), Icon(Icons.wifi_off, color: Colors.white70, size: 16), SizedBox(width: 4), Text('OFFLINE', style: TextStyle(color: Colors.white70, fontSize: 10))]),
+            const SizedBox(height: 10),
+            Text('Score: $_score  •  Best: $_best', style: const TextStyle(color: Colors.white)),
+            const SizedBox(height: 8),
+            DropdownButton<String>(value: _difficulty, dropdownColor: Colors.white, style: const TextStyle(color: Colors.black87), items: const ['All','Easy','Medium','Hard'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(), onChanged: (v) { if (v != null) setState(() { _difficulty = v; _index = 0; }); _newPuzzle(); }),
           ]),
         ),
-        const SizedBox(height:12),
-        if (_difficulty != 'Hard' && _puzzle.level != 'Hard')
-          Card(child: Padding(padding: const EdgeInsets.all(14),child: Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-            const Text('BIBLE VERSE',style:TextStyle(color:_blue,fontWeight:FontWeight.w900)),
-            const SizedBox(height:6),
-            Text('“${_puzzle.verse}”',style:const TextStyle(fontSize:15,height:1.45)),
-            const SizedBox(height:5),
-            Text(_puzzle.reference,style:const TextStyle(color:_blue,fontWeight:FontWeight.w800)),
-          ])))
-        else
-          Card(child: const Padding(padding:EdgeInsets.all(14),child:Text('HARD MODE • The verse is hidden. Find every word using the reference clues in the word list.'))),
-        const SizedBox(height:10),
-        const Text('TAP THE LETTERS IN ORDER',style:TextStyle(fontWeight:FontWeight.w900,color:_blue)),
-        const SizedBox(height:8),
-        AspectRatio(aspectRatio:1,child:GridView.builder(
-          physics:const NeverScrollableScrollPhysics(),
-          gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:_size,mainAxisSpacing:2,crossAxisSpacing:2),
-          itemCount:_size*_size,
-          itemBuilder:(context,i) {
-            final selected=_selection.contains(i);
-            final foundCell=_isCellInFoundWord(i);
-            return InkWell(
-              onTap:()=>_tapCell(i~/_size,i%_size),
-              child:Container(
-                alignment:Alignment.center,
-                decoration:BoxDecoration(
-                  color:foundCell ? Colors.green.shade600 : selected ? _gold : (dark?Colors.white12:Colors.blue.shade50),
-                  borderRadius:BorderRadius.circular(4),
-                ),
-                child:Text(_grid[i~/_size][i%_size],style:TextStyle(fontSize:13,fontWeight:FontWeight.w900,color:foundCell||selected?Colors.white:(dark?Colors.white:Colors.black87))),
-              ),
-            );
-          },
-        )),
-        const SizedBox(height:12),
-        const Text('WORDS TO FIND',style:TextStyle(fontWeight:FontWeight.w900,color:_blue)),
-        const SizedBox(height:6),
-        Wrap(spacing:8,runSpacing:8,children:_puzzle.words.map((w)=>Chip(
-          avatar:Icon(_found.contains(w)?Icons.check_circle:Icons.circle_outlined,size:17,color:_found.contains(w)?Colors.green: _blue),
-          label:Text(w,style:TextStyle(decoration:_found.contains(w)?TextDecoration.lineThrough:null,fontWeight:FontWeight.w700)),
-          backgroundColor:_found.contains(w)?Colors.green.withValues(alpha:0.12):null,
-        )).toList()),
-        if (_message!=null) Padding(padding:const EdgeInsets.symmetric(vertical:10),child:Text(_message!,style:const TextStyle(fontWeight:FontWeight.w700))),
-        if (_complete) Card(color:Colors.green.withValues(alpha:0.12),child:Padding(padding:const EdgeInsets.all(14),child:Column(children:[
-          const Text('PUZZLE COMPLETED!',style:TextStyle(fontWeight:FontWeight.w900,color:Colors.green)),
-          Text(_puzzle.explanation,textAlign:TextAlign.center),
-          Text(_puzzle.reference,style:const TextStyle(fontWeight:FontWeight.w800,color:_blue)),
+        const SizedBox(height: 14),
+        Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(_puzzle.mode == 'verse' ? 'BIBLE REFERENCE' : 'BIBLE WORD CHALLENGE', style: const TextStyle(color: _blue, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 6),
+          Text(_puzzle.reference, style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 5),
+          Text(_puzzle.mode == 'verse' ? 'The verse is hidden. Use the letter wheel and clues to discover its key words.' : 'There is no displayed verse for this round. Use the clues to discover the Bible-related words.'),
         ]))),
-        const SizedBox(height:10),
-        OutlinedButton.icon(onPressed:()=>setState(_selection.clear),icon:const Icon(Icons.backspace_outlined),label:const Text('Clear selection')),
-        FilledButton.icon(onPressed:_newPuzzle,icon:const Icon(Icons.navigate_next),label:Text(_complete?'Next puzzle':'New puzzle')),
-        const SizedBox(height:8),
-        Text('Each word found earns 10 points. Your score is saved on this device.',textAlign:TextAlign.center,style:TextStyle(fontSize:11,color:dark?Colors.white60:Colors.black54)),
+        const SizedBox(height: 12),
+        const Text('WORD BOXES', style: TextStyle(color: _blue, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 8),
+        ...List.generate(_puzzle.words.length, (i) {
+          final word = _puzzle.words[i];
+          final done = _found.contains(word);
+          return Card(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('WORD ${i + 1}  •  ${word.length} LETTERS', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: _blue)),
+            const SizedBox(height: 5),
+            Wrap(spacing: 4, children: List.generate(word.length, (j) => Container(width: 25, height: 31, alignment: Alignment.center, decoration: BoxDecoration(color: done ? Colors.green.withValues(alpha: .15) : (dark ? Colors.white10 : Colors.blue.shade50), border: Border(bottom: BorderSide(color: done ? Colors.green : _blue, width: 2))), child: Text(done ? word[j] : '', style: const TextStyle(fontWeight: FontWeight.w900))))),
+            const SizedBox(height: 5),
+            Text(_puzzle.clues[i], style: TextStyle(color: dark ? Colors.white70 : Colors.black87)),
+          ])));
+        }),
+        const SizedBox(height: 10),
+        Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(children: [
+          const Text('LETTER WHEEL', style: TextStyle(color: _blue, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 8),
+          Text(_formed.isEmpty ? 'Swipe across the letters or tap them to form a word' : _formed.join(), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 3)),
+          const SizedBox(height: 10),
+          Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, children: List.generate(letters.length, (i) => SizedBox(width: 43, height: 43, child: FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: _gold, foregroundColor: Colors.black87, padding: EdgeInsets.zero, shape: const CircleBorder()),
+            onPressed: () => _addLetter(letters[i]),
+            child: Text(letters[i], style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+          )))),
+          const SizedBox(height: 12),
+          Row(children: [
+            IconButton(onPressed: _formed.isEmpty ? null : () => _removeLetter(_formed.length - 1), icon: const Icon(Icons.backspace_outlined)),
+            Expanded(child: OutlinedButton(onPressed: _shuffleLetters, child: const Text('Shuffle letters'))),
+            const SizedBox(width: 8),
+            Expanded(child: FilledButton(onPressed: _submitWord, child: const Text('Submit word'))),
+          ]),
+          if (_message != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_message!, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700))),
+        ]))),
+        if (_complete) Card(color: Colors.green.withValues(alpha: .12), child: const Padding(padding: EdgeInsets.all(16), child: Text('LEVEL COMPLETE! Excellent work. Your score is saved on this device and will be submitted to the leaderboard when you are online and signed in.', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w800, color: Colors.green)))),
+        const SizedBox(height: 8),
+        FilledButton.icon(onPressed: _complete ? _newPuzzle : null, icon: const Icon(Icons.arrow_forward), label: const Text('Next level')),
+        Text('Find all the hidden words to complete each level. Your game remains playable offline.', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54)),
       ])),
     );
-  }
-
-  bool _isCellInFoundWord(int index) {
-    // Found words are marked by the cells in the selection path before it clears.
-    return _foundCells.contains(index);
   }
 }
