@@ -20,6 +20,9 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
 
   final Map<String, List<_TriviaQuestion>> _questions = {
     'Easy': const [
+      _TriviaQuestion('“The Lord is my shepherd.” Where is this verse found?', ['Psalm 23:1', 'John 10:10', 'Proverbs 3:5', 'Matthew 6:33'], 0, 'Psalm 23:1', 'Psalm 23 begins by describing the Lord as our shepherd.'),
+      _TriviaQuestion('“For God so loved the world.” Where is this verse found?', ['Romans 8:28', 'John 3:16', '1 John 4:8', 'Genesis 1:1'], 1, 'John 3:16', 'John 3:16 teaches about God’s love and the gift of His Son.'),
+      _TriviaQuestion('“Jesus wept.” Where is this short verse found?', ['Luke 19:41', 'John 11:35', 'Matthew 5:4', 'Mark 1:15'], 1, 'John 11:35', 'John 11:35 records Jesus weeping before the raising of Lazarus.'),
       _TriviaQuestion('Who built the ark?', ['Moses', 'Noah', 'Abraham', 'David'], 1, 'Genesis 6:13–22', 'God instructed Noah to build an ark before the flood.'),
       _TriviaQuestion('Who was the mother of Jesus?', ['Martha', 'Elizabeth', 'Mary', 'Ruth'], 2, 'Luke 1:26–31', 'Mary was chosen to be the mother of Jesus.'),
       _TriviaQuestion('Where was Jesus born?', ['Nazareth', 'Jerusalem', 'Bethlehem', 'Jericho'], 2, 'Luke 2:4–7', 'Jesus was born in Bethlehem.'),
@@ -42,6 +45,8 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('Which prayer did Jesus teach His disciples?', ['Prayer of Jabez', 'The Lord’s Prayer', 'Prayer of Hannah', 'Prayer of Solomon'], 1, 'Matthew 6:9–13', 'Jesus taught His disciples how to pray, beginning “Our Father”.'),
     ],
     'Medium': const [
+      _TriviaQuestion('“Your word is a lamp to my feet.” Where is this verse found?', ['Psalm 119:105', 'Proverbs 4:23', 'Isaiah 40:31', 'John 8:12'], 0, 'Psalm 119:105', 'The psalm describes God’s word as a lamp and a light for our path.'),
+      _TriviaQuestion('“Pray without ceasing.” Where is this instruction found?', ['Ephesians 6:10', '1 Thessalonians 5:17', 'Romans 12:2', 'Colossians 3:23'], 1, '1 Thessalonians 5:17', 'Paul encourages believers to remain constant in prayer.'),
       _TriviaQuestion('Which queen visited Solomon to test his wisdom?', ['Queen Esther', 'Queen of Sheba', 'Queen Jezebel', 'Queen Vashti'], 1, '1 Kings 10:1–3', 'The queen of Sheba came with difficult questions for Solomon.'),
       _TriviaQuestion('Who interpreted the writing on the wall for Belshazzar?', ['Ezekiel', 'Jeremiah', 'Daniel', 'Nehemiah'], 2, 'Daniel 5:13–28', 'Daniel explained the meaning of the writing.'),
       _TriviaQuestion('Which woman hid the Israelite spies in Jericho?', ['Deborah', 'Rahab', 'Jael', 'Abigail'], 1, 'Joshua 2:1–6', 'Rahab welcomed and hid the spies.'),
@@ -64,6 +69,8 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('What was the name of the servant whose ear Peter cut off?', ['Malchus', 'Bartimaeus', 'Tychicus', 'Onesimus'], 0, 'John 18:10', 'John identifies the servant as Malchus.'),
     ],
     'Hard': const [
+      _TriviaQuestion('“The joy of the Lord is your strength.” Where is this verse found?', ['Nehemiah 8:10', 'Habakkuk 3:18', 'Psalm 28:7', 'Isaiah 12:2'], 0, 'Nehemiah 8:10', 'Nehemiah encouraged the people not to grieve, because the Lord’s joy was their strength.'),
+      _TriviaQuestion('“Love is patient, love is kind.” Where is this passage found?', ['Romans 5:8', '1 Corinthians 13:4', 'Galatians 5:22', '1 John 3:18'], 1, '1 Corinthians 13:4', 'Paul describes the qualities of love in 1 Corinthians 13.'),
       _TriviaQuestion('Who was the father of Bezalel, the craftsman of the tabernacle?', ['Hur', 'Uri', 'Oholiab', 'Ithamar'], 1, 'Exodus 31:2', 'Bezalel was the son of Uri, son of Hur, of the tribe of Judah.'),
       _TriviaQuestion('Which king of Judah was eight years old when he began to reign?', ['Josiah', 'Joash', 'Uzziah', 'Hezekiah'], 0, '2 Kings 22:1', 'Josiah began to reign at eight years old.'),
       _TriviaQuestion('Who was the father of John the Baptist?', ['Simeon', 'Zechariah', 'Cleopas', 'Jairus'], 1, 'Luke 1:5–13', 'Zechariah was a priest and the father of John.'),
