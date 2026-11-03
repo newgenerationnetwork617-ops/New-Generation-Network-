@@ -120,13 +120,15 @@ class _AdminBibleTriviaPageState extends State<AdminBibleTriviaPage> {
                   } else {
                     await _client.from('bible_trivia_questions').update(data).eq('id', item['id']);
                   }
-                  if (!mounted) return;
+                  if (!mounted || !dialogContext.mounted) return;
                   Navigator.pop(dialogContext);
                   await _refresh();
+                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(item == null ? 'Question saved.' : 'Question updated.')),
                   );
                 } catch (e) {
+                  if (!mounted || !dialogContext.mounted) return;
                   setDialogState(() => saving = false);
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not save question: $e')));
                 }
