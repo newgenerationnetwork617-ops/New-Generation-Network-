@@ -31,8 +31,7 @@ void main() {
     expect(find.text('NEW GENERATION NETWORK'), findsOneWidget);
     expect(find.text('WORD FOR TODAY'), findsOneWidget);
     expect(find.text('Teachings'), findsOneWidget);
-    expect(find.text('Holy Bible'), findsOneWidget);
-    expect(find.text('Devotional'), findsOneWidget);
+    expect(find.text('YOUR DAILY DEVOTIONAL'), findsOneWidget);
     expect(find.text('Announcements'), findsOneWidget);
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Bible'), findsOneWidget);
