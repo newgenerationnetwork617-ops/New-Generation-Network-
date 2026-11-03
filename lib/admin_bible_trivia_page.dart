@@ -123,14 +123,14 @@ class _AdminBibleTriviaPageState extends State<AdminBibleTriviaPage> {
                   if (!mounted || !dialogContext.mounted) return;
                   Navigator.pop(dialogContext);
                   await _refresh();
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  if (!dialogContext.mounted) return;
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
                     SnackBar(content: Text(item == null ? 'Question saved.' : 'Question updated.')),
                   );
                 } catch (e) {
-                  if (!mounted || !dialogContext.mounted) return;
+                  if (!dialogContext.mounted) return;
                   setDialogState(() => saving = false);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not save question: $e')));
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(SnackBar(content: Text('Could not save question: $e')));
                 }
               },
               child: Text(saving ? 'Saving…' : 'Save question'),
