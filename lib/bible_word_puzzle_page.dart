@@ -22,8 +22,8 @@ class _CookiePuzzle {
 }
 
 class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
-  static const _blue = Color(0xFF0B5ED7);
-  static const _gold = Color(0xFFD4AF37);
+  static const _blue = Color(0xFF1746A2);
+  static const _gold = Color(0xFFFFC94A);
   static const _bestKey = 'ngn_bible_word_search_best';
   static const _levelKey = 'ngn_bible_word_search_level';
   static const _queueKey = 'ngn_game_score_queue';
