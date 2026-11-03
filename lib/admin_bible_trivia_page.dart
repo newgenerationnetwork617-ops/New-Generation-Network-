@@ -64,14 +64,14 @@ class _AdminBibleTriviaPageState extends State<AdminBibleTriviaPage> {
                     const SizedBox(height: 8),
                   ],
                   DropdownButtonFormField<String>(
-                    value: difficulty,
+                    initialValue: difficulty,
                     decoration: const InputDecoration(labelText: 'Difficulty'),
                     items: const ['Easy', 'Medium', 'Hard'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
                     onChanged: (v) { if (v != null) setDialogState(() => difficulty = v); },
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: correct,
+                    initialValue: correct,
                     decoration: const InputDecoration(labelText: 'Correct option'),
                     items: List.generate(4, (i) => DropdownMenuItem(value: i, child: Text('Option ${String.fromCharCode(65 + i)}'))),
                     onChanged: (v) { if (v != null) setDialogState(() => correct = v); },
