@@ -33,8 +33,8 @@ Future<void> main() async {
 
 class NewGenerationNetworkApp extends StatefulWidget {
   const NewGenerationNetworkApp({super.key});
-  static const primaryBlue = Color(0xFF0B5ED7);
-  static const accentGold = Color(0xFFD4AF37);
+  static const primaryBlue = Color(0xFF1746A2);
+  static const accentGold = Color(0xFFFFC94A);
 
 
   @override
@@ -43,8 +43,8 @@ class NewGenerationNetworkApp extends StatefulWidget {
 
 class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
   ThemeMode themeMode = ThemeMode.system;
-  static const primaryBlue = Color(0xFF0B5ED7);
-  static const accentGold = Color(0xFFD4AF37);
+  static const primaryBlue = Color(0xFF1746A2);
+  static const accentGold = Color(0xFFFFC94A);
 
   @override
   void initState() {
@@ -73,12 +73,12 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue).copyWith(
           primary: primaryBlue,
           secondary: accentGold,
-          tertiary: const Color(0xFF2E7D32),
+          tertiary: const Color(0xFF12A887),
           surface: Colors.white,
           onSurface: const Color(0xFF171A1F),
         ),
-        scaffoldBackgroundColor: const Color(0xFFF7F8FA),
-        dividerColor: const Color(0xFFE5E7EB),
+        scaffoldBackgroundColor: const Color(0xFFF4F7FC),
+        dividerColor: const Color(0xFFE2E8F2),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           foregroundColor: Color(0xFF111827),
@@ -93,7 +93,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           elevation: 0,
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            side: const BorderSide(color: Color(0xFFE7EAF0)),
+            side: const BorderSide(color: Color(0xFFE2E8F2)),
             borderRadius: BorderRadius.circular(16),
           ),
         ),
@@ -121,14 +121,14 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue, brightness: Brightness.dark).copyWith(
           primary: const Color(0xFF7CB0FF),
           secondary: accentGold,
-          tertiary: const Color(0xFF66BB6A),
-          surface: const Color(0xFF17191D),
+          tertiary: const Color(0xFF45C7A4),
+          surface: const Color(0xFF13233A),
         ),
-        scaffoldBackgroundColor: const Color(0xFF0F1115),
-        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF0F1115), surfaceTintColor: Colors.transparent, elevation: 0),
-        cardTheme: CardThemeData(color: const Color(0xFF17191D), surfaceTintColor: Colors.transparent, elevation: 0, shape: RoundedRectangleBorder(side: const BorderSide(color: Color(0xFF2B2F36)), borderRadius: BorderRadius.circular(16))),
-        navigationBarTheme: const NavigationBarThemeData(height: 68, elevation: 0, backgroundColor: Color(0xFF14161A), indicatorColor: Color(0xFF24334A)),
-        inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: const Color(0xFF17191D), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF343941)))),
+        scaffoldBackgroundColor: const Color(0xFF081629),
+        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF081629), surfaceTintColor: Colors.transparent, elevation: 0),
+        cardTheme: CardThemeData(color: const Color(0xFF13233A), surfaceTintColor: Colors.transparent, elevation: 0, shape: RoundedRectangleBorder(side: const BorderSide(color: Color(0xFF263B57)), borderRadius: BorderRadius.circular(16))),
+        navigationBarTheme: const NavigationBarThemeData(height: 68, elevation: 0, backgroundColor: Color(0xFF0D1E33), indicatorColor: Color(0xFF1B3A62)),
+        inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: const Color(0xFF13233A), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF304660)))),
       ),
       home: SplashScreen(onDone: () => Navigator.of(appNavigatorKey.currentContext!).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()))),
       navigatorKey: appNavigatorKey,
@@ -246,8 +246,8 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
                 context,
                 MaterialPageRoute(builder: (_) => const MorePage()),
               ),
-              backgroundColor: NewGenerationNetworkApp.primaryBlue,
-              foregroundColor: Colors.white,
+              backgroundColor: NewGenerationNetworkApp.accentGold,
+              foregroundColor: const Color(0xFF081629),
               child: const Icon(Icons.menu_rounded),
             ),
       bottomNavigationBar: NavigationBar(
@@ -290,13 +290,23 @@ class HomeContent extends StatelessWidget {
           children: [
             Row(children: [
               Container(
-                width: 48, height: 48,
+                width: 54, height: 54,
+                padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  color: NewGenerationNetworkApp.primaryBlue,
-                  borderRadius: BorderRadius.circular(14),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: NewGenerationNetworkApp.accentGold.withValues(alpha: .75)),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x160B2450), blurRadius: 16, offset: Offset(0, 6)),
+                  ],
                 ),
-                alignment: Alignment.center,
-                child: const Text('NGN', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: .6)),
+                child: Image.asset(
+                  'assets/branding/ngn_team_logo.png',
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Center(
+                    child: Text('NGN', style: TextStyle(color: NewGenerationNetworkApp.primaryBlue, fontSize: 14, fontWeight: FontWeight.w900)),
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
               const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -313,9 +323,14 @@ class HomeContent extends StatelessWidget {
                 return Container(
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0B5ED7),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: const [BoxShadow(color: Color(0x240B5ED7), blurRadius: 24, offset: Offset(0, 10))],
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF123A82), Color(0xFF1764C0), Color(0xFF0D2D64)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: NewGenerationNetworkApp.accentGold.withValues(alpha: .45)),
+                    boxShadow: const [BoxShadow(color: Color(0x26123A82), blurRadius: 26, offset: Offset(0, 11))],
                   ),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Row(children: [
@@ -409,13 +424,13 @@ class HomeContent extends StatelessWidget {
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
               childAspectRatio: 1.45,
-              children: const [
+              children: [
                 _HomeFeatureCard(icon: Icons.groups_outlined, title: 'Community', subtitle: 'Connect together', page: CommunityPage()),
                 _HomeFeatureCard(icon: Icons.campaign_outlined, title: 'Announcements', subtitle: 'Latest updates', page: AnnouncementsPage()),
-                _HomeFeatureCard(icon: Icons.quiz_rounded, title: 'Bible Trivia', subtitle: 'Test your Bible knowledge', page: GameLobbyPage(title: 'Bible Trivia', subtitle: 'Challenge your Bible knowledge with a fresh shuffled round.', gameId: 'bible_trivia', icon: Icons.quiz_rounded, bestKey: 'ngn_bible_trivia_high_score', gamePage: const BibleTriviaPage())),
-                _HomeFeatureCard(icon: Icons.extension_rounded, title: 'Bible Word Cookies', subtitle: 'Form Bible words from letter clues', page: GameLobbyPage(title: 'Bible Word Cookies', subtitle: 'Build Bible words, solve clues and advance through 1,000 levels.', gameId: 'bible_word_search', icon: Icons.extension_rounded, bestKey: 'ngn_bible_word_search_best', levelKey: 'ngn_bible_word_search_level', totalLevels: 1000, gamePage: const BibleWordPuzzlePage())),
-                _HomeFeatureCard(icon: Icons.person_search_rounded, title: 'Guess the Bible Character', subtitle: 'Who am I? Bible clues', page: GameLobbyPage(title: 'Guess the Bible Character', subtitle: 'Read the clues, identify Bible people and start a fresh shuffled round.', gameId: 'guess_bible_character', icon: Icons.person_search_rounded, bestKey: 'ngn_guess_character_best', gamePage: const GuessBibleCharacterPage())),
-                _HomeFeatureCard(icon: Icons.grid_on_rounded, title: 'Word Search Puzzle', subtitle: 'Find hidden words in the grid', page: GameLobbyPage(title: 'Word Search Puzzle', subtitle: 'Find hidden Bible words and progress through 1,000 levels.', gameId: 'bible_grid_search', icon: Icons.grid_on_rounded, bestKey: 'ngn_bible_grid_search_best', levelKey: 'ngn_bible_grid_search_level', totalLevels: 1000, gamePage: const BibleGridSearchPage())),
+                _HomeFeatureCard(icon: Icons.quiz_rounded, title: 'Bible Trivia', subtitle: 'Test your Bible knowledge', page: GameLobbyPage(title: 'Bible Trivia', subtitle: 'Choose a level, grow in the Word and challenge your best score.', gameId: 'bible_trivia', icon: Icons.quiz_rounded, bestKey: 'ngn_bible_trivia_high_score', levelKey: 'ngn_bible_trivia_level', totalLevels: 15, gamePage: BibleTriviaPage())),
+                _HomeFeatureCard(icon: Icons.extension_rounded, title: 'Bible Word Cookies', subtitle: 'Form Bible words from letter clues', page: GameLobbyPage(title: 'Bible Word Cookies', subtitle: 'Build Bible words, solve clues and advance through 1,000 levels.', gameId: 'bible_word_search', icon: Icons.extension_rounded, bestKey: 'ngn_bible_word_search_best', levelKey: 'ngn_bible_word_search_level', totalLevels: 1000, gamePage: BibleWordPuzzlePage())),
+                _HomeFeatureCard(icon: Icons.person_search_rounded, title: 'Guess the Bible Character', subtitle: 'Who am I? Bible clues', page: GameLobbyPage(title: 'Guess the Bible Character', subtitle: 'Read the clues, identify Bible people and start a fresh shuffled round.', gameId: 'guess_bible_character', icon: Icons.person_search_rounded, bestKey: 'ngn_guess_character_best', gamePage: GuessBibleCharacterPage())),
+                _HomeFeatureCard(icon: Icons.grid_on_rounded, title: 'Word Search Puzzle', subtitle: 'Find hidden words in the grid', page: GameLobbyPage(title: 'Word Search Puzzle', subtitle: 'Find hidden Bible words and progress through 1,000 levels.', gameId: 'bible_grid_search', icon: Icons.grid_on_rounded, bestKey: 'ngn_bible_grid_search_best', levelKey: 'ngn_bible_grid_search_level', totalLevels: 1000, gamePage: BibleGridSearchPage())),
               ],
             ),
             const SizedBox(height: 24),
