@@ -282,7 +282,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
                                 : (dark ? Colors.white : const Color(0xFF12356D)),
                           ),
                         ),
-                      ));
+                      )));
                   }))))),
                 ),
               );
