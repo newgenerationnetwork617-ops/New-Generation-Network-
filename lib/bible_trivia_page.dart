@@ -15,8 +15,8 @@ class BibleTriviaPage extends StatefulWidget {
 }
 
 class _BibleTriviaPageState extends State<BibleTriviaPage> {
-  static const _blue = Color(0xFF0B5ED7);
-  static const _gold = Color(0xFFD4AF37);
+  static const _blue = Color(0xFF1746A2);
+  static const _gold = Color(0xFFFFC94A);
   static const _highScoreKey = 'ngn_bible_trivia_high_score';
 
   final Map<String, List<_TriviaQuestion>> _questions = {
