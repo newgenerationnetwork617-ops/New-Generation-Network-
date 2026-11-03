@@ -20,9 +20,9 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
 
   final Map<String, List<_TriviaQuestion>> _questions = {
     'Easy': const [
-      _TriviaQuestion('“The Lord is my shepherd.” Where is this verse found?', ['Psalm 23:1', 'John 10:10', 'Proverbs 3:5', 'Matthew 6:33'], 0, 'Psalm 23:1', 'Psalm 23 begins by describing the Lord as our shepherd.'),
-      _TriviaQuestion('“For God so loved the world.” Where is this verse found?', ['Romans 8:28', 'John 3:16', '1 John 4:8', 'Genesis 1:1'], 1, 'John 3:16', 'John 3:16 teaches about God’s love and the gift of His Son.'),
-      _TriviaQuestion('“Jesus wept.” Where is this short verse found?', ['Luke 19:41', 'John 11:35', 'Matthew 5:4', 'Mark 1:15'], 1, 'John 11:35', 'John 11:35 records Jesus weeping before the raising of Lazarus.'),
+      _TriviaQuestion('“The Lord is my shepherd.” Where is this verse found?', ['Psalm 23:1', 'John 10:10', 'Proverbs 3:5', 'Matthew 6:33'], 0, 'Psalm 23:1', 'Psalm 23 begins by describing the Lord as our shepherd.', isVerseChallenge: true),
+      _TriviaQuestion('“For God so loved the world.” Where is this verse found?', ['Romans 8:28', 'John 3:16', '1 John 4:8', 'Genesis 1:1'], 1, 'John 3:16', 'John 3:16 teaches about God’s love and the gift of His Son.', isVerseChallenge: true),
+      _TriviaQuestion('“Jesus wept.” Where is this short verse found?', ['Luke 19:41', 'John 11:35', 'Matthew 5:4', 'Mark 1:15'], 1, 'John 11:35', 'John 11:35 records Jesus weeping before the raising of Lazarus.', isVerseChallenge: true),
       _TriviaQuestion('Who built the ark?', ['Moses', 'Noah', 'Abraham', 'David'], 1, 'Genesis 6:13–22', 'God instructed Noah to build an ark before the flood.'),
       _TriviaQuestion('Who was the mother of Jesus?', ['Martha', 'Elizabeth', 'Mary', 'Ruth'], 2, 'Luke 1:26–31', 'Mary was chosen to be the mother of Jesus.'),
       _TriviaQuestion('Where was Jesus born?', ['Nazareth', 'Jerusalem', 'Bethlehem', 'Jericho'], 2, 'Luke 2:4–7', 'Jesus was born in Bethlehem.'),
@@ -43,10 +43,18 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('What food did God provide for the Israelites in the wilderness?', ['Fish', 'Manna', 'Grapes', 'Bread from Egypt'], 1, 'Exodus 16:14–15', 'God provided manna for the Israelites to eat.'),
       _TriviaQuestion('Who baptized Jesus?', ['Peter', 'John the Baptist', 'James', 'Andrew'], 1, 'Matthew 3:13–17', 'John baptized Jesus in the Jordan River.'),
       _TriviaQuestion('Which prayer did Jesus teach His disciples?', ['Prayer of Jabez', 'The Lord’s Prayer', 'Prayer of Hannah', 'Prayer of Solomon'], 1, 'Matthew 6:9–13', 'Jesus taught His disciples how to pray, beginning “Our Father”.'),
+      _TriviaQuestion('Which reference contains the command, “Honour thy father and thy mother”?', ['Exodus 20:12', 'Deuteronomy 6:5', 'Leviticus 19:18', 'Numbers 6:24'], 0, 'Exodus 20:12', 'The command to honour parents is part of the Ten Commandments.', isVerseChallenge: true),
+      _TriviaQuestion('Where is the verse that says, “Be still, and know that I am God”?', ['Psalm 46:10', 'Psalm 91:1', 'Isaiah 26:3', 'Proverbs 16:3'], 0, 'Psalm 46:10', 'Psalm 46:10 calls people to be still and recognize God.', isVerseChallenge: true),
+      _TriviaQuestion('Which reference records, “In the beginning God created the heaven and the earth”?', ['Genesis 1:1', 'Genesis 2:7', 'John 1:1', 'Hebrews 11:3'], 0, 'Genesis 1:1', 'The Bible opens with the account of God creating the heavens and the earth.', isVerseChallenge: true),
+      _TriviaQuestion('Where does the Bible say, “The wages of sin is death”?', ['Romans 3:23', 'Romans 6:23', 'Romans 8:1', 'Galatians 6:7'], 1, 'Romans 6:23', 'Romans 6:23 contrasts sin’s wages with God’s gift of eternal life.', isVerseChallenge: true),
+      _TriviaQuestion('Which chapter contains the Beatitudes beginning, “Blessed are the poor in spirit”?', ['Matthew 5', 'Matthew 6', 'Luke 10', 'John 15'], 0, 'Matthew 5:3', 'The Beatitudes begin in Matthew chapter 5.', isVerseChallenge: true),
+      _TriviaQuestion('In which chapter is the Lord’s Prayer recorded in the Gospel of Matthew?', ['Matthew 5', 'Matthew 6', 'Matthew 7', 'Matthew 13'], 1, 'Matthew 6:9–13', 'Matthew records Jesus teaching the Lord’s Prayer in chapter 6.', isVerseChallenge: true),
+      _TriviaQuestion('Which reference says, “I can do all things through Christ which strengtheneth me”?', ['Philippians 2:13', 'Philippians 4:13', 'Ephesians 6:10', 'Colossians 3:17'], 1, 'Philippians 4:13', 'Paul writes about finding strength through Christ in Philippians 4:13.', isVerseChallenge: true),
+      _TriviaQuestion('Where is the instruction, “Children, obey your parents in the Lord”?', ['Ephesians 4:32', 'Ephesians 5:1', 'Ephesians 6:1', 'Colossians 3:16'], 2, 'Ephesians 6:1', 'The instruction appears at the beginning of Ephesians chapter 6.', isVerseChallenge: true),
     ],
     'Medium': const [
-      _TriviaQuestion('“Your word is a lamp to my feet.” Where is this verse found?', ['Psalm 119:105', 'Proverbs 4:23', 'Isaiah 40:31', 'John 8:12'], 0, 'Psalm 119:105', 'The psalm describes God’s word as a lamp and a light for our path.'),
-      _TriviaQuestion('“Pray without ceasing.” Where is this instruction found?', ['Ephesians 6:10', '1 Thessalonians 5:17', 'Romans 12:2', 'Colossians 3:23'], 1, '1 Thessalonians 5:17', 'Paul encourages believers to remain constant in prayer.'),
+      _TriviaQuestion('“Your word is a lamp to my feet.” Where is this verse found?', ['Psalm 119:105', 'Proverbs 4:23', 'Isaiah 40:31', 'John 8:12'], 0, 'Psalm 119:105', 'The psalm describes God’s word as a lamp and a light for our path.', isVerseChallenge: true),
+      _TriviaQuestion('“Pray without ceasing.” Where is this instruction found?', ['Ephesians 6:10', '1 Thessalonians 5:17', 'Romans 12:2', 'Colossians 3:23'], 1, '1 Thessalonians 5:17', 'Paul encourages believers to remain constant in prayer.', isVerseChallenge: true),
       _TriviaQuestion('Which queen visited Solomon to test his wisdom?', ['Queen Esther', 'Queen of Sheba', 'Queen Jezebel', 'Queen Vashti'], 1, '1 Kings 10:1–3', 'The queen of Sheba came with difficult questions for Solomon.'),
       _TriviaQuestion('Who interpreted the writing on the wall for Belshazzar?', ['Ezekiel', 'Jeremiah', 'Daniel', 'Nehemiah'], 2, 'Daniel 5:13–28', 'Daniel explained the meaning of the writing.'),
       _TriviaQuestion('Which woman hid the Israelite spies in Jericho?', ['Deborah', 'Rahab', 'Jael', 'Abigail'], 1, 'Joshua 2:1–6', 'Rahab welcomed and hid the spies.'),
@@ -67,10 +75,18 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('Who was the first Christian martyr recorded in Acts?', ['James', 'Stephen', 'Philip', 'Barnabas'], 1, 'Acts 7:54–60', 'Stephen was killed after bearing witness about Jesus.'),
       _TriviaQuestion('Which book comes immediately after the Gospel of John?', ['Romans', 'Acts', 'Hebrews', 'Revelation'], 1, 'New Testament order', 'Acts follows the four Gospels in the New Testament.'),
       _TriviaQuestion('What was the name of the servant whose ear Peter cut off?', ['Malchus', 'Bartimaeus', 'Tychicus', 'Onesimus'], 0, 'John 18:10', 'John identifies the servant as Malchus.'),
+      _TriviaQuestion('Which reference says, “The just shall live by faith”?', ['Romans 1:17', 'Romans 5:1', 'Hebrews 4:12', 'James 2:17'], 0, 'Romans 1:17', 'Paul quotes the statement that the just shall live by faith.', isVerseChallenge: true),
+      _TriviaQuestion('In which chapter does Paul describe the armour of God?', ['Ephesians 2', 'Ephesians 4', 'Ephesians 6', 'Ephesians 5'], 2, 'Ephesians 6:10–18', 'The armour of God passage is in Ephesians chapter 6.', isVerseChallenge: true),
+      _TriviaQuestion('Where is the verse, “Let every thing that hath breath praise the LORD” found?', ['Psalm 100:1', 'Psalm 145:18', 'Psalm 150:6', 'Psalm 34:1'], 2, 'Psalm 150:6', 'Psalm 150 closes by calling everything that has breath to praise the Lord.', isVerseChallenge: true),
+      _TriviaQuestion('Which chapter contains the account of the valley of dry bones?', ['Ezekiel 34', 'Ezekiel 36', 'Ezekiel 37', 'Ezekiel 40'], 2, 'Ezekiel 37:1–14', 'The vision of the dry bones is recorded in Ezekiel chapter 37.', isVerseChallenge: true),
+      _TriviaQuestion('Which reference says, “Create in me a clean heart, O God”?', ['Psalm 32:5', 'Psalm 51:10', 'Psalm 63:1', 'Psalm 139:23'], 1, 'Psalm 51:10', 'David asks God for a clean heart in Psalm 51.', isVerseChallenge: true),
+      _TriviaQuestion('In which chapter does Jesus raise Lazarus from the dead?', ['John 9', 'John 10', 'John 11', 'John 12'], 2, 'John 11:1–44', 'The raising of Lazarus is narrated in John chapter 11.', isVerseChallenge: true),
+      _TriviaQuestion('Where is the verse, “Faith without works is dead” found?', ['Hebrews 11:1', 'James 1:5', 'James 2:17', '1 Peter 1:7'], 2, 'James 2:17', 'James explains that genuine faith is demonstrated by action.', isVerseChallenge: true),
+      _TriviaQuestion('Which chapter records the fruit of the Spirit?', ['Galatians 3', 'Galatians 4', 'Galatians 5', 'Galatians 6'], 2, 'Galatians 5:22–23', 'The fruit of the Spirit is listed in Galatians chapter 5.', isVerseChallenge: true),
     ],
     'Hard': const [
-      _TriviaQuestion('“The joy of the Lord is your strength.” Where is this verse found?', ['Nehemiah 8:10', 'Habakkuk 3:18', 'Psalm 28:7', 'Isaiah 12:2'], 0, 'Nehemiah 8:10', 'Nehemiah encouraged the people not to grieve, because the Lord’s joy was their strength.'),
-      _TriviaQuestion('“Love is patient, love is kind.” Where is this passage found?', ['Romans 5:8', '1 Corinthians 13:4', 'Galatians 5:22', '1 John 3:18'], 1, '1 Corinthians 13:4', 'Paul describes the qualities of love in 1 Corinthians 13.'),
+      _TriviaQuestion('“The joy of the Lord is your strength.” Where is this verse found?', ['Nehemiah 8:10', 'Habakkuk 3:18', 'Psalm 28:7', 'Isaiah 12:2'], 0, 'Nehemiah 8:10', 'Nehemiah encouraged the people not to grieve, because the Lord’s joy was their strength.', isVerseChallenge: true),
+      _TriviaQuestion('“Love is patient, love is kind.” Where is this passage found?', ['Romans 5:8', '1 Corinthians 13:4', 'Galatians 5:22', '1 John 3:18'], 1, '1 Corinthians 13:4', 'Paul describes the qualities of love in 1 Corinthians 13.', isVerseChallenge: true),
       _TriviaQuestion('Who was the father of Bezalel, the craftsman of the tabernacle?', ['Hur', 'Uri', 'Oholiab', 'Ithamar'], 1, 'Exodus 31:2', 'Bezalel was the son of Uri, son of Hur, of the tribe of Judah.'),
       _TriviaQuestion('Which king of Judah was eight years old when he began to reign?', ['Josiah', 'Joash', 'Uzziah', 'Hezekiah'], 0, '2 Kings 22:1', 'Josiah began to reign at eight years old.'),
       _TriviaQuestion('Who was the father of John the Baptist?', ['Simeon', 'Zechariah', 'Cleopas', 'Jairus'], 1, 'Luke 1:5–13', 'Zechariah was a priest and the father of John.'),
@@ -91,43 +107,31 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('Which prophet married Gomer?', ['Amos', 'Hosea', 'Micah', 'Joel'], 1, 'Hosea 1:2–3', 'God instructed Hosea to marry Gomer.'),
       _TriviaQuestion('Who was the Roman governor who questioned Paul in Caesarea?', ['Felix', 'Gallio', 'Pilate', 'Festus'], 0, 'Acts 24:24–27', 'Paul appeared before the governor Felix in Caesarea.'),
       _TriviaQuestion('Which man was described as a chief tax collector in Jericho?', ['Matthew', 'Zacchaeus', 'Cornelius', 'Levi'], 1, 'Luke 19:1–2', 'Luke describes Zacchaeus as a chief tax collector.'),
-      _TriviaQuestion('I was a Moabite woman who chose to stay with my mother-in-law and later married Boaz. Who am I?', ['Orpah', 'Ruth', 'Rahab', 'Naomi'], 1, 'Ruth 1:16–17; 4:13', 'Ruth remained loyal to Naomi and became part of the family line of David.', isCharacterQuestion: true),
-      _TriviaQuestion('I was a young shepherd who became king after being anointed by Samuel. Who am I?', ['Saul', 'Solomon', 'David', 'Jonathan'], 2, '1 Samuel 16:11–13', 'Samuel anointed David, the youngest son of Jesse.', isCharacterQuestion: true),
-      _TriviaQuestion('I was a judge who defeated Midian with only 300 men. Who am I?', ['Gideon', 'Samson', 'Barak', 'Jephthah'], 0, 'Judges 7:7–22', 'God used Gideon and 300 men to defeat the Midianite camp.', isCharacterQuestion: true),
-      _TriviaQuestion('I was a woman who judged Israel and summoned Barak to battle. Who am I?', ['Jael', 'Deborah', 'Huldah', 'Miriam'], 1, 'Judges 4:4–9', 'Deborah served as a prophetess and judge in Israel.', isCharacterQuestion: true),
-      _TriviaQuestion('I was a foreign commander healed of leprosy after washing in the Jordan. Who am I?', ['Naaman', 'Gehazi', 'Ben-Hadad', 'Hazael'], 0, '2 Kings 5:1–14', 'Naaman followed Elisha’s instruction and was healed.', isCharacterQuestion: true),
-      _TriviaQuestion('I was the tax collector who climbed a tree because I wanted to see Jesus. Who am I?', ['Matthew', 'Zacchaeus', 'Bartimaeus', 'Nicodemus'], 1, 'Luke 19:1–10', 'Zacchaeus climbed a sycamore tree to see Jesus.', isCharacterQuestion: true),
-      _TriviaQuestion('I was the prophet who confronted David after his sin involving Bathsheba. Who am I?', ['Gad', 'Nathan', 'Samuel', 'Elijah'], 1, '2 Samuel 12:1–7', 'Nathan told David a parable that exposed his wrongdoing.', isCharacterQuestion: true),
-      _TriviaQuestion('I hid the Israelite spies in Jericho and tied a scarlet cord in my window. Who am I?', ['Rahab', 'Jael', 'Esther', 'Abigail'], 0, 'Joshua 2:1–21', 'Rahab protected the spies and asked for her family to be spared.', isCharacterQuestion: true),
-      _TriviaQuestion('I was the young man who fell asleep during Paul’s long sermon and fell from a window. Who am I?', ['Tychicus', 'Eutychus', 'Titus', 'Onesimus'], 1, 'Acts 20:7–12', 'Eutychus was restored after Paul went down to him.', isCharacterQuestion: true),
-      _TriviaQuestion('I was a prophetess who advised King Josiah’s messengers after the Book of the Law was found. Who am I?', ['Anna', 'Huldah', 'Deborah', 'Miriam'], 1, '2 Kings 22:14–20', 'Huldah delivered the word of the Lord to the king’s officials.', isCharacterQuestion: true),
-      _TriviaQuestion('I was the disciple chosen by lot to replace Judas Iscariot. Who am I?', ['Joseph Barsabbas', 'Matthias', 'Barnabas', 'Silas'], 1, 'Acts 1:23–26', 'Matthias was numbered with the eleven apostles.', isCharacterQuestion: true),
-      _TriviaQuestion('I was a seller of purple cloth who believed Paul’s message in Philippi. Who am I?', ['Priscilla', 'Lydia', 'Phoebe', 'Damaris'], 1, 'Acts 16:14–15', 'Lydia and her household were baptized after she received the message.', isCharacterQuestion: true),
-      _TriviaQuestion('I was a runaway enslaved man whom Paul sent back to Philemon as a brother. Who am I?', ['Titus', 'Onesimus', 'Tychicus', 'Epaphroditus'], 1, 'Philemon 1:10–16', 'Paul appealed to Philemon to welcome Onesimus as a beloved brother.', isCharacterQuestion: true),
-      _TriviaQuestion('I was the craftsman filled with the Spirit to help make the tabernacle furnishings. Who am I?', ['Oholiab', 'Bezalel', 'Hur', 'Uri'], 1, 'Exodus 31:1–5', 'Bezalel was equipped with skill and wisdom for the work.', isCharacterQuestion: true),
-      _TriviaQuestion('I was the left-handed judge who delivered Israel from King Eglon of Moab. Who am I?', ['Shamgar', 'Ehud', 'Othniel', 'Tola'], 1, 'Judges 3:15–23', 'Ehud was a Benjamite whom God raised as a deliverer.', isCharacterQuestion: true),
-      _TriviaQuestion('I was the queen who risked approaching the king to help save my people. Who am I?', ['Vashti', 'Esther', 'Jezebel', 'Athaliah'], 1, 'Esther 4:13–16; 5:1–3', 'Esther approached the king despite the danger and pleaded for her people.', isCharacterQuestion: true),
-      _TriviaQuestion('I was the prophet who challenged the prophets of Baal on Mount Carmel. Who am I?', ['Elisha', 'Elijah', 'Micaiah', 'Nathan'], 1, '1 Kings 18:20–39', 'Elijah called the people to recognize the Lord as the true God.', isCharacterQuestion: true),
-      _TriviaQuestion('I was a queen of Judah who tried to destroy the royal family but was overthrown. Who am I?', ['Jezebel', 'Athaliah', 'Maacah', 'Herodias'], 1, '2 Kings 11:1–16', 'Athaliah seized the throne, but Joash was preserved and she was removed.', isCharacterQuestion: true),
-      _TriviaQuestion('I was the Ethiopian official whose life was saved through Ebed-Melech’s intervention. Who am I?', ['Jeremiah', 'Baruch', 'Gedaliah', 'Zedekiah'], 0, 'Jeremiah 38:7–13', 'Jeremiah was lifted from the cistern after Ebed-Melech appealed to the king.', isCharacterQuestion: true),
-      _TriviaQuestion('I was a young helper of Elisha who became greedy and was struck with Naaman’s leprosy. Who am I?', ['Gehazi', 'Elkanah', 'Joab', 'Abner'], 0, '2 Kings 5:20–27', 'Gehazi secretly took gifts from Naaman and was judged for his deception.', isCharacterQuestion: true),
+      _TriviaQuestion('Which reference contains the words, “The fear of the LORD is the beginning of knowledge”?', ['Proverbs 1:7', 'Proverbs 3:5', 'Ecclesiastes 12:13', 'Job 28:28'], 0, 'Proverbs 1:7', 'Proverbs begins by identifying reverence for the Lord as the beginning of knowledge.', isVerseChallenge: true),
+      _TriviaQuestion('In which chapter does Paul list the gifts of the Spirit, including wisdom, knowledge and faith?', ['1 Corinthians 10', '1 Corinthians 12', '1 Corinthians 13', '1 Corinthians 15'], 1, '1 Corinthians 12:4–11', 'The gifts of the Spirit are discussed in 1 Corinthians chapter 12.', isVerseChallenge: true),
+      _TriviaQuestion('Where is the verse, “Thy word have I hid in mine heart, that I might not sin against thee”?', ['Psalm 19:14', 'Psalm 37:4', 'Psalm 119:11', 'Psalm 119:18'], 2, 'Psalm 119:11', 'The psalmist describes keeping God’s word in the heart in Psalm 119:11.', isVerseChallenge: true),
+      _TriviaQuestion('Which chapter contains the “hall of faith” passage naming Abel, Enoch, Noah and Abraham?', ['Romans 8', 'Hebrews 10', 'Hebrews 11', 'James 2'], 2, 'Hebrews 11', 'Hebrews chapter 11 recalls people who lived by faith.', isVerseChallenge: true),
+      _TriviaQuestion('Where does Micah ask what the Lord requires: to do justly, love mercy and walk humbly?', ['Micah 4:1', 'Micah 5:2', 'Micah 6:8', 'Nahum 1:7'], 2, 'Micah 6:8', 'Micah 6:8 summarizes the conduct God requires.', isVerseChallenge: true),
+      _TriviaQuestion('Which chapter records Peter’s sermon on the day of Pentecost?', ['Acts 1', 'Acts 2', 'Acts 4', 'Acts 10'], 1, 'Acts 2:14–41', 'Peter addressed the crowd in Acts chapter 2 after the coming of the Holy Spirit.', isVerseChallenge: true),
+      _TriviaQuestion('Which reference says, “Be ye doers of the word, and not hearers only”?', ['James 1:22', 'James 2:14', '1 John 2:5', 'Romans 12:1'], 0, 'James 1:22', 'James urges believers to put the word into practice.', isVerseChallenge: true),
+      _TriviaQuestion('In which chapter does Jesus teach the parable of the sower in Matthew?', ['Matthew 10', 'Matthew 12', 'Matthew 13', 'Matthew 18'], 2, 'Matthew 13:1–23', 'The parable of the sower is the first parable in Matthew chapter 13.', isVerseChallenge: true),
     ],
   };
 
   String _difficulty = 'Easy';
   String _category = 'All Questions';
 
-  bool _isCharacterQuestion(_TriviaQuestion question) =>
-      question.isCharacterQuestion;
+  bool _isVerseChallenge(_TriviaQuestion question) =>
+      question.isVerseChallenge;
 
-  int get _normalQuestionCount => _questions.values
+  int get _knowledgeQuestionCount => _questions.values
       .expand((items) => items)
-      .where((question) => !_isCharacterQuestion(question))
+      .where((question) => !_isVerseChallenge(question))
       .length;
 
-  int get _characterQuestionCount => _questions.values
+  int get _verseQuestionCount => _questions.values
       .expand((items) => items)
-      .where(_isCharacterQuestion)
+      .where(_isVerseChallenge)
       .length;
   List<_TriviaQuestion> _round = [];
   int _index = 0;
@@ -153,8 +157,8 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     final pool = _questions[_difficulty]!
         .where((question) => _category == 'All Questions' ||
             (_category == 'Bible Knowledge'
-                ? !_isCharacterQuestion(question)
-                : _isCharacterQuestion(question)))
+                ? !_isVerseChallenge(question)
+                : _isVerseChallenge(question)))
         .toList();
     if (pool.isEmpty) return;
     pool.shuffle(Random());
@@ -286,7 +290,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
             items: const [
               DropdownMenuItem(value: 'All Questions', child: Text('All Questions')),
               DropdownMenuItem(value: 'Bible Knowledge', child: Text('Bible Knowledge')),
-              DropdownMenuItem(value: 'Bible Characters', child: Text('Bible Characters')),
+              DropdownMenuItem(value: 'Bible Verses & Chapters', child: Text('Bible Verses & Chapters')),
             ],
             onChanged: _index == 0 && !_answered
                 ? (value) {
@@ -299,7 +303,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
         ]),
         const SizedBox(height: 8),
         Text(
-          'Question bank: $_normalQuestionCount / 700 Bible knowledge • $_characterQuestionCount / 300 Bible character questions',
+          'Question bank: $_knowledgeQuestionCount / 700 Bible knowledge • $_verseQuestionCount / 300 Bible verses & chapters',
           style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54, height: 1.4),
         ),
         const SizedBox(height: 14),
@@ -409,12 +413,12 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
 }
 
 class _TriviaQuestion {
-  const _TriviaQuestion(this.question, this.options, this.answerIndex, this.reference, this.explanation, {this.isCharacterQuestion = false});
+  const _TriviaQuestion(this.question, this.options, this.answerIndex, this.reference, this.explanation, {this.isVerseChallenge = false});
 
   final String question;
   final List<String> options;
   final int answerIndex;
   final String reference;
   final String explanation;
-  final bool isCharacterQuestion;
+  final bool isVerseChallenge;
 }
