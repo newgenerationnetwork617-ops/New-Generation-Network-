@@ -12,7 +12,7 @@ class GuessBibleCharacterPage extends StatefulWidget {
 }
 
 class _GuessBibleCharacterPageState extends State<GuessBibleCharacterPage> {
-  static const blue = Color(0xFF0B5ED7), gold = Color(0xFFD4AF37);
+  static const blue = Color(0xFF1746A2), gold = Color(0xFFFFC94A);
   static const bank = <_Person>[
     _Person('Noah','Easy',['I was told to build a huge vessel.','My family survived a worldwide flood.','I sent out a raven and a dove.','God gave a rainbow as a covenant sign.'],'Genesis 6–9','Noah obeyed God and built the ark.'),
     _Person('Moses','Easy',['I was placed in a basket as a baby.','I grew up in Pharaoh’s household.','God spoke to me from a burning bush.','I led Israel out of Egypt.'],'Exodus 2–14','God called Moses to lead Israel out of slavery.'),
