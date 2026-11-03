@@ -125,9 +125,9 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       .where((question) => !_isCharacterQuestion(question))
       .length;
 
-  int get _verseChallengeCount => _questions.values
+  int get _characterQuestionCount => _questions.values
       .expand((items) => items)
-      .where(_isVerseChallenge)
+      .where(_isCharacterQuestion)
       .length;
   List<_TriviaQuestion> _round = [];
   int _index = 0;
@@ -286,7 +286,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
             items: const [
               DropdownMenuItem(value: 'All Questions', child: Text('All Questions')),
               DropdownMenuItem(value: 'Bible Knowledge', child: Text('Bible Knowledge')),
-              DropdownMenuItem(value: 'Bible Characters', child: Text('Verse & Chapter')),
+              DropdownMenuItem(value: 'Bible Characters', child: Text('Bible Characters')),
             ],
             onChanged: _index == 0 && !_answered
                 ? (value) {
@@ -299,7 +299,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
         ]),
         const SizedBox(height: 8),
         Text(
-          'Question bank: $_normalQuestionCount / 700 Bible knowledge • $_verseChallengeCount / 300 verse & chapter challenges',
+          'Question bank: $_normalQuestionCount / 700 Bible knowledge • $_characterQuestionCount / 300 Bible character questions',
           style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54, height: 1.4),
         ),
         const SizedBox(height: 14),
