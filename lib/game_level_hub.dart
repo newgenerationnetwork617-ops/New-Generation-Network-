@@ -111,15 +111,15 @@ class GameLevelHub extends StatelessWidget {
                 ),
               ),
             ),
-            const SliverPadding(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 28),
-              sliver: SliverToBoxAdapter(
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+              sliver: const SliverToBoxAdapter(
                 child: Row(children: [
-                  const Text('ALL LEVELS',
+                  Text('ALL LEVELS',
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900,
                       letterSpacing: 1.1, fontSize: 12)),
-                  const Spacer(),
-                  const Text('Complete levels to unlock the next',
+                  Spacer(),
+                  Text('Complete levels to unlock the next',
                     style: TextStyle(color: _muted, fontSize: 10)),
                 ]),
               ),
