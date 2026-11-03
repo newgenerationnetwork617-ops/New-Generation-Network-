@@ -27,10 +27,10 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   static const _bestKey = 'ngn_bible_word_cookies_best';
   static const _levelKey = 'ngn_bible_word_cookies_level';
   static const _queueKey = 'ngn_game_score_queue';
-  static final List<_CookiePuzzle> _bank = _buildFiveHundredLevels();
+  static final List<_CookiePuzzle> _bank = _buildOneThousandLevels();
 
   static List<_CookiePuzzle> _buildFiveHundredLevels() {
-    // 25 Bible themes × all 20 combinations of three words from six = 500 levels.
+    // 50 Bible themes × all 20 combinations of three words from six = 1,000 levels.
     // Each answer has its own Bible-centred clue; the wheel is built from the answers.
     const themes = <_ThemePack>[
       _ThemePack('Creation • Genesis 1', [
@@ -233,6 +233,90 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
         _WordClue('KIND','A quality describing considerate goodness','Galatians 5:22'),
         _WordClue('GENTLE','Not harsh; a quality of Christlike character','Galatians 5:23'),
       ]),
+      _ThemePack('The Tabernacle • Exodus 25–30', [
+        _WordClue('GOLD','Precious metal used throughout the sanctuary','Exodus 25:3'), _WordClue('LAMP','The golden stand that gave light','Exodus 25:31-37'), _WordClue('ALTAR','Place for offerings before the Lord','Exodus 27:1'), _WordClue('VEIL','Curtain separating the Most Holy Place','Exodus 26:31-33'), _WordClue('ARK','The covenant chest placed in the Most Holy Place','Exodus 25:10-22'), _WordClue('OIL','Used to keep the lamps burning','Exodus 27:20'),
+      ]),
+      _ThemePack('The Ten Commandments • Exodus 20', [
+        _WordClue('HONOUR','Show respect to father and mother','Exodus 20:12'), _WordClue('SABBATH','The day set apart for rest','Exodus 20:8-11'), _WordClue('IDOLS','Images that must not be worshipped','Exodus 20:4-5'), _WordClue('WITNESS','Do not give false testimony','Exodus 20:16'), _WordClue('COVET','Do not desire what belongs to another','Exodus 20:17'), _WordClue('NAME','Do not misuse the Lord’s holy ____','Exodus 20:7'),
+      ]),
+      _ThemePack('Priests and Worship • Leviticus', [
+        _WordClue('AARON','Israel’s first high priest','Leviticus 8:1-2'), _WordClue('ROBE','A garment worn by the priest','Exodus 28:4'), _WordClue('EPOD','A special priestly garment','Exodus 28:6'), _WordClue('OFFER','Present a gift to God','Leviticus 1:2'), _WordClue('HOLY','Set apart for God','Leviticus 19:2'), _WordClue('ALTAR','Place where offerings were presented','Leviticus 1:5'),
+      ]),
+      _ThemePack('The Twelve Spies • Numbers 13–14', [
+        _WordClue('CALEB','One of the two faithful spies','Numbers 14:24'), _WordClue('JOSHUA','The other faithful spy who trusted God','Numbers 14:6-9'), _WordClue('GRAPES','A large cluster was carried from Canaan','Numbers 13:23'), _WordClue('GIANTS','The people who frightened ten spies','Numbers 13:33'), _WordClue('LAND','The place God promised to Israel','Numbers 13:2'), _WordClue('FEAR','The ten spies spread this among the people','Numbers 13:31-33'),
+      ]),
+      _ThemePack('Balaam and the Donkey • Numbers 22', [
+        _WordClue('BALAAM','The man summoned by Balak','Numbers 22:5'), _WordClue('DONKEY','The animal that saw the angel','Numbers 22:23'), _WordClue('ANGEL','The messenger standing in the road','Numbers 22:22-23'), _WordClue('MOAB','The land whose king summoned Balaam','Numbers 22:4-6'), _WordClue('SPEAK','God enabled the animal to do this','Numbers 22:28'), _WordClue('BLESS','What Balaam was made to do to Israel','Numbers 23:11-12'),
+      ]),
+      _ThemePack('Samson • Judges 13–16', [
+        _WordClue('SAMSON','Judge known for extraordinary strength','Judges 13:24-25'), _WordClue('DELILAH','The woman who pressed Samson for his secret','Judges 16:4-6'), _WordClue('HAIR','The sign connected with Samson’s vow','Judges 16:17'), _WordClue('LION','An animal Samson tore apart','Judges 14:5-6'), _WordClue('GATES','Samson carried these away from Gaza','Judges 16:3'), _WordClue('PILLAR','Samson pushed these apart in the temple','Judges 16:29-30'),
+      ]),
+      _ThemePack('Gideon’s Victory • Judges 6–8', [
+        _WordClue('FLEECE','Gideon used this to seek a sign','Judges 6:36-40'), _WordClue('JAR','The soldiers carried this clay vessel','Judges 7:16'), _WordClue('TORCH','Hidden inside each jar','Judges 7:16'), _WordClue('TRUMPET','Blown by Gideon’s three hundred men','Judges 7:18-20'), _WordClue('MIDIAN','The enemy nation defeated by Gideon','Judges 7:23-25'), _WordClue('THREE','Number of hundred men in Gideon’s army','Judges 7:7'),
+      ]),
+      _ThemePack('Hannah’s Prayer • 1 Samuel 1–2', [
+        _WordClue('HANNAH','The mother who prayed for a son','1 Samuel 1:10-20'), _WordClue('ELKANAH','Hannah’s husband','1 Samuel 1:1-2'), _WordClue('ELI','The priest who blessed Hannah','1 Samuel 1:17'), _WordClue('SAMUEL','The son Hannah dedicated to the Lord','1 Samuel 1:27-28'), _WordClue('PRAYER','Hannah poured out her heart in this','1 Samuel 1:12-16'), _WordClue('TEMPLE','Hannah brought Samuel to serve the Lord here','1 Samuel 1:24'),
+      ]),
+      _ThemePack('Saul Becomes King • 1 Samuel 9–11', [
+        _WordClue('SAUL','Israel’s first king','1 Samuel 10:24'), _WordClue('KISH','Saul’s father','1 Samuel 9:1-2'), _WordClue('DONKEY','The animals Saul searched for','1 Samuel 9:3'), _WordClue('OIL','Samuel poured this on Saul’s head','1 Samuel 10:1'), _WordClue('KING','The people asked Samuel for one','1 Samuel 8:5'), _WordClue('GIBEAH','Saul’s home town','1 Samuel 10:26'),
+      ]),
+      _ThemePack('David and Jonathan • 1 Samuel 18–20', [
+        _WordClue('JONATHAN','Saul’s son and David’s close friend','1 Samuel 18:1'), _WordClue('BOW','Jonathan gave this to David','1 Samuel 18:4'), _WordClue('ARROW','Jonathan used this as a warning signal','1 Samuel 20:20-22'), _WordClue('COVENANT','The two friends made a solemn agreement','1 Samuel 20:16-17'), _WordClue('SAUL','The king who became jealous of David','1 Samuel 18:8-9'), _WordClue('FRIEND','Jonathan proved himself to be this to David','1 Samuel 20:17'),
+      ]),
+      _ThemePack('The Wisdom of Proverbs • Proverbs', [
+        _WordClue('WISDOM','The book urges readers to seek this','Proverbs 4:7'), _WordClue('FOOL','The opposite of a wise person','Proverbs 1:7'), _WordClue('TONGUE','Can bring life or destruction','Proverbs 18:21'), _WordClue('HEART','Guard this above all else','Proverbs 4:23'), _WordClue('PATH','The Lord makes straight the way of the righteous','Proverbs 3:5-6'), _WordClue('ANSWER','A gentle one turns away wrath','Proverbs 15:1'),
+      ]),
+      _ThemePack('Queen Esther • Esther 1–10', [
+        _WordClue('ESTHER','The Jewish woman who became queen','Esther 2:17'), _WordClue('MORDECAI','Esther’s cousin and guardian','Esther 2:7'), _WordClue('HAMAN','The official who plotted against the Jews','Esther 3:5-6'), _WordClue('PERSIA','The empire where the story takes place','Esther 1:1'), _WordClue('FEAST','Esther invited the king and Haman to this','Esther 5:4'), _WordClue('COURAGE','Esther showed this by approaching the king','Esther 4:16'),
+      ]),
+      _ThemePack('Nehemiah Rebuilds • Nehemiah 1–6', [
+        _WordClue('NEHEMIAH','The cupbearer who led Jerusalem’s rebuilding','Nehemiah 2:17-18'), _WordClue('WALL','The structure rebuilt around Jerusalem','Nehemiah 6:15'), _WordClue('GATE','An entrance repaired by the people','Nehemiah 3:1'), _WordClue('PRAY','Nehemiah did this before answering the king','Nehemiah 2:4'), _WordClue('SWORD','Workers kept weapons nearby while building','Nehemiah 4:17-18'), _WordClue('JERUSALEM','The city whose walls were rebuilt','Nehemiah 2:11-17'),
+      ]),
+      _ThemePack('Job’s Faith • Book of Job', [
+        _WordClue('JOB','A man described as blameless and upright','Job 1:1'), _WordClue('UZ','The land where Job lived','Job 1:1'), _WordClue('SATAN','The accuser who challenged Job’s faith','Job 1:6-12'), _WordClue('ASHES','Job sat among these in his grief','Job 2:8'), _WordClue('FRIENDS','Visitors who debated with Job','Job 2:11'), _WordClue('REDEEMER','Job declared that this one lives','Job 19:25'),
+      ]),
+      _ThemePack('Isaiah’s Prophecies • Isaiah', [
+        _WordClue('ISAIAH','The prophet who saw the Lord’s glory','Isaiah 6:1'), _WordClue('EMMANUEL','The promised name meaning God with us','Isaiah 7:14'), _WordClue('SERAPH','A heavenly being in Isaiah’s vision','Isaiah 6:2'), _WordClue('HOLY','The seraphim called the Lord this','Isaiah 6:3'), _WordClue('ZION','The mountain associated with the Lord’s house','Isaiah 2:2-3'), _WordClue('PEACE','The promised Prince is called this in a title','Isaiah 9:6'),
+      ]),
+      _ThemePack('Jeremiah and the New Covenant • Jeremiah', [
+        _WordClue('JEREMIAH','The prophet called before birth','Jeremiah 1:5'), _WordClue('ANATHOTH','The town Jeremiah came from','Jeremiah 1:1'), _WordClue('POTTER','Jeremiah watched this worker shape clay','Jeremiah 18:1-6'), _WordClue('CLAY','The material shaped by the potter','Jeremiah 18:4'), _WordClue('COVENANT','God promised a new one written on hearts','Jeremiah 31:31-33'), _WordClue('TEARS','Jeremiah is often associated with weeping','Jeremiah 9:1'),
+      ]),
+      _ThemePack('Ezekiel’s Visions • Ezekiel', [
+        _WordClue('EZEKIEL','The prophet who saw a valley of dry bones','Ezekiel 37:1-10'), _WordClue('BONES','The dry ones came together in a vision','Ezekiel 37:7'), _WordClue('VALLEY','The place of the dry bones vision','Ezekiel 37:1'), _WordClue('WHEELS','Part of the prophet’s opening vision','Ezekiel 1:15-21'), _WordClue('RIVER','Water flowed from the temple in a vision','Ezekiel 47:1-12'), _WordClue('WATCHMAN','A role God gave Ezekiel for Israel','Ezekiel 3:17'),
+      ]),
+      _ThemePack('The Minor Prophets • Twelve Prophets', [
+        _WordClue('HOSEA','The prophet whose marriage became a sign','Hosea 1:2-3'), _WordClue('AMOS','A shepherd called to prophesy to Israel','Amos 7:14-15'), _WordClue('MICAH','The prophet who named Bethlehem in prophecy','Micah 5:2'), _WordClue('NAHUM','The prophet who announced Nineveh’s fall','Nahum 1:1'), _WordClue('HABAKKUK','The prophet who lived by faith','Habakkuk 2:4'), _WordClue('MALACHI','The final book in the Old Testament in many Christian Bibles','Malachi 1:1'),
+      ]),
+      _ThemePack('John the Baptist • Gospels', [
+        _WordClue('JOHN','The prophet who prepared the way for Jesus','Matthew 3:1-3'), _WordClue('JORDAN','The river where John baptised people','Matthew 3:5-6'), _WordClue('CAMEL','The hair used for John’s clothing','Matthew 3:4'), _WordClue('HONEY','Wild food John ate in the wilderness','Matthew 3:4'), _WordClue('VOICE','John was a ____ crying in the wilderness','John 1:23'), _WordClue('BAPTISM','John preached this as a sign of repentance','Mark 1:4'),
+      ]),
+      _ThemePack('The Sermon on the Mount • Matthew 5–7', [
+        _WordClue('POOR','Jesus said these in spirit are blessed','Matthew 5:3'), _WordClue('MEEK','These shall inherit the earth','Matthew 5:5'), _WordClue('MERCY','The merciful will receive this','Matthew 5:7'), _WordClue('SALT','Jesus called His disciples this of the earth','Matthew 5:13'), _WordClue('LIGHT','A city on a hill cannot be hidden; disciples are this','Matthew 5:14'), _WordClue('GOLDEN','The ____ Rule says do to others as you would have them do to you','Matthew 7:12'),
+      ]),
+      _ThemePack('Jesus Calls the First Disciples • Gospels', [
+        _WordClue('SIMON','Peter’s original name','Matthew 4:18'), _WordClue('ANDREW','The brother who was with Simon','Matthew 4:18'), _WordClue('JAMES','The son of Zebedee called by Jesus','Matthew 4:21'), _WordClue('JOHN','James’s brother and fellow fisherman','Matthew 4:21'), _WordClue('NETS','The fishermen were mending these','Matthew 4:21'), _WordClue('FOLLOW','Jesus invited them to do this','Matthew 4:19'),
+      ]),
+      _ThemePack('The Good Samaritan • Luke 10', [
+        _WordClue('SAMARITAN','The traveller who showed compassion','Luke 10:33'), _WordClue('PRIEST','A religious leader who passed by','Luke 10:31'), _WordClue('LEVITE','Another traveller who passed by','Luke 10:32'), _WordClue('INN','The injured man was taken here','Luke 10:34'), _WordClue('OIL','Used with wine to care for the wounds','Luke 10:34'), _WordClue('MERCY','The Samaritan showed this to the injured man','Luke 10:37'),
+      ]),
+      _ThemePack('The Lost Parables • Luke 15', [
+        _WordClue('SHEEP','The shepherd searched for one lost animal','Luke 15:4'), _WordClue('COIN','The woman searched for one lost piece','Luke 15:8'), _WordClue('SON','A younger one left home and later returned','Luke 15:11-24'), _WordClue('FATHER','The one who welcomed the returning son','Luke 15:20'), _WordClue('RING','A gift placed on the returning son’s hand','Luke 15:22'), _WordClue('FEAST','The family celebrated with this','Luke 15:23-24'),
+      ]),
+      _ThemePack('The Last Supper • Gospels', [
+        _WordClue('BREAD','Jesus broke this and gave it to His disciples','Luke 22:19'), _WordClue('CUP','Jesus gave thanks and shared this','Luke 22:20'), _WordClue('WASH','Jesus did this to His disciples’ feet','John 13:5'), _WordClue('FEET','The disciples’ body part Jesus washed','John 13:5'), _WordClue('JUDAS','The disciple who left to betray Jesus','John 13:30'), _WordClue('SERVE','Jesus modelled humble service','John 13:14-15'),
+      ]),
+      _ThemePack('Pentecost • Acts 2', [
+        _WordClue('SPIRIT','The Holy ____ came upon the believers','Acts 2:4'), _WordClue('WIND','A sound like a mighty rushing one filled the house','Acts 2:2'), _WordClue('FIRE','Tongues appeared like this over them','Acts 2:3'), _WordClue('TONGUES','The believers spoke in other languages','Acts 2:4'), _WordClue('PETER','The apostle who addressed the crowd','Acts 2:14'), _WordClue('THREE','About this many thousand were added that day','Acts 2:41'),
+      ]),
+      _ThemePack('Paul’s Missionary Journeys • Acts', [
+        _WordClue('BARNABAS','Paul’s companion on the first journey','Acts 13:2-3'), _WordClue('SILAS','Paul’s companion after the council at Jerusalem','Acts 15:40'), _WordClue('TIMOTHY','A young disciple Paul mentored','Acts 16:1-3'), _WordClue('LYDIA','A seller of purple goods in Philippi','Acts 16:14'), _WordClue('PHILIPPI','The city where Paul and Silas were imprisoned','Acts 16:12-24'), _WordClue('PRISON','Paul and Silas sang hymns in this place','Acts 16:25'),
+      ]),
+      _ThemePack('The Armour of God • Ephesians 6', [
+        _WordClue('BELT','The belt of truth','Ephesians 6:14'), _WordClue('BREASTPLATE','The breastplate of righteousness','Ephesians 6:14'), _WordClue('SHIELD','The shield of faith','Ephesians 6:16'), _WordClue('HELMET','The helmet of salvation','Ephesians 6:17'), _WordClue('SWORD','The sword of the Spirit','Ephesians 6:17'), _WordClue('PRAYER','Believers are told to pray at all times','Ephesians 6:18'),
+      ]),
+      _ThemePack('The New Creation • Revelation 21–22', [
+        _WordClue('HEAVEN','The new one and earth are promised','Revelation 21:1'), _WordClue('CITY','The holy one comes down from God','Revelation 21:2'), _WordClue('GATE','The city has twelve of these','Revelation 21:12'), _WordClue('RIVER','The water of life flows through the city','Revelation 22:1'), _WordClue('TREE','The tree of life stands by the river','Revelation 22:2'), _WordClue('LIGHT','The Lord God gives light there','Revelation 22:5'),
+      ]),
     ];
 
     final levels = <_CookiePuzzle>[];
@@ -242,7 +326,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
           for (var d = b + 1; d < 6; d++) {
             final chosen = [theme.words[a], theme.words[b], theme.words[d]];
             final number = levels.length + 1;
-            final difficulty = number <= 150 ? 'Easy' : number <= 350 ? 'Medium' : 'Hard';
+            final difficulty = number <= 300 ? 'Easy' : number <= 700 ? 'Medium' : 'Hard';
             levels.add(_CookiePuzzle(
               'Level $number • ${theme.title}',
               chosen.map((w) => w.word).join(),
@@ -255,7 +339,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
         }
       }
     }
-    return levels.take(500).toList(growable: false);
+    return levels.take(1000).toList(growable: false);
   }
 
   final Random _random = Random();
