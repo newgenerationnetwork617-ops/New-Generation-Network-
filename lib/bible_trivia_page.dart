@@ -64,6 +64,11 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('Which reference begins, “I will lift up mine eyes unto the hills”?', ['Psalm 23:1', 'Psalm 91:1', 'Psalm 121:1', 'Psalm 150:6'], 2, 'Psalm 121:1', 'Psalm 121 begins with the psalmist looking to the hills and asking where help comes from.', isVerseChallenge: true),
       _TriviaQuestion('Where is the verse, “The name of the LORD is a strong tower”?', ['Proverbs 3:5', 'Proverbs 18:10', 'Proverbs 22:6', 'Ecclesiastes 3:1'], 1, 'Proverbs 18:10', 'Proverbs 18:10 describes the Lord’s name as a strong tower.', isVerseChallenge: true),
       _TriviaQuestion('Which reference says that the servant was wounded for our transgressions?', ['Isaiah 6:8', 'Isaiah 40:31', 'Isaiah 53:5', 'Isaiah 61:1'], 2, 'Isaiah 53:5', 'Isaiah 53 describes the suffering servant and the healing associated with his wounds.', isVerseChallenge: true),
+
+      _TriviaQuestion('Who interpreted Pharaoh’s dreams about seven years of plenty and famine?', ['Aaron', 'Joseph', 'Daniel', 'Moses'], 1, 'Genesis 41:14–36', 'Joseph explained the dreams and advised Pharaoh to prepare for the coming famine.'),
+      _TriviaQuestion('Which disciple stepped out of the boat and walked toward Jesus on the water?', ['John', 'Andrew', 'Peter', 'Thomas'], 2, 'Matthew 14:28–31', 'Peter walked toward Jesus before becoming afraid of the wind.'),
+      _TriviaQuestion('Where does the Bible say, “Be still, and know that I am God”?', ['Psalm 23:1', 'Psalm 46:10', 'Psalm 91:2', 'Psalm 119:105'], 1, 'Psalm 46:10', 'Psalm 46 calls God’s people to be still and recognize His authority.', isVerseChallenge: true),
+      _TriviaQuestion('Which reference says, “I can do all things through Christ which strengtheneth me”?', ['Romans 8:28', 'Philippians 4:13', 'Galatians 2:20', 'Ephesians 6:10'], 1, 'Philippians 4:13', 'Paul describes the strength he receives through Christ.', isVerseChallenge: true),
     ],
     'Medium': const [
       _TriviaQuestion('“Your word is a lamp to my feet.” Where is this verse found?', ['Psalm 119:105', 'Proverbs 4:23', 'Isaiah 40:31', 'John 8:12'], 0, 'Psalm 119:105', 'The psalm describes God’s word as a lamp and a light for our path.', isVerseChallenge: true),
@@ -109,6 +114,11 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('Which chapter records Esther deciding to approach the king on behalf of her people?', ['Esther 2', 'Esther 3', 'Esther 4', 'Esther 7'], 2, 'Esther 4:13–16', 'Esther chapter 4 records her decision to approach the king.', isVerseChallenge: true),
       _TriviaQuestion('In which chapter does Jonah pray to God from inside the great fish?', ['Jonah 1', 'Jonah 2', 'Jonah 3', 'Jonah 4'], 1, 'Jonah 2:1–10', 'Jonah’s prayer from inside the fish is in chapter 2.', isVerseChallenge: true),
       _TriviaQuestion('Which chapter describes Ezra reading the Book of the Law to the gathered people?', ['Nehemiah 2', 'Nehemiah 4', 'Nehemiah 8', 'Nehemiah 13'], 2, 'Nehemiah 8:1–8', 'The public reading and explanation of the Law are recorded in Nehemiah chapter 8.', isVerseChallenge: true),
+
+      _TriviaQuestion('Who became the leader of Israel after Moses died?', ['Caleb', 'Aaron', 'Joshua', 'Eleazar'], 2, 'Joshua 1:1–9', 'God commissioned Joshua to lead the people into the land promised to them.'),
+      _TriviaQuestion('What was the name of Samuel’s mother?', ['Deborah', 'Hannah', 'Abigail', 'Michal'], 1, '1 Samuel 1:1–20', 'Hannah prayed for a son and later dedicated Samuel to the Lord’s service.'),
+      _TriviaQuestion('Which New Testament chapter is well known for its description of love?', ['Romans 8', '1 Corinthians 13', 'Hebrews 11', 'James 1'], 1, '1 Corinthians 13', 'Paul describes the qualities and lasting importance of love.', isVerseChallenge: true),
+      _TriviaQuestion('Where does Scripture say that faith without works is dead?', ['Hebrews 11:1', 'James 2:17', 'Romans 12:2', '1 Peter 5:7'], 1, 'James 2:17', 'James teaches that genuine faith is demonstrated through action.', isVerseChallenge: true),
     ],
     'Hard': const [
       _TriviaQuestion('“The joy of the Lord is your strength.” Where is this verse found?', ['Nehemiah 8:10', 'Habakkuk 3:18', 'Psalm 28:7', 'Isaiah 12:2'], 0, 'Nehemiah 8:10', 'Nehemiah encouraged the people not to grieve, because the Lord’s joy was their strength.', isVerseChallenge: true),
@@ -155,6 +165,11 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('Which reference instructs believers to work heartily, as to the Lord and not unto men?', ['Colossians 2:6', 'Colossians 3:17', 'Colossians 3:23', 'Colossians 4:2'], 2, 'Colossians 3:23', 'Paul teaches believers to work wholeheartedly as serving the Lord.', isVerseChallenge: true),
       _TriviaQuestion('Where is the instruction, “Delight thyself also in the LORD”?', ['Psalm 27:1', 'Psalm 34:8', 'Psalm 37:4', 'Psalm 46:1'], 2, 'Psalm 37:4', 'Psalm 37 encourages trust and delight in the Lord.', isVerseChallenge: true),
       _TriviaQuestion('Which reference says, “Iron sharpeneth iron; so a man sharpeneth the countenance of his friend”?', ['Proverbs 15:1', 'Proverbs 17:17', 'Proverbs 27:17', 'Ecclesiastes 4:9'], 2, 'Proverbs 27:17', 'Proverbs 27:17 uses iron sharpening iron as a picture of mutual encouragement.', isVerseChallenge: true),
+
+      _TriviaQuestion('Which king asked God for wisdom instead of riches or long life?', ['David', 'Saul', 'Solomon', 'Hezekiah'], 2, '1 Kings 3:5–14', 'Solomon asked for an understanding heart to govern God’s people.'),
+      _TriviaQuestion('Which prophet was instructed to marry Gomer?', ['Amos', 'Hosea', 'Micah', 'Joel'], 1, 'Hosea 1:1–3', 'Hosea’s family life became part of the prophetic message to Israel.'),
+      _TriviaQuestion('Where does the Bible speak of running the race with patience?', ['Hebrews 12:1', 'Romans 5:1', '1 Timothy 4:8', '2 Timothy 4:7'], 0, 'Hebrews 12:1', 'Hebrews encourages believers to run with endurance, fixing their eyes on Jesus.', isVerseChallenge: true),
+      _TriviaQuestion('Which reference says that God’s mercies are new every morning?', ['Isaiah 40:31', 'Lamentations 3:22–23', 'Psalm 19:1', 'Matthew 5:9'], 1, 'Lamentations 3:22–23', 'Lamentations points to God’s unfailing compassion and faithfulness.', isVerseChallenge: true),
     ],
   };
 
