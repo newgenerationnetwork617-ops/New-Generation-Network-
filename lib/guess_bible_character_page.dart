@@ -1,6 +1,8 @@
 import 'dart:math';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GuessBibleCharacterPage extends StatefulWidget {
   const GuessBibleCharacterPage({super.key});
@@ -34,6 +36,8 @@ class _GuessBibleCharacterPageState extends State<GuessBibleCharacterPage> {
   ];
 
   final answer = TextEditingController();
+  List<_Person> allCharacters = List<_Person>.from(bank);
+  static const _characterCacheKey = 'ngn_guess_character_remote_cache';
   String difficulty = 'All', mode = 'Quick Guess';
   List<_Person> session = [];
   int index = 0, clue = 0, score = 0, best = 0;
@@ -42,14 +46,67 @@ class _GuessBibleCharacterPageState extends State<GuessBibleCharacterPage> {
   _Person get current => session[index];
 
   @override
-  void initState() { super.initState(); _loadBest(); _start(); }
+  void initState() { super.initState(); _loadBest(); _start(); _syncRemoteCharacters(); }
   @override
   void dispose() { answer.dispose(); super.dispose(); }
   Future<void> _loadBest() async {
     final p = await SharedPreferences.getInstance();
     if (mounted) setState(() => best = p.getInt('ngn_guess_character_best') ?? 0);
   }
-  List<_Person> get pool => difficulty == 'All' ? List.of(bank) : bank.where((p) => p.level == difficulty).toList();
+  List<_Person> get pool => difficulty == 'All'
+      ? List.of(allCharacters)
+      : allCharacters.where((p) => p.level == difficulty).toList();
+
+  Future<void> _syncRemoteCharacters() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cached = prefs.getString(_characterCacheKey);
+    if (cached != null) {
+      try {
+        final rows = (jsonDecode(cached) as List).cast<Map<String, dynamic>>();
+        final cachedPeople = rows.map(_personFromMap).toList();
+        if (cachedPeople.isNotEmpty && mounted) {
+          setState(() => allCharacters = _mergeCharacters(cachedPeople));
+          _start();
+        }
+      } catch (_) {
+        // Ignore an invalid old cache and keep the bundled characters.
+      }
+    }
+
+    try {
+      final rows = await Supabase.instance.client
+          .from('bible_characters')
+          .select('name,difficulty,clues,bible_references,explanation')
+          .eq('is_published', true)
+          .order('name');
+      final remoteRows = List<Map<String, dynamic>>.from(rows);
+      if (remoteRows.isEmpty) return;
+      await prefs.setString(_characterCacheKey, jsonEncode(remoteRows));
+      final remotePeople = remoteRows.map(_personFromMap).toList();
+      if (mounted) {
+        setState(() => allCharacters = _mergeCharacters(remotePeople));
+        _start();
+      }
+    } catch (_) {
+      // The bundled and last-cached character sets remain playable offline.
+    }
+  }
+
+  _Person _personFromMap(Map<String, dynamic> row) => _Person(
+    row['name'].toString(),
+    row['difficulty'].toString(),
+    List<String>.from(row['clues'] as List),
+    row['bible_references'].toString(),
+    row['explanation'].toString(),
+  );
+
+  List<_Person> _mergeCharacters(List<_Person> remote) {
+    final byName = <String, _Person>{
+      for (final person in bank) person.name.toLowerCase(): person,
+      for (final person in remote) person.name.toLowerCase(): person,
+    };
+    return byName.values.toList();
+  }
 
   void _start() {
     final items = pool;
