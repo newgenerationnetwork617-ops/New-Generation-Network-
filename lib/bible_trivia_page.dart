@@ -186,12 +186,12 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Row(children: [
               Icon(Icons.menu_book_rounded, color: _gold),
-              const SizedBox(width: 8),
-              const Text('KNOW THE WORD', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w800, letterSpacing: 1)),
-              const Spacer(),
-              const Icon(Icons.wifi_off_rounded, color: Colors.white70, size: 16),
-              const SizedBox(width: 5),
-              const Text('OFFLINE', style: TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w800)),
+              SizedBox(width: 8),
+              Text('KNOW THE WORD', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w800, letterSpacing: 1)),
+              Spacer(),
+              Icon(Icons.wifi_off_rounded, color: Colors.white70, size: 16),
+              SizedBox(width: 5),
+              Text('OFFLINE', style: TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w800)),
             ]),
             const SizedBox(height: 18),
             Text(_difficulty.toUpperCase(), style: const TextStyle(color: _gold, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1)),
