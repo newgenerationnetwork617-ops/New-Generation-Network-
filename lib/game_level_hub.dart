@@ -111,8 +111,8 @@ class GameLevelHub extends StatelessWidget {
                 ),
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            const SliverPadding(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 28),
               sliver: SliverToBoxAdapter(
                 child: Row(children: [
                   const Text('ALL LEVELS',
