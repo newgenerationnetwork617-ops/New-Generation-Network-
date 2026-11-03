@@ -134,8 +134,8 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
   }
 
   void _track(Offset pos, double cell) {
-    final c = (pos.dx / cell).floor().clamp(0, size - 1);
-    final r = (pos.dy / cell).floor().clamp(0, size - 1);
+    final c = (pos.dx / cell).floor().clamp(0, size - 1).toInt();
+    final r = (pos.dy / cell).floor().clamp(0, size - 1).toInt();
     final end = r * size + c;
     if (dragStart == null) { dragStart = end; selection = [end]; return; }
     final sr = dragStart! ~/ size, sc = dragStart! % size;
