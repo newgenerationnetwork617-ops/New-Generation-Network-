@@ -40,6 +40,7 @@ class _GameLobbyPageState extends State<GameLobbyPage> {
 
   int _best = 0;
   int _currentLevel = 1;
+  String _rank = 'UNRANKED';
   bool _loading = true;
 
   @override
@@ -50,6 +51,24 @@ class _GameLobbyPageState extends State<GameLobbyPage> {
 
   Future<void> _loadProgress() async {
     final prefs = await SharedPreferences.getInstance();
+    var rank = 'UNRANKED';
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      try {
+        final row = await Supabase.instance.client
+            .from('game_leaderboard')
+            .select('player_rank')
+            .eq('game_id', widget.gameId)
+            .eq('user_id', user.id)
+            .maybeSingle();
+        final value = row?['player_rank'];
+        if (value != null) rank = '#$value';
+      } catch (_) {
+        rank = 'RANK UNAVAILABLE';
+      }
+    } else {
+      rank = 'GUEST';
+    }
     if (!mounted) return;
     setState(() {
       _best = prefs.getInt(widget.bestKey) ?? 0;
@@ -57,6 +76,7 @@ class _GameLobbyPageState extends State<GameLobbyPage> {
           ? 1
           : ((prefs.getInt(widget.levelKey!) ?? 0) + 1)
               .clamp(1, widget.totalLevels ?? 1);
+      _rank = rank;
       _loading = false;
     });
   }
@@ -232,7 +252,7 @@ class _GameLobbyPageState extends State<GameLobbyPage> {
                                   color: _gold, size: 19),
                               const SizedBox(height: 2),
                               Text(
-                                user == null ? 'GUEST' : 'PLAYER',
+                                _rank,
                                 style: const TextStyle(
                                   color: _gold,
                                   fontSize: 9,
