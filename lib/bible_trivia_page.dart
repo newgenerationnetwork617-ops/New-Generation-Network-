@@ -91,18 +91,38 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('Which prophet married Gomer?', ['Amos', 'Hosea', 'Micah', 'Joel'], 1, 'Hosea 1:2–3', 'God instructed Hosea to marry Gomer.'),
       _TriviaQuestion('Who was the Roman governor who questioned Paul in Caesarea?', ['Felix', 'Gallio', 'Pilate', 'Festus'], 0, 'Acts 24:24–27', 'Paul appeared before the governor Felix in Caesarea.'),
       _TriviaQuestion('Which man was described as a chief tax collector in Jericho?', ['Matthew', 'Zacchaeus', 'Cornelius', 'Levi'], 1, 'Luke 19:1–2', 'Luke describes Zacchaeus as a chief tax collector.'),
+      _TriviaQuestion('I was a Moabite woman who chose to stay with my mother-in-law and later married Boaz. Who am I?', ['Orpah', 'Ruth', 'Rahab', 'Naomi'], 1, 'Ruth 1:16–17; 4:13', 'Ruth remained loyal to Naomi and became part of the family line of David.', isCharacterQuestion: true),
+      _TriviaQuestion('I was a young shepherd who became king after being anointed by Samuel. Who am I?', ['Saul', 'Solomon', 'David', 'Jonathan'], 2, '1 Samuel 16:11–13', 'Samuel anointed David, the youngest son of Jesse.', isCharacterQuestion: true),
+      _TriviaQuestion('I was a judge who defeated Midian with only 300 men. Who am I?', ['Gideon', 'Samson', 'Barak', 'Jephthah'], 0, 'Judges 7:7–22', 'God used Gideon and 300 men to defeat the Midianite camp.', isCharacterQuestion: true),
+      _TriviaQuestion('I was a woman who judged Israel and summoned Barak to battle. Who am I?', ['Jael', 'Deborah', 'Huldah', 'Miriam'], 1, 'Judges 4:4–9', 'Deborah served as a prophetess and judge in Israel.', isCharacterQuestion: true),
+      _TriviaQuestion('I was a foreign commander healed of leprosy after washing in the Jordan. Who am I?', ['Naaman', 'Gehazi', 'Ben-Hadad', 'Hazael'], 0, '2 Kings 5:1–14', 'Naaman followed Elisha’s instruction and was healed.', isCharacterQuestion: true),
+      _TriviaQuestion('I was the tax collector who climbed a tree because I wanted to see Jesus. Who am I?', ['Matthew', 'Zacchaeus', 'Bartimaeus', 'Nicodemus'], 1, 'Luke 19:1–10', 'Zacchaeus climbed a sycamore tree to see Jesus.', isCharacterQuestion: true),
+      _TriviaQuestion('I was the prophet who confronted David after his sin involving Bathsheba. Who am I?', ['Gad', 'Nathan', 'Samuel', 'Elijah'], 1, '2 Samuel 12:1–7', 'Nathan told David a parable that exposed his wrongdoing.', isCharacterQuestion: true),
+      _TriviaQuestion('I hid the Israelite spies in Jericho and tied a scarlet cord in my window. Who am I?', ['Rahab', 'Jael', 'Esther', 'Abigail'], 0, 'Joshua 2:1–21', 'Rahab protected the spies and asked for her family to be spared.', isCharacterQuestion: true),
+      _TriviaQuestion('I was the young man who fell asleep during Paul’s long sermon and fell from a window. Who am I?', ['Tychicus', 'Eutychus', 'Titus', 'Onesimus'], 1, 'Acts 20:7–12', 'Eutychus was restored after Paul went down to him.', isCharacterQuestion: true),
+      _TriviaQuestion('I was a prophetess who advised King Josiah’s messengers after the Book of the Law was found. Who am I?', ['Anna', 'Huldah', 'Deborah', 'Miriam'], 1, '2 Kings 22:14–20', 'Huldah delivered the word of the Lord to the king’s officials.', isCharacterQuestion: true),
+      _TriviaQuestion('I was the disciple chosen by lot to replace Judas Iscariot. Who am I?', ['Joseph Barsabbas', 'Matthias', 'Barnabas', 'Silas'], 1, 'Acts 1:23–26', 'Matthias was numbered with the eleven apostles.', isCharacterQuestion: true),
+      _TriviaQuestion('I was a seller of purple cloth who believed Paul’s message in Philippi. Who am I?', ['Priscilla', 'Lydia', 'Phoebe', 'Damaris'], 1, 'Acts 16:14–15', 'Lydia and her household were baptized after she received the message.', isCharacterQuestion: true),
+      _TriviaQuestion('I was a runaway enslaved man whom Paul sent back to Philemon as a brother. Who am I?', ['Titus', 'Onesimus', 'Tychicus', 'Epaphroditus'], 1, 'Philemon 1:10–16', 'Paul appealed to Philemon to welcome Onesimus as a beloved brother.', isCharacterQuestion: true),
+      _TriviaQuestion('I was the craftsman filled with the Spirit to help make the tabernacle furnishings. Who am I?', ['Oholiab', 'Bezalel', 'Hur', 'Uri'], 1, 'Exodus 31:1–5', 'Bezalel was equipped with skill and wisdom for the work.', isCharacterQuestion: true),
+      _TriviaQuestion('I was the left-handed judge who delivered Israel from King Eglon of Moab. Who am I?', ['Shamgar', 'Ehud', 'Othniel', 'Tola'], 1, 'Judges 3:15–23', 'Ehud was a Benjamite whom God raised as a deliverer.', isCharacterQuestion: true),
+      _TriviaQuestion('I was the queen who risked approaching the king to help save my people. Who am I?', ['Vashti', 'Esther', 'Jezebel', 'Athaliah'], 1, 'Esther 4:13–16; 5:1–3', 'Esther approached the king despite the danger and pleaded for her people.', isCharacterQuestion: true),
+      _TriviaQuestion('I was the prophet who challenged the prophets of Baal on Mount Carmel. Who am I?', ['Elisha', 'Elijah', 'Micaiah', 'Nathan'], 1, '1 Kings 18:20–39', 'Elijah called the people to recognize the Lord as the true God.', isCharacterQuestion: true),
+      _TriviaQuestion('I was a queen of Judah who tried to destroy the royal family but was overthrown. Who am I?', ['Jezebel', 'Athaliah', 'Maacah', 'Herodias'], 1, '2 Kings 11:1–16', 'Athaliah seized the throne, but Joash was preserved and she was removed.', isCharacterQuestion: true),
+      _TriviaQuestion('I was the Ethiopian official whose life was saved through Ebed-Melech’s intervention. Who am I?', ['Jeremiah', 'Baruch', 'Gedaliah', 'Zedekiah'], 0, 'Jeremiah 38:7–13', 'Jeremiah was lifted from the cistern after Ebed-Melech appealed to the king.', isCharacterQuestion: true),
+      _TriviaQuestion('I was a young helper of Elisha who became greedy and was struck with Naaman’s leprosy. Who am I?', ['Gehazi', 'Elkanah', 'Joab', 'Abner'], 0, '2 Kings 5:20–27', 'Gehazi secretly took gifts from Naaman and was judged for his deception.', isCharacterQuestion: true),
     ],
   };
 
   String _difficulty = 'Easy';
   String _category = 'All Questions';
 
-  bool _isVerseChallenge(_TriviaQuestion question) =>
-      question.question.startsWith('“');
+  bool _isCharacterQuestion(_TriviaQuestion question) =>
+      question.isCharacterQuestion;
 
   int get _normalQuestionCount => _questions.values
       .expand((items) => items)
-      .where((question) => !_isVerseChallenge(question))
+      .where((question) => !_isCharacterQuestion(question))
       .length;
 
   int get _verseChallengeCount => _questions.values
@@ -133,8 +153,8 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     final pool = _questions[_difficulty]!
         .where((question) => _category == 'All Questions' ||
             (_category == 'Bible Knowledge'
-                ? !_isVerseChallenge(question)
-                : _isVerseChallenge(question)))
+                ? !_isCharacterQuestion(question)
+                : _isCharacterQuestion(question)))
         .toList();
     if (pool.isEmpty) return;
     pool.shuffle(Random());
@@ -266,7 +286,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
             items: const [
               DropdownMenuItem(value: 'All Questions', child: Text('All Questions')),
               DropdownMenuItem(value: 'Bible Knowledge', child: Text('Bible Knowledge')),
-              DropdownMenuItem(value: 'Verse & Chapter', child: Text('Verse & Chapter')),
+              DropdownMenuItem(value: 'Bible Characters', child: Text('Verse & Chapter')),
             ],
             onChanged: _index == 0 && !_answered
                 ? (value) {
@@ -389,11 +409,12 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
 }
 
 class _TriviaQuestion {
-  const _TriviaQuestion(this.question, this.options, this.answerIndex, this.reference, this.explanation);
+  const _TriviaQuestion(this.question, this.options, this.answerIndex, this.reference, this.explanation, {this.isCharacterQuestion = false});
 
   final String question;
   final List<String> options;
   final int answerIndex;
   final String reference;
   final String explanation;
+  final bool isCharacterQuestion;
 }
