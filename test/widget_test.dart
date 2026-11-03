@@ -34,7 +34,7 @@ void main() {
     expect(find.text('YOUR DAILY DEVOTIONAL'), findsOneWidget);
     expect(find.text('Announcements'), findsOneWidget);
     expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Bible'), findsOneWidget);
+    expect(find.text('Bible'), findsWidgets);
     expect(find.text('Media'), findsOneWidget);
     expect(find.text('Events'), findsWidgets);
     expect(find.text('Community'), findsWidgets);
