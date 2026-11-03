@@ -25,6 +25,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   static const _blue = Color(0xFF0B5ED7);
   static const _gold = Color(0xFFD4AF37);
   static const _bestKey = 'ngn_bible_word_cookies_best';
+  static const _levelKey = 'ngn_bible_word_cookies_level';
   static const _queueKey = 'ngn_game_score_queue';
   static final List<_CookiePuzzle> _bank = _buildFiveHundredLevels();
 
@@ -273,14 +274,16 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   @override
   void initState() {
     super.initState();
-    _loadBest();
-    _newPuzzle();
-    _syncQueuedScores();
+    _initGame();
   }
 
-  Future<void> _loadBest() async {
+  Future<void> _initGame() async {
     final p = await SharedPreferences.getInstance();
-    if (mounted) setState(() => _best = p.getInt(_bestKey) ?? 0);
+    _best = p.getInt(_bestKey) ?? 0;
+    _index = p.getInt(_levelKey) ?? 0;
+    if (mounted) setState(() {});
+    _newPuzzle();
+    _syncQueuedScores();
   }
 
   void _newPuzzle() {
@@ -368,6 +371,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
     final p = await SharedPreferences.getInstance();
     final nextBest = max(_best, _score);
     await p.setInt(_bestKey, nextBest);
+    await p.setInt(_levelKey, _index);
     if (mounted) setState(() => _best = nextBest);
     await _submitScore();
   }
