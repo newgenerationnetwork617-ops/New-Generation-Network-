@@ -371,7 +371,20 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   void _newPuzzle() {
     final pool = _pool;
     if (pool.isEmpty) return;
-    _puzzle = pool[_index % pool.length];
+    final base = pool[_index % pool.length];
+    // Keep the selected level and its answers, but reshuffle clue order on every attempt.
+    final pairs = List.generate(
+      base.words.length,
+      (i) => MapEntry(base.words[i], base.clues[i]),
+    )..shuffle(Random());
+    _puzzle = _CookiePuzzle(
+      base.reference,
+      base.letters,
+      pairs.map((pair) => pair.key).toList(growable: false),
+      pairs.map((pair) => pair.value).toList(growable: false),
+      base.mode,
+      base.level,
+    );
     _index++;
     _found.clear();
         _answerController.clear();
