@@ -13,6 +13,7 @@ import 'bible_page.dart';
 import 'content_pages.dart';
 import 'content_repository.dart';
 import 'bible_trivia_page.dart';
+import 'bible_word_puzzle_page.dart';
 
 const supabaseUrl = 'https://nlhjxoevyatvxstxgnhs.supabase.co';
 final appNavigatorKey = GlobalKey<NavigatorState>();
@@ -366,6 +367,7 @@ class HomeContent extends StatelessWidget {
                 _HomeFeatureCard(icon: Icons.calendar_month_outlined, title: 'Events', subtitle: 'Stay connected', page: EventsPage()),
                 _HomeFeatureCard(icon: Icons.campaign_outlined, title: 'Announcements', subtitle: 'Latest updates', page: AnnouncementsPage()),
                 _HomeFeatureCard(icon: Icons.quiz_rounded, title: 'Bible Trivia', subtitle: 'Test your Bible knowledge', page: BibleTriviaPage()),
+                _HomeFeatureCard(icon: Icons.extension_rounded, title: 'Bible Word Puzzle', subtitle: 'Unscramble Bible words', page: BibleWordPuzzlePage()),
               ],
             ),
             const SizedBox(height: 24),
