@@ -64,7 +64,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
   }
 
   static _Puzzle _makePuzzle(int number, String theme, List<String> words) {
-    final random = Random(number * 7919);
+    final random = Random(DateTime.now().microsecondsSinceEpoch ^ (number * 7919));
     final grid = List.generate(size, (_) => List.filled(size, ''));
     final paths = <String, List<int>>{};
     const dirs = <(int,int)>[(0,1),(1,0),(1,1),(1,-1),(0,-1),(-1,0),(-1,-1),(-1,1)];
@@ -121,7 +121,10 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
   }
 
   void _reset() {
-    puzzle = levels[index]; found.clear(); foundCells.clear();
+    final savedLevel = levels[index];
+    // Keep the same level and word list, but generate a fresh grid layout each attempt.
+    puzzle = _makePuzzle(savedLevel.number, savedLevel.theme, savedLevel.words);
+    found.clear(); foundCells.clear();
     selection = []; dragStart = null; message = null; submitted = false;
   }
 
