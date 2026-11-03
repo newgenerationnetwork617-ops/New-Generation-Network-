@@ -184,8 +184,8 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              const Icon(Icons.menu_book_rounded, color: _gold),
+            const Row(children: [
+              Icon(Icons.menu_book_rounded, color: _gold),
               const SizedBox(width: 8),
               const Text('KNOW THE WORD', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w800, letterSpacing: 1)),
               const Spacer(),
