@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'game_leaderboard_page.dart';
 
-/// Offline-first Word Cookies-style Bible word-connect game.
+/// Offline-first Bible Word Search word-forming game.
 class BibleWordPuzzlePage extends StatefulWidget {
   const BibleWordPuzzlePage({super.key});
   @override
@@ -24,8 +24,8 @@ class _CookiePuzzle {
 class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   static const _blue = Color(0xFF0B5ED7);
   static const _gold = Color(0xFFD4AF37);
-  static const _bestKey = 'ngn_bible_word_cookies_best';
-  static const _levelKey = 'ngn_bible_word_cookies_level';
+  static const _bestKey = 'ngn_bible_word_search_best';
+  static const _levelKey = 'ngn_bible_word_search_level';
   static const _queueKey = 'ngn_game_score_queue';
   static final List<_CookiePuzzle> _bank = _buildOneThousandLevels();
 
@@ -351,6 +351,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   String? _message;
   bool _submitted = false;
   final Set<int> _dragVisited = {};
+  final TextEditingController _answerController = TextEditingController();
 
   List<_CookiePuzzle> get _pool => _difficulty == 'All' ? _bank : _bank.where((p) => p.level == _difficulty).toList();
   bool get _complete => _found.length == _puzzle.words.length;
@@ -377,65 +378,15 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
     _index++;
     _found.clear();
     _formed.clear();
+        _answerController.clear();
     _message = null;
     _submitted = false;
     if (mounted) setState(() {});
   }
 
-  void _addLetter(String letter) {
-    if (_complete || _formed.length >= _puzzle.letters.length) return;
-    setState(() { _formed.add(letter); _message = null; });
-  }
-
-  void _dragLetter(int index, List<String> letters) {
-    if (index < 0 || index >= letters.length || _dragVisited.contains(index)) return;
-    _dragVisited.add(index);
-    _addLetter(letters[index]);
-  }
-
-  Widget _letterWheel(List<String> letters) {
-    return SizedBox(
-      height: 230,
-      child: LayoutBuilder(builder: (context, constraints) {
-        final center = Offset(constraints.maxWidth / 2, 115);
-        final radius = min(88.0, constraints.maxWidth / 2 - 28);
-        int nearest(Offset point) {
-          var bestIndex = -1;
-          var bestDistance = double.infinity;
-          for (var i = 0; i < letters.length; i++) {
-            final angle = -pi / 2 + (2 * pi * i / letters.length);
-            final target = Offset(center.dx + radius * cos(angle), center.dy + radius * sin(angle));
-            final distance = (point - target).distance;
-            if (distance < bestDistance) { bestDistance = distance; bestIndex = i; }
-          }
-          return bestDistance < 34 ? bestIndex : -1;
-        }
-        return GestureDetector(
-          onPanStart: (details) { _dragVisited.clear(); _dragLetter(nearest(details.localPosition), letters); },
-          onPanUpdate: (details) => _dragLetter(nearest(details.localPosition), letters),
-          onPanEnd: (_) { _submitWord(); _dragVisited.clear(); },
-          child: Stack(children: [
-            Positioned.fill(child: CustomPaint(painter: _WheelGuidePainter(center: center, radius: radius))),
-            for (var i = 0; i < letters.length; i++)
-              Positioned(
-                left: center.dx + radius * cos(-pi / 2 + 2 * pi * i / letters.length) - 22,
-                top: center.dy + radius * sin(-pi / 2 + 2 * pi * i / letters.length) - 22,
-                child: Container(width: 44, height: 44, alignment: Alignment.center, decoration: const BoxDecoration(color: _gold, shape: BoxShape.circle), child: Text(letters[i], style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 17))),
-              ),
-          ]),
-        );
-      }),
-    );
-  }
-
-  void _removeLetter(int index) {
-    if (index < 0 || index >= _formed.length) return;
-    setState(() => _formed.removeAt(index));
-  }
-
   void _submitWord() {
-    if (_formed.isEmpty || _complete) return;
-    final word = _formed.join();
+    final word = _answerController.text.trim().toUpperCase();
+    if (word.isEmpty || _complete) return;
     if (_puzzle.words.contains(word) && !_found.contains(word)) {
       setState(() {
         _found.add(word);
@@ -445,9 +396,9 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
       });
       if (_complete) _finishPuzzle();
     } else if (_found.contains(word)) {
-      setState(() { _message = 'You have already found that word.'; _formed.clear(); });
+      setState(() { _message = 'You have already found that word.'; _answerController.clear(); });
     } else {
-      setState(() { _message = 'Not one of the words in this puzzle. Try another combination.'; _formed.clear(); });
+      setState(() { _message = 'That word is not in this level. Check the clues and try again.'; _answerController.clear(); });
     }
   }
 
@@ -502,19 +453,24 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   }
 
   @override
+  void dispose() {
+    _answerController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final letters = _puzzle.letters.split('');
     return Scaffold(
-      appBar: AppBar(title: const Text('Bible Word Cookies'), actions: [
-        IconButton(tooltip: 'Leaderboard', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLeaderboardPage(gameId: 'bible_word_search', gameTitle: 'Bible Word Cookies'))), icon: const Icon(Icons.leaderboard_rounded)),
+      appBar: AppBar(title: const Text('Bible Word Search'), actions: [
+        IconButton(tooltip: 'Leaderboard', onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLeaderboardPage(gameId: 'bible_word_search', gameTitle: 'Bible Word Search'))), icon: const Icon(Icons.leaderboard_rounded)),
       ]),
       body: SafeArea(child: ListView(padding: const EdgeInsets.all(16), children: [
         Container(
           padding: const EdgeInsets.all(17),
           decoration: BoxDecoration(gradient: const LinearGradient(colors: [_blue, Color(0xFF173E80)]), borderRadius: BorderRadius.circular(18)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Row(children: [Icon(Icons.cookie_rounded, color: _gold), SizedBox(width: 8), Text('CONNECT THE BIBLE WORDS', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)), Spacer(), Icon(Icons.wifi_off, color: Colors.white70, size: 16), SizedBox(width: 4), Text('OFFLINE', style: TextStyle(color: Colors.white70, fontSize: 10))]),
+            const Row(children: [Icon(Icons.search_rounded, color: _gold), SizedBox(width: 8), Text('TYPE THE BIBLE WORDS', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)), Spacer(), Icon(Icons.wifi_off, color: Colors.white70, size: 16), SizedBox(width: 4), Text('OFFLINE', style: TextStyle(color: Colors.white70, fontSize: 10))]),
             const SizedBox(height: 10),
             Text('Score: $_score  •  Best: $_best', style: const TextStyle(color: Colors.white)),
             const SizedBox(height: 8),
@@ -527,7 +483,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
           const SizedBox(height: 6),
           Text(_puzzle.reference, style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w900)),
           const SizedBox(height: 5),
-          Text(_puzzle.mode == 'verse' ? 'The verse is hidden. Use the letter wheel and clues to discover its key words.' : 'There is no displayed verse for this round. Use the clues to discover the Bible-related words.'),
+          Text(_puzzle.mode == 'verse' ? 'Read the verse reference and clues, then type each hidden Bible word.' : 'Use the clues to discover the Bible-related words, then type each answer.'),
         ]))),
         const SizedBox(height: 12),
         const Text('WORD BOXES', style: TextStyle(color: _blue, fontWeight: FontWeight.w900)),
@@ -544,21 +500,50 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
           ])));
         }),
         const SizedBox(height: 10),
-        Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(children: [
-          const Text('LETTER WHEEL', style: TextStyle(color: _blue, fontWeight: FontWeight.w900)),
-          const SizedBox(height: 8),
-          Text(_formed.isEmpty ? 'Swipe across the letters to form a word' : _formed.join(), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 3)),
-          const SizedBox(height: 10),
-          _letterWheel(letters),
-          const SizedBox(height: 12),
-          Row(children: [
-            IconButton(onPressed: _formed.isEmpty ? null : () => _removeLetter(_formed.length - 1), icon: const Icon(Icons.backspace_outlined)),
-            Expanded(child: OutlinedButton(onPressed: _shuffleLetters, child: const Text('Shuffle letters'))),
-            const SizedBox(width: 8),
-            Expanded(child: FilledButton(onPressed: _submitWord, child: const Text('Submit word'))),
-          ]),
-          if (_message != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_message!, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700))),
-        ]))),
+        Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Row(children: [
+                Icon(Icons.keyboard_alt_rounded, color: _blue),
+                SizedBox(width: 8),
+                Text('TYPE YOUR ANSWER', style: TextStyle(color: _blue, fontWeight: FontWeight.w900)),
+              ]),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _answerController,
+                textCapitalization: TextCapitalization.characters,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _submitWord(),
+                decoration: InputDecoration(
+                  hintText: 'Enter the Bible word',
+                  prefixIcon: const Icon(Icons.edit_rounded),
+                  suffixIcon: IconButton(
+                    tooltip: 'Clear answer',
+                    onPressed: () => _answerController.clear(),
+                    icon: const Icon(Icons.backspace_outlined),
+                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _submitWord,
+                  icon: const Icon(Icons.check_circle_outline_rounded),
+                  label: const Text('Check answer'),
+                ),
+              ),
+              if (_message != null) Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(_message!, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700)),
+              ),
+            ]),
+          ),
+        ),
         if (_complete) Card(color: Colors.green.withValues(alpha: .12), child: const Padding(padding: EdgeInsets.all(16), child: Text('LEVEL COMPLETE! Excellent work. Your score is saved on this device and will be submitted to the leaderboard when you are online and signed in.', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w800, color: Colors.green)))),
         const SizedBox(height: 8),
         FilledButton.icon(onPressed: _complete ? _newPuzzle : null, icon: const Icon(Icons.arrow_forward), label: const Text('Next level')),
@@ -566,24 +551,6 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
       ])),
     );
   }
-}
-
-
-class _WheelGuidePainter extends CustomPainter {
-  const _WheelGuidePainter({required this.center, required this.radius});
-  final Offset center;
-  final double radius;
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFD4AF37).withValues(alpha: 0.22)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-    canvas.drawCircle(center, radius, paint);
-  }
-  @override
-  bool shouldRepaint(covariant _WheelGuidePainter oldDelegate) =>
-      oldDelegate.center != center || oldDelegate.radius != radius;
 }
 
 
