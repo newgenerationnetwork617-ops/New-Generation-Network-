@@ -210,6 +210,14 @@ class _GuessBibleCharacterPageState extends State<GuessBibleCharacterPage> {
       items: const ['All', 'Easy', 'Medium', 'Hard'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
       onChanged: (v) { if (v != null) { setState(() => difficulty = v); _start(); } },
     ),
+    Padding(
+      padding: const EdgeInsets.only(top: 2, bottom: 12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Character question bank: ${allCharacters.length} / 1,000', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: blue)),
+        const SizedBox(height: 6),
+        ClipRRect(borderRadius: BorderRadius.circular(20), child: LinearProgressIndicator(value: (allCharacters.length / 1000).clamp(0.0, 1.0), minHeight: 6, backgroundColor: blue.withValues(alpha: .12), color: gold)),
+      ]),
+    ),
     const SizedBox(height: 20),
     Text('CLUE ${clue + 1} OF 4', style: const TextStyle(color: blue, fontWeight: FontWeight.w900)),
     const SizedBox(height: 8),
