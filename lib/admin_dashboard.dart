@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'admin_content_manager.dart';
 import 'admin_storage_page.dart';
 import 'admin_community_page.dart';
+import 'admin_bible_characters_page.dart';
 
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({super.key});
@@ -585,6 +586,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             title: 'Manage Existing Content',
             icon: Icons.edit_note_rounded,
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminContentManagerPage())),
+          ),
+          _AdminAction(
+            title: 'Bible Character Bank',
+            icon: Icons.person_search_rounded,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminBibleCharactersPage())),
           ),
           _AdminAction(
             title: 'Community Moderation',
