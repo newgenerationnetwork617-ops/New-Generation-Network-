@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'game_leaderboard_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -153,7 +154,13 @@ class _GuessBibleCharacterPageState extends State<GuessBibleCharacterPage> {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('Guess the Bible Character')),
+      appBar: AppBar(title: const Text('Guess the Bible Character'), actions: [
+        IconButton(
+          tooltip: 'Leaderboard',
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLeaderboardPage(gameId: 'guess_bible_character', gameTitle: 'Guess the Bible Character'))),
+          icon: const Icon(Icons.leaderboard_rounded),
+        ),
+      ]),
       body: SafeArea(child: session.isEmpty ? const Center(child: Text('No characters for this difficulty.')) : finished ? _result(dark) : _game(dark)),
     );
   }
