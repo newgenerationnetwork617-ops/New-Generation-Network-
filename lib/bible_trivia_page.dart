@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'game_leaderboard_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Offline-first Bible Trivia. Questions are bundled with the app so the
@@ -154,6 +155,11 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       appBar: AppBar(
         title: const Text('Bible Trivia'),
         actions: [
+          IconButton(
+            tooltip: 'Leaderboard',
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLeaderboardPage(gameId: 'bible_trivia', gameTitle: 'Bible Trivia'))),
+            icon: const Icon(Icons.leaderboard_rounded),
+          ),
           IconButton(
             tooltip: 'Restart quiz',
             onPressed: _startRound,
