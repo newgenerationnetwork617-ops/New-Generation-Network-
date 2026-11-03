@@ -23,10 +23,12 @@ class _AdminBibleCharactersPageState extends State<AdminBibleCharactersPage> {
     setState(() => loading = true);
     try {
       final rows = await supabase.from('bible_characters').select().order('name');
-      if (mounted) setState(() {
-        characters = List<Map<String, dynamic>>.from(rows);
-        loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          characters = List<Map<String, dynamic>>.from(rows);
+          loading = false;
+        });
+      }
     } catch (e) {
       if (mounted) {
         setState(() => loading = false);
@@ -99,9 +101,11 @@ class _AdminBibleCharactersPageState extends State<AdminBibleCharactersPage> {
                     clues.any((c) => c.text.trim().isEmpty) ||
                     reference.text.trim().isEmpty ||
                     explanation.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Complete the name, all four clues, references and explanation.')),
-                  );
+                  if (dialogContext.mounted) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      const SnackBar(content: Text('Complete the name, all four clues, references and explanation.')),
+                    );
+                  }
                   return;
                 }
                 final data = {
@@ -122,9 +126,11 @@ class _AdminBibleCharactersPageState extends State<AdminBibleCharactersPage> {
                   if (dialogContext.mounted) Navigator.pop(dialogContext);
                   await loadCharacters();
                 } catch (e) {
-                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Could not save character: $e')),
-                  );
+                  if (dialogContext.mounted) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      SnackBar(content: Text('Could not save character: $e')),
+                    );
+                  }
                 }
               },
               child: const Text('Save character'),
@@ -149,9 +155,11 @@ class _AdminBibleCharactersPageState extends State<AdminBibleCharactersPage> {
       }).eq('id', character['id']);
       await loadCharacters();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not update publication status: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not update publication status: $e')),
+        );
+      }
     }
   }
 
@@ -172,9 +180,11 @@ class _AdminBibleCharactersPageState extends State<AdminBibleCharactersPage> {
       await supabase.from('bible_characters').delete().eq('id', character['id']);
       await loadCharacters();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete character: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not delete character: $e')),
+        );
+      }
     }
   }
 
