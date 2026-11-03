@@ -12,6 +12,7 @@ import 'admin_dashboard.dart';
 import 'bible_page.dart';
 import 'content_pages.dart';
 import 'content_repository.dart';
+import 'bible_trivia_page.dart';
 
 const supabaseUrl = 'https://nlhjxoevyatvxstxgnhs.supabase.co';
 final appNavigatorKey = GlobalKey<NavigatorState>();
@@ -364,6 +365,7 @@ class HomeContent extends StatelessWidget {
                 _HomeFeatureCard(icon: Icons.groups_outlined, title: 'Community', subtitle: 'Connect together', page: CommunityPage()),
                 _HomeFeatureCard(icon: Icons.calendar_month_outlined, title: 'Events', subtitle: 'Stay connected', page: EventsPage()),
                 _HomeFeatureCard(icon: Icons.campaign_outlined, title: 'Announcements', subtitle: 'Latest updates', page: AnnouncementsPage()),
+                _HomeFeatureCard(icon: Icons.quiz_rounded, title: 'Bible Trivia', subtitle: 'Test your Bible knowledge', page: BibleTriviaPage()),
               ],
             ),
             const SizedBox(height: 24),
