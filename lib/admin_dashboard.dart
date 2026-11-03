@@ -9,6 +9,7 @@ import 'admin_storage_page.dart';
 import 'admin_community_page.dart';
 import 'admin_bible_characters_page.dart';
 import 'admin_bible_trivia_page.dart';
+import 'admin_bible_word_search_page.dart';
 
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({super.key});
@@ -597,6 +598,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             title: 'Bible Trivia Question Bank',
             icon: Icons.quiz_rounded,
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminBibleTriviaPage())),
+          ),
+          _AdminAction(
+            title: 'Word Search Puzzle Bank',
+            icon: Icons.grid_on_rounded,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminBibleWordSearchPage())),
           ),
           _AdminAction(
             title: 'Community Moderation',
