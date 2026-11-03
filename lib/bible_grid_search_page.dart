@@ -55,17 +55,9 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
     final result = <_Puzzle>[];
     for (var t = 0; t < themes.length; t++) {
       final pair = themes[t];
-      final sourceWords = pair.$2.split(' ');
-      final combos = <List<String>>[];
-      void pick(int start, List<String> chosen) {
-        if (chosen.length == 6) { combos.add(List.of(chosen)); return; }
-        for (var i = start; i <= sourceWords.length - (6 - chosen.length); i++) {
-          chosen.add(sourceWords[i]); pick(i + 1, chosen); chosen.removeLast();
-        }
-      }
-      pick(0, []);
+      final words = pair.$2.split(' ');
       for (var v = 0; v < 50; v++) {
-        result.add(_makePuzzle(t * 50 + v + 1, pair.$1, combos[(v * 3) % combos.length]));
+        result.add(_makePuzzle(t * 50 + v + 1, pair.$1, words));
       }
     }
     return result;
@@ -224,97 +216,186 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
     if (loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
     final complete = found.length == puzzle.words.length;
     return Scaffold(
-      appBar: AppBar(title: const Text('Word Search Puzzle'), actions: [
-        IconButton(tooltip: 'Leaderboard', icon: const Icon(Icons.leaderboard_rounded),
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLeaderboardPage(gameId: 'bible_grid_search', gameTitle: 'Word Search Puzzle')))),
-      ]),
-      body: SafeArea(child: ListView(padding: const EdgeInsets.all(16), children: [
-        Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [blue, Color(0xFF12356D), Color(0xFF1684D8)]),
-          borderRadius: BorderRadius.circular(22)),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Row(children: [Icon(Icons.auto_awesome_rounded, color: gold), SizedBox(width: 8),
-              Expanded(child: Text('SCRIPTURE WORD HUNT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900))),
-              Icon(Icons.wifi_off_rounded, color: Colors.white70, size: 16), SizedBox(width: 4),
-              Text('OFFLINE', style: TextStyle(color: Colors.white70, fontSize: 10))]),
-            const SizedBox(height: 12),
-            Text('Level ${puzzle.number} of 1,000', style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w900)),
-            Text('${puzzle.theme}  •  Score: $score  •  Best: $best', style: const TextStyle(color: Colors.white70)),
-            const SizedBox(height: 12),
-            ClipRRect(borderRadius: BorderRadius.circular(20), child: LinearProgressIndicator(
-              value: found.length / puzzle.words.length, minHeight: 8, backgroundColor: Colors.white24,
-              valueColor: const AlwaysStoppedAnimation<Color>(gold))),
-          ])),
-        const SizedBox(height: 14),
-        Card(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), child: Padding(
-          padding: const EdgeInsets.all(12), child: Column(children: [
-            Row(children: [const Icon(Icons.touch_app_rounded, color: blue), const SizedBox(width: 8),
-              const Expanded(child: Text('Find the hidden words', style: TextStyle(fontWeight: FontWeight.w900))),
-              Text('${found.length}/${puzzle.words.length}', style: const TextStyle(color: blue, fontWeight: FontWeight.w900))]),
-            const SizedBox(height: 5),
-            Text('Drag across a word in a straight line. Words can go forwards, backwards, vertically or diagonally.',
-              style: TextStyle(fontSize: 12, color: dark ? Colors.white70 : Colors.black54)),
-            const SizedBox(height: 12),
-            LayoutBuilder(builder: (context, constraints) {
-              final side = constraints.maxWidth, cell = side / size;
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onPanStart: (d) => setState(() { dragStart = null; _track(d.localPosition, cell); }),
-                onPanUpdate: (d) => setState(() => _track(d.localPosition, cell)),
-                onPanEnd: (_) => _finish(),
-                child: Container(width: side, height: side, padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(color: dark ? const Color(0xFF0D1A2D) : const Color(0xFFEAF2FF),
-                    borderRadius: BorderRadius.circular(14), border: Border.all(color: blue.withValues(alpha: .25))),
-                  child: Column(children: List.generate(size, (r) => Expanded(child: Row(children: List.generate(size, (c) {
-                    final n = r * size + c, isFound = foundCells.contains(n), isSelected = selection.contains(n);
-                    return Expanded(child: Container(margin: const EdgeInsets.all(1), alignment: Alignment.center,
-                      decoration: BoxDecoration(color: isFound ? const Color(0xFF19A66A).withValues(alpha: .22)
-                        : isSelected ? gold.withValues(alpha: .65) : Colors.transparent,
-                        borderRadius: BorderRadius.circular(4)),
-                      child: FittedBox(
-                        child: Text(
-                          puzzle.grid[r][c],
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                            color: isFound
-                                ? const Color(0xFF148451)
-                                : (dark ? Colors.white : const Color(0xFF12356D)),
+      appBar: AppBar(
+        title: const Text('Word Search Puzzle'),
+        actions: [
+          IconButton(
+            tooltip: 'Leaderboard',
+            icon: const Icon(Icons.leaderboard_rounded),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(
+              builder: (_) => const GameLeaderboardPage(
+                gameId: 'bible_grid_search',
+                gameTitle: 'Word Search Puzzle',
+              ),
+            )),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('LEVEL ${puzzle.number} / 1,000',
+                          style: const TextStyle(color: blue, fontWeight: FontWeight.w900, fontSize: 12)),
+                        Text('${puzzle.theme}  •  Score: $score  •  Best: $best',
+                          maxLines: 1, overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12, color: dark ? Colors.white70 : Colors.black54)),
+                      ],
+                    ),
+                  ),
+                  Text('${found.length}/${puzzle.words.length}',
+                    style: const TextStyle(color: blue, fontWeight: FontWeight.w900)),
+                ],
+              ),
+              const SizedBox(height: 7),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: LinearProgressIndicator(
+                  value: found.length / puzzle.words.length,
+                  minHeight: 6,
+                  backgroundColor: dark ? Colors.white12 : blue.withValues(alpha: .10),
+                  valueColor: const AlwaysStoppedAnimation<Color>(gold),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final side = min(constraints.maxWidth, constraints.maxHeight);
+                    final cell = side / size;
+                    return Center(
+                      child: SizedBox(
+                        width: side,
+                        height: side,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onPanStart: (d) => setState(() {
+                            dragStart = null;
+                            _track(d.localPosition, cell);
+                          }),
+                          onPanUpdate: (d) => setState(() => _track(d.localPosition, cell)),
+                          onPanEnd: (_) => _finish(),
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: dark ? const Color(0xFF0D1A2D) : const Color(0xFFEAF2FF),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: blue.withValues(alpha: .3)),
+                            ),
+                            child: Column(
+                              children: List.generate(size, (r) => Expanded(
+                                child: Row(
+                                  children: List.generate(size, (c) {
+                                    final n = r * size + c;
+                                    final isFound = foundCells.contains(n);
+                                    final isSelected = selection.contains(n);
+                                    return Expanded(
+                                      child: Container(
+                                        margin: const EdgeInsets.all(1),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: isFound
+                                            ? const Color(0xFF19A66A).withValues(alpha: .22)
+                                            : isSelected ? gold.withValues(alpha: .70) : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: FittedBox(
+                                          child: Text(
+                                            puzzle.grid[r][c],
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w900,
+                                              color: isFound ? const Color(0xFF148451)
+                                                : (dark ? Colors.white : const Color(0xFF12356D)),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              )),
+                            ),
                           ),
                         ),
-                      )));
-                  }))))),
+                      ),
+                    );
+                  },
                 ),
-              );
-            }),
-          ]))),
-        const SizedBox(height: 14),
-        Card(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), child: Padding(
-          padding: const EdgeInsets.all(14), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('WORDS TO FIND', style: TextStyle(color: blue, fontWeight: FontWeight.w900)),
-            const SizedBox(height: 10),
-            Wrap(spacing: 8, runSpacing: 8, children: puzzle.words.map((word) {
-              final done = found.contains(word);
-              return Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-                decoration: BoxDecoration(color: done ? const Color(0xFF19A66A).withValues(alpha: .13)
-                  : (dark ? Colors.white10 : const Color(0xFFFFF6D9)),
-                  borderRadius: BorderRadius.circular(30), border: Border.all(color: done ? const Color(0xFF19A66A) : gold)),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  if (done) const Icon(Icons.check_circle_rounded, size: 15, color: Color(0xFF19A66A)),
-                  if (done) const SizedBox(width: 5),
-                  Text(word, style: TextStyle(fontWeight: FontWeight.w900, decoration: done ? TextDecoration.lineThrough : null)),
-                ]));
-            }).toList()),
-          ]))),
-        if (message != null) Padding(padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Text(message!, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w800,
-            color: complete ? const Color(0xFF19A66A) : blue))),
-        if (complete) FilledButton.icon(onPressed: _next, icon: const Icon(Icons.arrow_forward_rounded),
-          label: Text(index == levels.length - 1 ? 'Finish all levels' : 'Next level')),
-        const SizedBox(height: 8),
-        Text('Progress is saved on this device. This game works offline.', textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54)),
-      ])),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text('WORDS TO FIND',
+                      style: TextStyle(color: blue, fontWeight: FontWeight.w900, letterSpacing: .5)),
+                  ),
+                  Text('Select each word in the grid',
+                    style: TextStyle(fontSize: 10, color: dark ? Colors.white60 : Colors.black54)),
+                ],
+              ),
+              const SizedBox(height: 6),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 126),
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: puzzle.words.map((word) {
+                      final done = found.contains(word);
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: done ? const Color(0xFF19A66A).withValues(alpha: .13)
+                            : (dark ? Colors.white10 : const Color(0xFFFFF6D9)),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: done ? const Color(0xFF19A66A) : gold),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (done) const Icon(Icons.check_circle_rounded, size: 13, color: Color(0xFF19A66A)),
+                            if (done) const SizedBox(width: 4),
+                            Text(word, style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              decoration: done ? TextDecoration.lineThrough : null,
+                            )),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              if (message != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Text(message!, maxLines: 2, overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800,
+                      color: complete ? const Color(0xFF19A66A) : blue)),
+                ),
+              if (complete)
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _next,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    label: Text(index == levels.length - 1 ? 'Finish all levels' : 'Next level'),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
