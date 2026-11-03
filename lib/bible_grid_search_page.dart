@@ -121,7 +121,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
 
   Future<void> _load() async {
     final p = await SharedPreferences.getInstance();
-    index = (p.getInt(levelKey) ?? 0).clamp(0, levels.length - 1);
+    index = (p.getInt(levelKey) ?? 0).clamp(0, levels.length - 1).toInt();
     best = p.getInt(bestKey) ?? 0;
     _reset();
     if (mounted) setState(() => loading = false);
