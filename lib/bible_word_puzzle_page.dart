@@ -49,6 +49,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
 
   final Random _random = Random();
   final Set<String> _found = {};
+  final Set<int> _foundCells = {};
   final List<int> _selection = [];
   late _BibleWordSearch _puzzle;
   late List<List<String>> _grid;
@@ -78,6 +79,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
     _puzzle = pool[_round % pool.length];
     _round++;
     _found.clear();
+    _foundCells.clear();
     _selection.clear();
     _message = null;
     _grid = List.generate(_size, (_) => List.filled(_size, ''));
@@ -125,9 +127,13 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
       _selection.add(index);
       final letters = _selection.map((i) => _grid[i~/_size][i%_size]).join();
       final reverse = letters.split('').reversed.join();
-      final match = _puzzle.words.where((w) => !_found.contains(w) && (w == letters || w == reverse)).firstOrNull;
+      String? match;
+      for (final word in _puzzle.words) {
+        if (!_found.contains(word) && (word == letters || word == reverse)) { match = word; break; }
+      }
       if (match != null) {
         _found.add(match);
+        _foundCells.addAll(_selection);
         _score += 10;
         _selection.clear();
         _message = 'Found $match! +10 points';
@@ -232,6 +238,6 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
 
   bool _isCellInFoundWord(int index) {
     // Found words are marked by the cells in the selection path before it clears.
-    return false;
+    return _foundCells.contains(index);
   }
 }
