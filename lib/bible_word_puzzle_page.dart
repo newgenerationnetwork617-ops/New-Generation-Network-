@@ -342,15 +342,12 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
     return levels.take(1000).toList(growable: false);
   }
 
-  final Random _random = Random();
   final Set<String> _found = {};
-  final List<String> _formed = [];
   late _CookiePuzzle _puzzle;
   int _index = 0, _score = 0, _best = 0;
   String _difficulty = 'All';
   String? _message;
   bool _submitted = false;
-  final Set<int> _dragVisited = {};
   final TextEditingController _answerController = TextEditingController();
 
   List<_CookiePuzzle> get _pool => _difficulty == 'All' ? _bank : _bank.where((p) => p.level == _difficulty).toList();
@@ -377,7 +374,6 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
     _puzzle = pool[_index % pool.length];
     _index++;
     _found.clear();
-    _formed.clear();
         _answerController.clear();
     _message = null;
     _submitted = false;
@@ -447,10 +443,6 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
       } catch (_) { remaining.add(item); }
     }
     await p.setStringList(_queueKey, remaining);
-  }
-
-  void _shuffleLetters() {
-    setState(() { _puzzle = _CookiePuzzle(_puzzle.reference, String.fromCharCodes(_puzzle.letters.runes.toList()..shuffle(_random)), _puzzle.words, _puzzle.clues, _puzzle.mode, _puzzle.level); });
   }
 
   @override
