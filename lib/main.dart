@@ -424,7 +424,7 @@ class HomeContent extends StatelessWidget {
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
               childAspectRatio: 1.45,
-              children: [
+              children: const [
                 _HomeFeatureCard(icon: Icons.groups_outlined, title: 'Community', subtitle: 'Connect together', page: CommunityPage()),
                 _HomeFeatureCard(icon: Icons.campaign_outlined, title: 'Announcements', subtitle: 'Latest updates', page: AnnouncementsPage()),
                 _HomeFeatureCard(icon: Icons.quiz_rounded, title: 'Bible Trivia', subtitle: 'Test your Bible knowledge', page: GameLobbyPage(title: 'Bible Trivia', subtitle: 'Choose a level, grow in the Word and challenge your best score.', gameId: 'bible_trivia', icon: Icons.quiz_rounded, bestKey: 'ngn_bible_trivia_high_score', levelKey: 'ngn_bible_trivia_level', totalLevels: 15, gamePage: BibleTriviaPage())),
