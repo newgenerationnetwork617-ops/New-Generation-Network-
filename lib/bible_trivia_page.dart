@@ -23,7 +23,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _TriviaQuestion('Who was the mother of Jesus?', ['Martha', 'Elizabeth', 'Mary', 'Ruth'], 2, 'Luke 1:26–31', 'Mary was chosen to be the mother of Jesus.'),
       _TriviaQuestion('Where was Jesus born?', ['Nazareth', 'Jerusalem', 'Bethlehem', 'Jericho'], 2, 'Luke 2:4–7', 'Jesus was born in Bethlehem.'),
       _TriviaQuestion('Who defeated Goliath?', ['Jonathan', 'David', 'Saul', 'Samuel'], 1, '1 Samuel 17:45–50', 'David trusted God and defeated Goliath with a sling and a stone.'),
-      _TriviaQuestion('How many disciples did Jesus choose?', ['10', '11', '12', '13'], 2, 'Luke 6:13–16', 'Jesus chose twelve apostles.'),
+      _TriviaQuestion('How many apostles did Jesus appoint from His disciples?', ['10', '11', '12', '13'], 2, 'Luke 6:13–16', 'Jesus chose twelve apostles.'),
       _TriviaQuestion('Who was swallowed by a great fish?', ['Jonah', 'Job', 'Joseph', 'Elijah'], 0, 'Jonah 1:17', 'Jonah spent three days and three nights inside the great fish.'),
       _TriviaQuestion('What is the first book of the Bible?', ['Exodus', 'Psalms', 'Matthew', 'Genesis'], 3, 'Genesis 1:1', 'Genesis is the first book of the Bible.'),
       _TriviaQuestion('Who received the Ten Commandments?', ['Aaron', 'Moses', 'Joshua', 'Caleb'], 1, 'Exodus 31:18', 'God gave the tablets of the covenant to Moses.'),
@@ -184,8 +184,8 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              const Icon(Icons.menu_book_rounded, color: _gold),
+            const Row(children: [
+              Icon(Icons.menu_book_rounded, color: _gold),
               const SizedBox(width: 8),
               const Text('KNOW THE WORD', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w800, letterSpacing: 1)),
               const Spacer(),
