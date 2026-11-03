@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'game_leaderboard_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Offline-first Bible Trivia. Questions are bundled with the app so the
 /// game remains playable without a network connection.
@@ -173,19 +174,24 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     ],
   };
 
-  String _difficulty = 'Easy';
+  String _difficulty = 'All';
   String _category = 'All Questions';
+  int _selectedLevel = 1;
+  Map<String, List<_TriviaQuestion>> _remoteQuestions = {};
 
   bool _isVerseChallenge(_TriviaQuestion question) =>
       question.isVerseChallenge;
 
-  int get _knowledgeQuestionCount => _questions.values
-      .expand((items) => items)
+  Iterable<_TriviaQuestion> get _allQuestions => [
+        ..._questions.values.expand((items) => items),
+        ..._remoteQuestions.values.expand((items) => items),
+      ];
+
+  int get _knowledgeQuestionCount => _allQuestions
       .where((question) => !_isVerseChallenge(question))
       .length;
 
-  int get _verseQuestionCount => _questions.values
-      .expand((items) => items)
+  int get _verseQuestionCount => _allQuestions
       .where(_isVerseChallenge)
       .length;
   List<_TriviaQuestion> _round = [];
@@ -200,7 +206,52 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
   void initState() {
     super.initState();
     _loadHighScore();
+    _loadSelectedLevel();
+    _loadRemoteQuestions();
     _startRound();
+  }
+
+  Future<void> _loadSelectedLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() => _selectedLevel =
+        ((prefs.getInt('ngn_bible_trivia_level') ?? 0) + 1).clamp(1, 15));
+  }
+
+  Future<void> _loadRemoteQuestions() async {
+    try {
+      final rows = await Supabase.instance.client
+          .from('bible_trivia_questions')
+          .select('question,options,correct_index,difficulty,bible_reference,explanation')
+          .eq('is_published', true)
+          .order('created_at');
+      final grouped = <String, List<_TriviaQuestion>>{
+        'Easy': [],
+        'Medium': [],
+        'Hard': [],
+      };
+      for (final row in List<Map<String, dynamic>>.from(rows)) {
+        final difficulty = row['difficulty']?.toString() ?? 'Easy';
+        final options = List<String>.from(row['options'] as List);
+        if (!grouped.containsKey(difficulty) ||
+            options.length != 4 ||
+            row['question'] == null ||
+            row['bible_reference'] == null ||
+            row['explanation'] == null) {
+          continue;
+        }
+        grouped[difficulty]!.add(_TriviaQuestion(
+          row['question'].toString(),
+          options,
+          (row['correct_index'] as num).toInt(),
+          row['bible_reference'].toString(),
+          row['explanation'].toString(),
+        ));
+      }
+      if (mounted) setState(() => _remoteQuestions = grouped);
+    } catch (_) {
+      // Offline play continues with the bundled question bank.
+    }
   }
 
   Future<void> _loadHighScore() async {
@@ -209,14 +260,20 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
   }
 
   void _startRound() {
-    final pool = _questions[_difficulty]!
+    final local = _difficulty == 'All'
+        ? _questions.values.expand((items) => items)
+        : _questions[_difficulty]!.asMap().values;
+    final remote = _difficulty == 'All'
+        ? _remoteQuestions.values.expand((items) => items)
+        : (_remoteQuestions[_difficulty] ?? <_TriviaQuestion>[]);
+    final pool = [...local, ...remote]
         .where((question) => _category == 'All Questions' ||
             (_category == 'Bible Knowledge'
                 ? !_isVerseChallenge(question)
                 : _isVerseChallenge(question)))
         .toList();
     if (pool.isEmpty) return;
-    pool.shuffle(Random());
+    pool.shuffle(Random(DateTime.now().microsecondsSinceEpoch + _selectedLevel));
     setState(() {
       _round = pool.take(10).toList();
       _index = 0;
@@ -225,6 +282,27 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
       _answered = false;
       _finished = false;
     });
+  }
+
+  Future<void> _unlockNextLevel() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getInt('ngn_bible_trivia_level') ?? 0;
+    await prefs.setInt('ngn_bible_trivia_level',
+        max(saved, _selectedLevel).clamp(0, 14));
+  }
+
+  Future<void> _submitScore() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      await Supabase.instance.client.from('game_scores').insert({
+        'user_id': user.id,
+        'game_id': 'bible_trivia',
+        'score': _score,
+      });
+    } catch (_) {
+      // Local best score remains saved if the player is offline.
+    }
   }
 
   Future<void> _submitAnswer() async {
@@ -242,9 +320,11 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     }
   }
 
-  void _nextQuestion() {
+  Future<void> _nextQuestion() async {
     if (_index == _round.length - 1) {
       setState(() => _finished = true);
+      await _unlockNextLevel();
+      await _submitScore();
       return;
     }
     setState(() {
@@ -308,7 +388,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
             const SizedBox(height: 18),
             Text(_difficulty.toUpperCase(), style: const TextStyle(color: _gold, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1)),
             const SizedBox(height: 6),
-            Text('Question ${_index + 1} of ${_round.length}', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
+            Text('LEVEL $_selectedLevel  •  QUESTION ${_index + 1} OF ${_round.length}', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
             const SizedBox(height: 14),
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
@@ -325,7 +405,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
           DropdownButton<String>(
             value: _difficulty,
             underline: const SizedBox.shrink(),
-            items: _questions.keys.map((level) => DropdownMenuItem(value: level, child: Text(level))).toList(),
+            items: ['All', ..._questions.keys].map((level) => DropdownMenuItem(value: level, child: Text(level))).toList(),
             onChanged: _index == 0 && !_answered
                 ? (value) {
                     if (value == null) return;
@@ -454,7 +534,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
           const SizedBox(height: 10),
           Text('$_score / ${_round.length * 10}', style: const TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: _blue)),
           const SizedBox(height: 6),
-          Text('Your best score: $_highScore', style: TextStyle(color: dark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w600)),
+          Text('Level $_selectedLevel completed  •  Your best score: $_highScore', style: TextStyle(color: dark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
           Text(perfect ? 'Excellent! You answered every question correctly.' : 'Keep exploring the Scriptures and try again.', textAlign: TextAlign.center, style: const TextStyle(height: 1.5)),
           const SizedBox(height: 26),
