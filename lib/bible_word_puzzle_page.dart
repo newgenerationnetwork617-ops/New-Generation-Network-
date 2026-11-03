@@ -29,7 +29,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   static const _queueKey = 'ngn_game_score_queue';
   static final List<_CookiePuzzle> _bank = _buildOneThousandLevels();
 
-  static List<_CookiePuzzle> _buildFiveHundredLevels() {
+  static List<_CookiePuzzle> _buildOneThousandLevels() {
     // 50 Bible themes × all 20 combinations of three words from six = 1,000 levels.
     // Each answer has its own Bible-centred clue; the wheel is built from the answers.
     const themes = <_ThemePack>[
