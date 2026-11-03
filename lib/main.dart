@@ -16,6 +16,7 @@ import 'bible_trivia_page.dart';
 import 'bible_word_puzzle_page.dart';
 import 'bible_grid_search_page.dart';
 import 'guess_bible_character_page.dart';
+import 'game_lobby_page.dart';
 
 const supabaseUrl = 'https://nlhjxoevyatvxstxgnhs.supabase.co';
 final appNavigatorKey = GlobalKey<NavigatorState>();
@@ -411,10 +412,10 @@ class HomeContent extends StatelessWidget {
               children: const [
                 _HomeFeatureCard(icon: Icons.groups_outlined, title: 'Community', subtitle: 'Connect together', page: CommunityPage()),
                 _HomeFeatureCard(icon: Icons.campaign_outlined, title: 'Announcements', subtitle: 'Latest updates', page: AnnouncementsPage()),
-                _HomeFeatureCard(icon: Icons.quiz_rounded, title: 'Bible Trivia', subtitle: 'Test your Bible knowledge', page: BibleTriviaPage()),
-                _HomeFeatureCard(icon: Icons.extension_rounded, title: 'Bible Word Search', subtitle: 'Type Bible-themed words', page: BibleWordPuzzlePage()),
-                _HomeFeatureCard(icon: Icons.person_search_rounded, title: 'Guess the Bible Character', subtitle: 'Who am I? Bible clues', page: GuessBibleCharacterPage()),
-                _HomeFeatureCard(icon: Icons.grid_on_rounded, title: 'Word Search Puzzle', subtitle: 'Find hidden words in the grid', page: BibleGridSearchPage()),
+                _HomeFeatureCard(icon: Icons.quiz_rounded, title: 'Bible Trivia', subtitle: 'Test your Bible knowledge', page: GameLobbyPage(title: 'Bible Trivia', subtitle: 'Challenge your Bible knowledge with a fresh shuffled round.', gameId: 'bible_trivia', icon: Icons.quiz_rounded, bestKey: 'ngn_bible_trivia_high_score', gamePage: const BibleTriviaPage())),
+                _HomeFeatureCard(icon: Icons.extension_rounded, title: 'Bible Word Cookies', subtitle: 'Form Bible words from letter clues', page: GameLobbyPage(title: 'Bible Word Cookies', subtitle: 'Build Bible words, solve clues and advance through 1,000 levels.', gameId: 'bible_word_search', icon: Icons.extension_rounded, bestKey: 'ngn_bible_word_search_best', levelKey: 'ngn_bible_word_search_level', totalLevels: 1000, gamePage: const BibleWordPuzzlePage())),
+                _HomeFeatureCard(icon: Icons.person_search_rounded, title: 'Guess the Bible Character', subtitle: 'Who am I? Bible clues', page: GameLobbyPage(title: 'Guess the Bible Character', subtitle: 'Read the clues, identify Bible people and start a fresh shuffled round.', gameId: 'guess_bible_character', icon: Icons.person_search_rounded, bestKey: 'ngn_guess_character_best', gamePage: const GuessBibleCharacterPage())),
+                _HomeFeatureCard(icon: Icons.grid_on_rounded, title: 'Word Search Puzzle', subtitle: 'Find hidden words in the grid', page: GameLobbyPage(title: 'Word Search Puzzle', subtitle: 'Find hidden Bible words and progress through 1,000 levels.', gameId: 'bible_grid_search', icon: Icons.grid_on_rounded, bestKey: 'ngn_bible_grid_search_best', levelKey: 'ngn_bible_grid_search_level', totalLevels: 1000, gamePage: const BibleGridSearchPage())),
               ],
             ),
             const SizedBox(height: 24),
