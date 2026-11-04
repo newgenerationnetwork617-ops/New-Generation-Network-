@@ -786,28 +786,3 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 }
-
-class _AdminAction extends StatelessWidget {
-  const _AdminAction({
-    required this.title,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: Icon(icon),
-        title: Text(title),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
-        onTap: onTap,
-      ),
-    );
-  }
-}
