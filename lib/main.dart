@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'in_app_notifications.dart';
+import 'daily_local_notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,6 +29,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabasePublishableKey);
   await InAppNotificationService.instance.initialize();
+  await DailyLocalNotificationService.instance.initialize();
   runApp(const NewGenerationNetworkApp());
 }
 
@@ -193,7 +195,27 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    DailyLocalNotificationService.instance.openedPayload.addListener(_handleDailyNotificationTap);
     _scheduleLocalMidnightRefresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await DailyLocalNotificationService.instance.requestPermissionAndSchedule();
+      _handleDailyNotificationTap();
+    });
+  }
+
+  void _handleDailyNotificationTap() {
+    final service = DailyLocalNotificationService.instance;
+    final payload = service.openedPayload.value;
+    if (payload == null || !mounted) return;
+    service.openedPayload.value = null;
+    if (payload.startsWith('devotional:')) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const DevotionalsPage()),
+      );
+    } else if (payload.startsWith('word:')) {
+      setState(() => index = 0);
+    }
   }
 
   void _scheduleLocalMidnightRefresh() {
@@ -211,6 +233,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       InAppNotificationService.instance.refreshCounts();
+      DailyLocalNotificationService.instance.scheduleUpcoming();
       if (mounted) {
         setState(() {});
         _scheduleLocalMidnightRefresh();
@@ -221,6 +244,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    DailyLocalNotificationService.instance.openedPayload.removeListener(_handleDailyNotificationTap);
     _dayRefreshTimer?.cancel();
     super.dispose();
   }
