@@ -40,7 +40,10 @@ jobs:
           s = p.read_text()
           permissions = [
               '<uses-permission android:name="android.permission.INTERNET"/>',
-              '<uses-permission android:name="android.permission.RECORD_AUDIO"/>'
+              '<uses-permission android:name="android.permission.RECORD_AUDIO"/>',
+              '<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>',
+              '<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>',
+              '<uses-permission android:name="android.permission.VIBRATE"/>'
           ]
           for permission in permissions:
               if permission not in s:
