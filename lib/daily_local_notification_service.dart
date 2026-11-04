@@ -120,6 +120,7 @@ class DailyLocalNotificationService {
   }
 
   Future<void> requestPermissionAndSchedule() async {
+    if (!await dailyVerseEnabled() && !await devotionalEnabled()) return;
     if (await requestPermissions()) {
       await scheduleUpcoming();
     }
