@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'daily_local_notification_service.dart';
+import 'community_archive_manager_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.currentMode, required this.onThemeChanged});
@@ -98,6 +99,18 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Text(
                 'These reminders use reading content stored in the app and do not need mobile data. Your phone must allow NGN to send notifications. Reminder times follow your device timezone.',
                 style: TextStyle(fontSize: 12, height: 1.45),
+              ),
+            ),
+          ]),
+          section('Community storage', [
+            ListTile(
+              leading: const Icon(Icons.offline_pin_rounded),
+              title: const Text('Saved Community history'),
+              subtitle: const Text('Review saved messages and remove items from this phone'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CommunityArchiveManagerPage()),
               ),
             ),
           ]),
