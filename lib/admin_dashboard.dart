@@ -116,6 +116,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   final supabase = Supabase.instance.client;
   bool checking = true;
   bool allowed = false;
+  int selectedSection = 0;
 
   void notice(String message) {
     if (!mounted) return;
@@ -546,6 +547,190 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     venue.dispose();
   }
 
+  void openPage(Widget page) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  }
+
+  Widget actionTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? tint,
+  }) {
+    final color = tint ?? Theme.of(context).colorScheme.primary;
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: color),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 3),
+                    Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios_rounded, size: 15),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget sectionHeading(String title, {String? subtitle}) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 22, bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          if (subtitle != null) ...[
+            const SizedBox(height: 3),
+            Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget publishGrid() {
+    final actions = <({String title, String subtitle, IconData icon, VoidCallback run})>[
+      (title: 'Daily Bible Verse', subtitle: 'Publish today’s Scripture', icon: Icons.menu_book_rounded, run: addBibleVerse),
+      (title: 'Daily Devotional', subtitle: 'Share a faith-building message', icon: Icons.auto_stories_rounded, run: addDevotional),
+      (title: 'Teachings & Sermons', subtitle: 'Add a teaching or sermon', icon: Icons.play_circle_fill_rounded, run: addTeaching),
+      (title: 'Teaching Book', subtitle: 'Upload a PDF or document', icon: Icons.picture_as_pdf_rounded, run: addTeachingBook),
+      (title: 'Announcement', subtitle: 'Share an important update', icon: Icons.campaign_rounded, run: addAnnouncement),
+      (title: 'Create Event', subtitle: 'Publish an upcoming event', icon: Icons.event_rounded, run: addEvent),
+    ];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = (constraints.maxWidth - 12) / 2;
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: actions.map((item) => SizedBox(
+            width: width,
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: item.run,
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(item.icon, size: 27, color: Theme.of(context).colorScheme.primary),
+                      const SizedBox(height: 16),
+                      Text(item.title, style: const TextStyle(fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 4),
+                      Text(item.subtitle, style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )).toList(),
+        );
+      },
+    );
+  }
+
+  Widget dashboardHome() {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primary.withValues(alpha: 0.78)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('NEW GENERATION NETWORK', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.1)),
+              SizedBox(height: 9),
+              Text('Welcome, Administrator', style: TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w800)),
+              SizedBox(height: 6),
+              Text('What would you like to manage today?', style: TextStyle(color: Colors.white70)),
+            ],
+          ),
+        ),
+        sectionHeading('Quick publish', subtitle: 'Create and share new content in a few taps'),
+        publishGrid(),
+        sectionHeading('Manage NGN', subtitle: 'Go directly to the areas you use most'),
+        actionTile(title: 'Published Content', subtitle: 'Edit, schedule or remove existing content', icon: Icons.library_books_rounded, onTap: () => openPage(const AdminContentManagerPage())),
+        actionTile(title: 'Community', subtitle: 'Moderate conversations and members', icon: Icons.groups_rounded, onTap: () => openPage(const AdminCommunityPage())),
+        actionTile(title: 'Media Storage', subtitle: 'Review uploaded files and storage', icon: Icons.cloud_rounded, onTap: () => openPage(const AdminStoragePage())),
+      ],
+    );
+  }
+
+  Widget manageSection() {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
+      children: [
+        const Text('Manage your content', style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 6),
+        const Text('Find existing posts and keep the NGN experience up to date.'),
+        const SizedBox(height: 18),
+        actionTile(title: 'Published Content', subtitle: 'Devotionals, teachings, announcements, events and verses', icon: Icons.edit_note_rounded, onTap: () => openPage(const AdminContentManagerPage())),
+        actionTile(title: 'Community Moderation', subtitle: 'Manage community activity', icon: Icons.groups_rounded, onTap: () => openPage(const AdminCommunityPage())),
+        actionTile(title: 'Media Storage', subtitle: 'Manage uploaded media', icon: Icons.cloud_rounded, onTap: () => openPage(const AdminStoragePage())),
+      ],
+    );
+  }
+
+  Widget toolsSection() {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
+      children: [
+        const Text('Games & question banks', style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 6),
+        const Text('Maintain the Bible games and their content libraries.'),
+        const SizedBox(height: 18),
+        actionTile(title: 'Bible Character Bank', subtitle: 'Manage Guess the Bible Character entries', icon: Icons.person_search_rounded, onTap: () => openPage(const AdminBibleCharactersPage())),
+        actionTile(title: 'Bible Trivia Question Bank', subtitle: 'Manage Bible quiz questions', icon: Icons.quiz_rounded, onTap: () => openPage(const AdminBibleTriviaPage())),
+        actionTile(title: 'Word Search Puzzle Bank', subtitle: 'Manage categories and puzzles', icon: Icons.grid_on_rounded, onTap: () => openPage(const AdminBibleWordSearchPage())),
+      ],
+    );
+  }
+
+  Widget publishSection() {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
+      children: [
+        const Text('Publish to NGN', style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 6),
+        const Text('Choose what you want to publish. Your content tools are grouped here.'),
+        const SizedBox(height: 18),
+        publishGrid(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (checking) {
@@ -567,84 +752,35 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       );
     }
 
+    final pages = [dashboardHome(), publishSection(), manageSection(), toolsSection()];
+    final titles = ['Admin Home', 'Publish', 'Manage', 'Game Tools'];
     return Scaffold(
       appBar: AppBar(
-        title: const Text('N.G.N. Admin Dashboard'),
+        title: Text(titles[selectedSection]),
         actions: [
-          IconButton(onPressed: signOut, icon: const Icon(Icons.logout)),
+          IconButton(
+            tooltip: 'Sign out',
+            onPressed: signOut,
+            icon: const Icon(Icons.logout_rounded),
+          ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const Text(
-            'Content Management',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text('Manage N.G.N. content from inside the app.'),
-          const SizedBox(height: 24),
-          _AdminAction(
-            title: 'Manage Existing Content',
-            icon: Icons.edit_note_rounded,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminContentManagerPage())),
-          ),
-          _AdminAction(
-            title: 'Bible Character Bank',
-            icon: Icons.person_search_rounded,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminBibleCharactersPage())),
-          ),
-          _AdminAction(
-            title: 'Bible Trivia Question Bank',
-            icon: Icons.quiz_rounded,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminBibleTriviaPage())),
-          ),
-          _AdminAction(
-            title: 'Word Search Puzzle Bank',
-            icon: Icons.grid_on_rounded,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminBibleWordSearchPage())),
-          ),
-          _AdminAction(
-            title: 'Community Moderation',
-            icon: Icons.groups_rounded,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminCommunityPage())),
-          ),
-          _AdminAction(
-            title: 'Media Storage',
-            icon: Icons.cloud_rounded,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminStoragePage())),
-          ),
-          const SizedBox(height: 8),
-          _AdminAction(
-            title: 'Daily Bible Verse',
-            icon: Icons.menu_book_rounded,
-            onTap: addBibleVerse,
-          ),
-          _AdminAction(
-            title: 'Daily Devotional',
-            icon: Icons.auto_stories_rounded,
-            onTap: addDevotional,
-          ),
-          _AdminAction(
-            title: 'Teachings & Sermons',
-            icon: Icons.play_circle_fill_rounded,
-            onTap: addTeaching,
-          ),
-          _AdminAction(
-            title: 'Upload Teaching Book',
-            icon: Icons.menu_book_rounded,
-            onTap: addTeachingBook,
-          ),
-          _AdminAction(
-            title: 'Announcements',
-            icon: Icons.campaign_rounded,
-            onTap: addAnnouncement,
-          ),
-          _AdminAction(
-            title: 'Events',
-            icon: Icons.event_rounded,
-            onTap: addEvent,
-          ),
+      body: SafeArea(child: pages[selectedSection]),
+      floatingActionButton: selectedSection == 0
+          ? FloatingActionButton.extended(
+              onPressed: () => setState(() => selectedSection = 1),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Publish'),
+            )
+          : null,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: selectedSection,
+        onDestinationSelected: (index) => setState(() => selectedSection = index),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.dashboard_rounded), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.add_box_rounded), label: 'Publish'),
+          NavigationDestination(icon: Icon(Icons.folder_open_rounded), label: 'Manage'),
+          NavigationDestination(icon: Icon(Icons.extension_rounded), label: 'Games'),
         ],
       ),
     );
