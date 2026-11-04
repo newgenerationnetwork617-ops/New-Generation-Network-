@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'daily_local_notification_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.currentMode, required this.onThemeChanged});
@@ -10,6 +11,37 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool dailyVerseEnabled = true;
+  bool devotionalEnabled = true;
+  bool notificationSettingsLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationSettings();
+  }
+
+  Future<void> _loadNotificationSettings() async {
+    final service = DailyLocalNotificationService.instance;
+    final verse = await service.dailyVerseEnabled();
+    final devotional = await service.devotionalEnabled();
+    if (!mounted) return;
+    setState(() {
+      dailyVerseEnabled = verse;
+      devotionalEnabled = devotional;
+      notificationSettingsLoaded = true;
+    });
+  }
+
+  Future<void> _setDailyVerse(bool enabled) async {
+    setState(() => dailyVerseEnabled = enabled);
+    await DailyLocalNotificationService.instance.setDailyVerseEnabled(enabled);
+  }
+
+  Future<void> _setDevotional(bool enabled) async {
+    setState(() => devotionalEnabled = enabled);
+    await DailyLocalNotificationService.instance.setDevotionalEnabled(enabled);
+  }
 
   Future<void> openLink(String url) async {
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
@@ -44,6 +76,29 @@ class _SettingsPageState extends State<SettingsPage> {
                 RadioListTile<ThemeMode>(title: Text('Light mode'), value: ThemeMode.light),
                 RadioListTile<ThemeMode>(title: Text('Dark mode'), value: ThemeMode.dark),
               ]),
+            ),
+          ]),
+          section('Daily Notifications', [
+            SwitchListTile(
+              secondary: const Icon(Icons.auto_stories_rounded),
+              title: const Text('Daily Bible verse'),
+              subtitle: const Text('Offline reminder at 7:00 AM'),
+              value: dailyVerseEnabled,
+              onChanged: notificationSettingsLoaded ? _setDailyVerse : null,
+            ),
+            SwitchListTile(
+              secondary: const Icon(Icons.menu_book_rounded),
+              title: const Text('Daily devotional'),
+              subtitle: const Text('Offline reminder at 7:30 AM'),
+              value: devotionalEnabled,
+              onChanged: notificationSettingsLoaded ? _setDevotional : null,
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
+              child: Text(
+                'These reminders use reading content stored in the app and do not need mobile data. Your phone must allow NGN to send notifications. Reminder times follow your device timezone.',
+                style: TextStyle(fontSize: 12, height: 1.45),
+              ),
             ),
           ]),
           section('About N.G.N.', const [
