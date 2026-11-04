@@ -34,17 +34,20 @@ class DailyLocalNotificationService {
   final Map<String, Map<String, dynamic>> _devotionalMonthCache = {};
   bool _initialized = false;
 
-  Future<void> initialize() async {
-    if (_initialized) return;
-
-    tz_data.initializeTimeZones();
+  Future<void> _refreshLocalTimezone() async {
     try {
       final localTimeZone = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(localTimeZone.identifier));
     } catch (_) {
-      // Retain the timezone package's UTC fallback rather than guessing a
-      // timezone from an ambiguous device abbreviation.
+      // Keep the last known timezone rather than guessing from an abbreviation.
     }
+  }
+
+  Future<void> initialize() async {
+    if (_initialized) return;
+
+    tz_data.initializeTimeZones();
+    await _refreshLocalTimezone();
 
     const initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -128,6 +131,7 @@ class DailyLocalNotificationService {
 
   Future<void> scheduleUpcoming() async {
     if (!_initialized) await initialize();
+    await _refreshLocalTimezone();
 
     final verseEnabled = await dailyVerseEnabled();
     final devotionalIsEnabled = await devotionalEnabled();
