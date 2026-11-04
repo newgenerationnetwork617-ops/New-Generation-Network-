@@ -33,6 +33,7 @@ class _CommunityStoriesWidgetState extends State<CommunityStoriesWidget> {
       withData: true,
     );
     if (picked == null || picked.files.isEmpty) return;
+    if (!mounted) return;
 
     final file = picked.files.single;
     final ext = (file.extension ?? '').toLowerCase();
