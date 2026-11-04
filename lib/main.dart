@@ -28,9 +28,11 @@ const supabasePublishableKey =
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabasePublishableKey);
-  await InAppNotificationService.instance.initialize();
   await DailyLocalNotificationService.instance.initialize();
   runApp(const NewGenerationNetworkApp());
+  // In-app counters and guest chat identity can refresh after the first frame;
+  // local daily reminders must not wait on a network-dependent Supabase call.
+  unawaited(InAppNotificationService.instance.initialize());
 }
 
 class NewGenerationNetworkApp extends StatefulWidget {
