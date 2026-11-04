@@ -32,8 +32,13 @@ for book in "${!books[@]}"; do
   osis="${books[$book]}"
   echo "Preparing $book..."
   curl --fail --silent --show-error --location \
+    --retry 6 --retry-all-errors --retry-delay 3 --connect-timeout 20 \
     "$BASE/$osis.json" \
     --output "$OUT/$book.json"
+  test -s "$OUT/$book.json" || {
+    echo "Downloaded Bible data for $book is empty." >&2
+    exit 1
+  }
 done
 
 echo "Offline Bible data prepared: ${#books[@]} books."
