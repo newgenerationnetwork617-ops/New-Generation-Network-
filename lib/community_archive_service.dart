@@ -13,6 +13,7 @@ class CommunityArchiveService {
   static final CommunityArchiveService instance = CommunityArchiveService._();
 
   Database? _database;
+  final Set<String> _hiddenMessageIds = {};
 
   Future<Database> get _db async {
     if (_database != null) return _database!;
@@ -46,26 +47,19 @@ class CommunityArchiveService {
         ''');
       },
     );
+    final hiddenRows = await _database!.query('hidden_messages', columns: ['id']);
+    _hiddenMessageIds.addAll(hiddenRows.map((row) => row['id'] as String));
     return _database!;
   }
 
-  Future<List<String>> _hiddenIds(Database db) async {
-    final rows = await db.query('hidden_messages', columns: ['id']);
-    return rows.map((row) => row['id'] as String).toList();
-  }
-
-  Future<List<Map<String, dynamic>>> visibleMessages(
+  List<Map<String, dynamic>> filterVisibleMessages(
     List<Map<String, dynamic>> rows,
-  ) async {
-    final db = await _db;
-    final hidden = (await _hiddenIds(db)).toSet();
-    return rows.where((row) => !hidden.contains(row['id']?.toString())).toList();
-  }
+  ) => rows.where((row) => !_hiddenMessageIds.contains(row['id']?.toString())).toList();
 
   Future<void> cacheMessages(List<Map<String, dynamic>> rows) async {
     if (rows.isEmpty) return;
     final db = await _db;
-    final hidden = (await _hiddenIds(db)).toSet();
+    final hidden = _hiddenMessageIds;
     final batch = db.batch();
     for (final row in rows) {
       final id = row['id']?.toString();
@@ -164,6 +158,7 @@ class CommunityArchiveService {
       whereArgs: [messageId],
       limit: 1,
     );
+    _hiddenMessageIds.add(messageId);
     await db.insert(
       'hidden_messages',
       {'id': messageId, 'hidden_at': DateTime.now().toUtc().toIso8601String()},
@@ -182,6 +177,7 @@ class CommunityArchiveService {
     final rows = await db.query('messages', columns: ['id']);
     final batch = db.batch();
     for (final row in rows) {
+      _hiddenMessageIds.add(row['id'] as String);
       batch.insert(
         'hidden_messages',
         {
