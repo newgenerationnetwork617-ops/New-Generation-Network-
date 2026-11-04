@@ -87,39 +87,56 @@ jobs:
           gradle = next((p for p in candidates if p.exists()), None)
           if gradle is None:
               raise SystemExit("Android app Gradle file was not generated")
+
           content = gradle.read_text()
           kotlin_dsl = gradle.suffix == ".kts"
 
           if kotlin_dsl:
               if "isCoreLibraryDesugaringEnabled" not in content:
-                  content, count = re.subn(r"compileOptions\\s*\\{", "compileOptions {\\n        isCoreLibraryDesugaringEnabled = true", content, count=1)
+                  content, count = re.subn(
+                      r"compileOptions\s*\{",
+                      "compileOptions {\n        isCoreLibraryDesugaringEnabled = true",
+                      content,
+                      count=1,
+                  )
                   if count == 0:
                       raise SystemExit("Could not locate compileOptions block")
               if "multiDexEnabled" not in content:
-                  content, count = re.subn(r"defaultConfig\\s*\\{", "defaultConfig {\\n        multiDexEnabled = true", content, count=1)
+                  content, count = re.subn(
+                      r"defaultConfig\s*\{",
+                      "defaultConfig {\n        multiDexEnabled = true",
+                      content,
+                      count=1,
+                  )
                   if count == 0:
                       raise SystemExit("Could not locate defaultConfig block")
               dependency = 'coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")'
-              if dependency not in content:
-                  if "dependencies {" in content:
-                      content = content.replace("dependencies {", "dependencies {\\n    " + dependency, 1)
-                  else:
-                      content += "\\ndependencies {\\n    " + dependency + "\\n}\\n"
           else:
               if "coreLibraryDesugaringEnabled" not in content:
-                  content, count = re.subn(r"compileOptions\\s*\\{", "compileOptions {\\n        coreLibraryDesugaringEnabled true", content, count=1)
+                  content, count = re.subn(
+                      r"compileOptions\s*\{",
+                      "compileOptions {\n        coreLibraryDesugaringEnabled true",
+                      content,
+                      count=1,
+                  )
                   if count == 0:
                       raise SystemExit("Could not locate compileOptions block")
               if "multiDexEnabled" not in content:
-                  content, count = re.subn(r"defaultConfig\\s*\\{", "defaultConfig {\\n        multiDexEnabled true", content, count=1)
+                  content, count = re.subn(
+                      r"defaultConfig\s*\{",
+                      "defaultConfig {\n        multiDexEnabled true",
+                      content,
+                      count=1,
+                  )
                   if count == 0:
                       raise SystemExit("Could not locate defaultConfig block")
               dependency = "coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'"
-              if dependency not in content:
-                  if "dependencies {" in content:
-                      content = content.replace("dependencies {", "dependencies {\\n    " + dependency, 1)
-                  else:
-                      content += "\\ndependencies {\\n    " + dependency + "\\n}\\n"
+
+          if dependency not in content:
+              if "dependencies {" in content:
+                  content = content.replace("dependencies {", "dependencies {\n    " + dependency, 1)
+              else:
+                  content += "\ndependencies {\n    " + dependency + "\n}\n"
 
           gradle.write_text(content)
           print(f"Configured scheduled notifications in {gradle}")
