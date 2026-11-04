@@ -187,7 +187,7 @@ class DailyLocalNotificationService {
     required DateTime scheduledAt,
     required String payload,
   }) async {
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: AndroidNotificationDetails(
         'ngn_daily_readings',
         'Daily Bible Readings',
@@ -195,9 +195,9 @@ class DailyLocalNotificationService {
             'Daily Bible verse and devotional reminders from NGN',
         importance: Importance.high,
         priority: Priority.high,
-        styleInformation: BigTextStyleInformation(''),
+        styleInformation: BigTextStyleInformation(body),
       ),
-      iOS: DarwinNotificationDetails(
+      iOS: const DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: false,
         presentSound: true,
