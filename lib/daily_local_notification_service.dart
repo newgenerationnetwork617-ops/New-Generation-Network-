@@ -139,9 +139,10 @@ class DailyLocalNotificationService {
     // announcement or Firebase notification implementation.
     for (var offset = 0; offset < _rollingDays; offset++) {
       final date = today.add(Duration(days: offset));
-      await _plugin.cancel(_notificationId(date, _verseNotificationOffset));
+      await _plugin.cancel(id: _notificationId(date, _verseNotificationOffset));
       await _plugin.cancel(
-          _notificationId(date, _devotionalNotificationOffset));
+        id: _notificationId(date, _devotionalNotificationOffset),
+      );
     }
 
     for (var offset = 0; offset < _rollingDays; offset++) {
