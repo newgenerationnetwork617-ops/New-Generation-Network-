@@ -302,6 +302,12 @@ class DailyLocalNotificationService {
       '${date.month.toString().padLeft(2, '0')}-'
       '${date.day.toString().padLeft(2, '0')}';
 
+  // Android notification IDs are 32-bit integers. A YYYYMMDD-based ID
+  // exceeds that range, so use the UTC day number and a two-slot offset.
   int _notificationId(DateTime date, int offset) =>
-      int.parse(_dateKey(date).replaceAll('-', '')) * 10 + offset;
+      DateTime.utc(date.year, date.month, date.day)
+              .difference(DateTime.utc(1970, 1, 1))
+              .inDays *
+          10 +
+      offset;
 }
