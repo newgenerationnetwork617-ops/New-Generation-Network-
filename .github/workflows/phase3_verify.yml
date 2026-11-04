@@ -73,7 +73,7 @@ jobs:
               </receiver>
           """
           if "com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" not in s:
-              s = s.replace("</application>", receivers + "\\n    </application>")
+              s = s.replace("</application>", receivers + "\n    </application>")
           p.write_text(s)
           PY
 
