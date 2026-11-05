@@ -410,7 +410,7 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                           return const Center(child: CircularProgressIndicator());
                         }
                         if (snapshot.hasError) {
-                          return Center(child: Text('Could not load comments: ' + snapshot.error.toString()));
+                          return Center(child: Text('Could not load comments: ${snapshot.error}'));
                         }
                         final comments = snapshot.data ?? [];
                         if (comments.isEmpty) {
@@ -447,13 +447,13 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                                         try {
                                           await _supabase.from('community_story_comments').delete().eq('id', comment['id']);
                                           final refreshed = _fetchComments();
-                                          setSheetState(() => commentsFuture = refreshed);
+                                          if (sheetContext.mounted) setSheetState(() => commentsFuture = refreshed);
                                           final updated = await refreshed;
                                           if (mounted) setState(() => _commentCount = updated.length);
                                         } catch (error) {
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Could not remove comment: ' + error.toString())),
+                                          if (sheetContext.mounted) {
+                                            ScaffoldMessenger.of(sheetContext).showSnackBar(
+                                              SnackBar(content: Text('Could not remove comment: $error')),
                                             );
                                           }
                                         }
@@ -507,17 +507,17 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                               });
                               controller.clear();
                               final refreshed = _fetchComments();
-                              setSheetState(() => commentsFuture = refreshed);
+                              if (sheetContext.mounted) setSheetState(() => commentsFuture = refreshed);
                               final updated = await refreshed;
                               if (mounted) setState(() => _commentCount = updated.length);
                             } catch (error) {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Could not post comment: ' + error.toString())),
+                              if (sheetContext.mounted) {
+                                ScaffoldMessenger.of(sheetContext).showSnackBar(
+                                  SnackBar(content: Text('Could not post comment: $error')),
                                 );
                               }
                             } finally {
-                              setSheetState(() => sending = false);
+                              if (sheetContext.mounted) setSheetState(() => sending = false);
                             }
                           },
                           icon: sending
