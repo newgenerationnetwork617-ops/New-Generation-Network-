@@ -204,7 +204,7 @@ class _AdminBibleTriviaPageState extends State<AdminBibleTriviaPage> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF142E52), Color(0xFF0B5ED7)]),
+                  gradient: const LinearGradient(colors: [Color(0xFF142E52), Color(0xFF073B8C)]),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
