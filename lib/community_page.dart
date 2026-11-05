@@ -448,9 +448,11 @@ class _CommunityChatPageState extends State<CommunityChatPage>{
        await _saveChatAppearance();
        if (mounted) Navigator.pop(context);
      } catch (error) {
-       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text('Could not set wallpaper: $error')),
-       );
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('Could not set wallpaper: $error')),
+         );
+       }
      }
    }
 
