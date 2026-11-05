@@ -63,7 +63,7 @@ class _BiblePageState extends State<BiblePage> {
               children: [
                 Card(
                   child: ListTile(
-                    leading: const CircleAvatar(backgroundColor: Color(0xFFE8F0FE), child: Icon(Icons.offline_bolt_rounded, color: Color(0xFF0B5ED7))),
+                    leading: const CircleAvatar(backgroundColor: Color(0xFFF3E7B5), child: Icon(Icons.offline_bolt_rounded, color: Color(0xFF073B8C))),
                     title: Text(section == 0 ? 'Old Testament' : 'New Testament'),
                     subtitle: Text(section == 0 ? '39 books • available offline' : '27 books • available offline'),
                   ),
@@ -154,7 +154,7 @@ class _BibleNotesPanelState extends State<_BibleNotesPanel> {
         return Card(
           margin: const EdgeInsets.only(bottom: 10),
           child: ListTile(
-            leading: const CircleAvatar(backgroundColor: Color(0xFFE8F0FE), child: Icon(Icons.edit_note_rounded, color: Color(0xFF0B5ED7))),
+            leading: const CircleAvatar(backgroundColor: Color(0xFFF3E7B5), child: Icon(Icons.edit_note_rounded, color: Color(0xFF073B8C))),
             title: Text(reference(key), style: const TextStyle(fontWeight: FontWeight.w800)),
             subtitle: Text(notes[key] ?? ''),
             onTap: () => edit(key, notes[key] ?? ''),
@@ -176,7 +176,7 @@ class _BookTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: const CircleAvatar(backgroundColor: Color(0xFFE8F0FE), child: Icon(Icons.menu_book_rounded, color: Color(0xFF0B5ED7))),
+        leading: const CircleAvatar(backgroundColor: Color(0xFFF3E7B5), child: Icon(Icons.menu_book_rounded, color: Color(0xFF073B8C))),
         title: Text(book),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: () => Navigator.of(context).push(
@@ -395,7 +395,7 @@ class _BibleChapterPageState extends State<BibleChapterPage> {
                                 text: '${verse.number} ',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0B5ED7),
+                                  color: Color(0xFF073B8C),
                                 ),
                               ),
                               TextSpan(text: verse.text),
