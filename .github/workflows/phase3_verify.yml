@@ -49,18 +49,24 @@ jobs:
           if "com.google.gms.google-services" not in settings_text:
               if "plugins {" not in settings_text:
                   raise SystemExit("Android settings plugins block was not found")
-              declaration = ('    id("com.google.gms.google-services") version "4.4.4" apply false\n'
+              declaration = ('    id("com.google.gms.google-services") version "4.4.4" apply false
+'
                              if kotlin_dsl else
-                             "    id 'com.google.gms.google-services' version '4.4.4' apply false\n")
-              settings_text = settings_text.replace("plugins {", "plugins {\n" + declaration, 1)
+                             "    id 'com.google.gms.google-services' version '4.4.4' apply false
+")
+              settings_text = settings_text.replace("plugins {", "plugins {
+" + declaration, 1)
 
           if "com.google.gms.google-services" not in app_text:
               if "plugins {" not in app_text:
                   raise SystemExit("Android app plugins block was not found")
-              application_plugin = ('    id("com.google.gms.google-services")\n'
+              application_plugin = ('    id("com.google.gms.google-services")
+'
                                     if app_gradle.suffix == ".kts" else
-                                    "    id 'com.google.gms.google-services'\n")
-              app_text = app_text.replace("plugins {", "plugins {\n" + application_plugin, 1)
+                                    "    id 'com.google.gms.google-services'
+")
+              app_text = app_text.replace("plugins {", "plugins {
+" + application_plugin, 1)
 
           settings.write_text(settings_text)
           app_gradle.write_text(app_text)
@@ -86,10 +92,12 @@ jobs:
           ]
           for permission in permissions:
               if permission not in s:
-                  s = s.replace('<manifest xmlns:android="http://schemas.android.com/apk/res/android">', '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n    ' + permission)
+                  s = s.replace('<manifest xmlns:android="http://schemas.android.com/apk/res/android">', '<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    ' + permission)
           s, count = re.subn(r'android:label="[^"]*"', 'android:label="Holy World [NGN]"', s, count=1)
           if count == 0:
-              s = s.replace('<application', '<application\n        android:label="Holy World [NGN]"', 1)
+              s = s.replace('<application', '<application
+        android:label="Holy World [NGN]"', 1)
           deep_link = """
               <intent-filter>
                   <action android:name="android.intent.action.VIEW" />
@@ -99,7 +107,8 @@ jobs:
               </intent-filter>
           """
           if 'android:scheme="ngncommunity"' not in s:
-              s = s.replace('</activity>', deep_link + '\n        </activity>', 1)
+              s = s.replace('</activity>', deep_link + '
+        </activity>', 1)
           receivers = """
               <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
               <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
@@ -112,7 +121,8 @@ jobs:
               </receiver>
           """
           if "com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" not in s:
-              s = s.replace("</application>", receivers + "\n    </application>")
+              s = s.replace("</application>", receivers + "
+    </application>")
           p.write_text(s)
           PY
 
@@ -134,7 +144,8 @@ jobs:
               if "isCoreLibraryDesugaringEnabled" not in content:
                   content, count = re.subn(
                       r"compileOptions\s*\{",
-                      "compileOptions {\n        isCoreLibraryDesugaringEnabled = true",
+                      "compileOptions {
+        isCoreLibraryDesugaringEnabled = true",
                       content,
                       count=1,
                   )
@@ -143,7 +154,8 @@ jobs:
               if "multiDexEnabled" not in content:
                   content, count = re.subn(
                       r"defaultConfig\s*\{",
-                      "defaultConfig {\n        multiDexEnabled = true",
+                      "defaultConfig {
+        multiDexEnabled = true",
                       content,
                       count=1,
                   )
@@ -154,7 +166,8 @@ jobs:
               if "coreLibraryDesugaringEnabled" not in content:
                   content, count = re.subn(
                       r"compileOptions\s*\{",
-                      "compileOptions {\n        coreLibraryDesugaringEnabled true",
+                      "compileOptions {
+        coreLibraryDesugaringEnabled true",
                       content,
                       count=1,
                   )
@@ -163,7 +176,8 @@ jobs:
               if "multiDexEnabled" not in content:
                   content, count = re.subn(
                       r"defaultConfig\s*\{",
-                      "defaultConfig {\n        multiDexEnabled true",
+                      "defaultConfig {
+        multiDexEnabled true",
                       content,
                       count=1,
                   )
@@ -173,9 +187,14 @@ jobs:
 
           if dependency not in content:
               if "dependencies {" in content:
-                  content = content.replace("dependencies {", "dependencies {\n    " + dependency, 1)
+                  content = content.replace("dependencies {", "dependencies {
+    " + dependency, 1)
               else:
-                  content += "\ndependencies {\n    " + dependency + "\n}\n"
+                  content += "
+dependencies {
+    " + dependency + "
+}
+"
 
           gradle.write_text(content)
           print(f"Configured scheduled notifications in {gradle}")
