@@ -469,8 +469,9 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                       },
                     ),
                   ),
-                  const Divider(height: 1),
-                  Padding(
+                  if (!_isOwner) ...[
+                    const Divider(height: 1),
+                    Padding(
                     padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
                     child: Row(
                       children: [
@@ -525,7 +526,8 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                         ),
                       ],
                     ),
-                  ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -570,114 +572,174 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final caption = widget.story['caption']?.toString() ?? '';
     return Scaffold(
-      backgroundColor: colors.surface,
+      backgroundColor: const Color(0xFF081321),
       appBar: AppBar(
-        backgroundColor: colors.surface,
-        foregroundColor: colors.onSurface,
+        backgroundColor: const Color(0xFF0D1B2A),
+        foregroundColor: Colors.white,
         elevation: 0,
-        title: Text(_isOwner ? 'Your story' : 'Community story'),
+        titleSpacing: 4,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_isOwner ? 'Your story' : 'Community story',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+            const Text('New Generation Network',
+                style: TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.w400)),
+          ],
+        ),
         actions: [
-          if (_isOwner)
-            IconButton(
-              onPressed: _deleting ? null : _showViewers,
-              tooltip: 'See who viewed',
-              icon: const Icon(Icons.visibility_outlined),
-            ),
           if (_isOwner)
             IconButton(
               onPressed: _deleting ? null : _deleteStory,
               tooltip: 'Delete story',
               icon: _deleting
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.delete_outline),
+                  : const Icon(Icons.delete_outline_rounded),
             ),
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37)))
           : _error != null
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
-                    child: Text(_error!, textAlign: TextAlign.center, style: TextStyle(color: colors.onSurface)),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.cloud_off_rounded, color: Colors.white70, size: 42),
+                        const SizedBox(height: 12),
+                        Text(_error!, style: const TextStyle(color: Colors.white), textAlign: TextAlign.center),
+                        const SizedBox(height: 16),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _loading = true;
+                              _error = null;
+                            });
+                            _loadStory();
+                          },
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: const Text('Try again'),
+                        ),
+                      ],
+                    ),
                   ),
                 )
-              : Column(
+              : Stack(
+                  fit: StackFit.expand,
                   children: [
-                    Expanded(
-                      child: Container(
-                        width: double.infinity,
-                        color: colors.surfaceContainerHighest,
-                        alignment: Alignment.center,
-                        child: _isVideo && _video != null
-                            ? AspectRatio(
-                                aspectRatio: _video!.value.aspectRatio,
-                                child: VideoPlayer(_video!),
-                              )
-                            : _url != null
-                                ? InteractiveViewer(
-                                    minScale: 0.8,
-                                    maxScale: 4,
-                                    child: Image.network(
-                                      _url!,
-                                      fit: BoxFit.contain,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      errorBuilder: (_, __, ___) => Center(
-                                        child: Text('Story media could not be loaded.', style: TextStyle(color: colors.onSurface)),
-                                      ),
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
-                      ),
-                    ),
-                    if ((widget.story['caption']?.toString() ?? '').isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.fromLTRB(18, 13, 18, 6),
-                        color: colors.surface,
-                        child: Text(
-                          widget.story['caption'].toString(),
-                          style: TextStyle(color: colors.onSurface, fontSize: 15, height: 1.4),
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0xFF14283E), Color(0xFF081321), Color(0xFF050B13)],
                         ),
                       ),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        border: Border(top: BorderSide(color: colors.outlineVariant)),
+                    ),
+                    Center(
+                      child: _isVideo && _video != null
+                          ? AspectRatio(
+                              aspectRatio: _video!.value.aspectRatio,
+                              child: VideoPlayer(_video!),
+                            )
+                          : _url != null
+                              ? InteractiveViewer(
+                                  minScale: .8,
+                                  maxScale: 4,
+                                  child: Image.network(
+                                    _url!,
+                                    fit: BoxFit.contain,
+                                    loadingBuilder: (context, child, progress) => progress == null
+                                        ? child
+                                        : const Center(
+                                            child: CircularProgressIndicator(color: Color(0xFFD4AF37)),
+                                          ),
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.broken_image_outlined,
+                                      color: Colors.white70,
+                                      size: 48,
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                    ),
+                    if (caption.isNotEmpty)
+                      Positioned(
+                        left: 16,
+                        right: 16,
+                        bottom: 92,
+                        child: SafeArea(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                            decoration: BoxDecoration(
+                              color: const Color(0xE6101D2C),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white.withValues(alpha: .16)),
+                              boxShadow: const [
+                                BoxShadow(color: Colors.black38, blurRadius: 18, offset: Offset(0, 6)),
+                              ],
+                            ),
+                            child: Text(
+                              caption,
+                              style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
                       ),
+                    Positioned(
+                      left: 14,
+                      right: 14,
+                      bottom: 14,
                       child: SafeArea(
-                        top: false,
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            if (_isOwner) ...[
+                              OutlinedButton.icon(
+                                onPressed: _showViewers,
+                                icon: const Icon(Icons.visibility_outlined, size: 18),
+                                label: Text('$_viewCount views'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: const Color(0xCC10243A),
+                                  side: BorderSide(color: Colors.white.withValues(alpha: .28)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                            ],
                             OutlinedButton.icon(
                               onPressed: _showComments,
-                              icon: const Icon(Icons.chat_bubble_outline_rounded),
-                              label: Text('Comments ($_commentCount)'),
-                            ),
-                            const Spacer(),
-                            if (_isOwner)
-                              TextButton.icon(
-                                onPressed: _showViewers,
-                                icon: const Icon(Icons.visibility_outlined),
-                                label: Text('$_viewCount views'),
+                              icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                              label: Text(_isOwner ? 'Comments ($_commentCount)' : 'Leave a comment ($_commentCount)'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: const Color(0xCC10243A),
+                                side: BorderSide(color: Colors.white.withValues(alpha: .28)),
+                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                               ),
+                            ),
                           ],
                         ),
                       ),
                     ),
                   ],
                 ),
-      floatingActionButton: _isVideo && _video != null && !_loading
+      floatingActionButton: _isVideo && _video != null && !_loading && _error == null
           ? FloatingActionButton.small(
+              backgroundColor: const Color(0xFFD4AF37),
+              foregroundColor: const Color(0xFF10243A),
               onPressed: () => setState(() {
                 _video!.value.isPlaying ? _video!.pause() : _video!.play();
               }),
-              child: Icon(_video!.value.isPlaying ? Icons.pause : Icons.play_arrow),
+              child: Icon(_video!.value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
             )
           : null,
     );
