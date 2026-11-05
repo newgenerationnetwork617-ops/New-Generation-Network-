@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "515153071985",
+    "project_id": "new-generation-network-d5e65",
+    "storage_bucket": "new-generation-network-d5e65.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:515153071985:android:794e7e07a99c6abebfb0d0",
+        "android_client_info": {
+          "package_name": "com.example.new_generation_network"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAB8YD99xUlvqQQZdrkHoC-MM3uKp2-yQc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
