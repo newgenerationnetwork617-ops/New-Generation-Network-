@@ -21,9 +21,12 @@ class DailyLocalNotificationService {
 
   static const String dailyVerseEnabledKey = 'ngn_local_daily_verse_enabled';
   static const String devotionalEnabledKey = 'ngn_local_devotional_enabled';
-  static const int _rollingDays = 30;
+  static const String eveningReflectionEnabledKey = 'ngn_local_evening_reflection_enabled';
+  // Keep at most 63 pending reminders for iOS compatibility (21 days × 3).
+  static const int _rollingDays = 21;
   static const int _verseNotificationOffset = 1;
   static const int _devotionalNotificationOffset = 2;
+  static const int _eveningNotificationOffset = 3;
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
@@ -122,8 +125,22 @@ class DailyLocalNotificationService {
     await scheduleUpcoming();
   }
 
+  Future<bool> eveningReflectionEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(eveningReflectionEnabledKey) ?? true;
+  }
+
+  Future<void> setEveningReflectionEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(eveningReflectionEnabledKey, enabled);
+    if (enabled && !await requestPermissions()) return;
+    await scheduleUpcoming();
+  }
+
   Future<void> requestPermissionAndSchedule() async {
-    if (!await dailyVerseEnabled() && !await devotionalEnabled()) return;
+    if (!await dailyVerseEnabled() &&
+        !await devotionalEnabled() &&
+        !await eveningReflectionEnabled()) return;
     if (await requestPermissions()) {
       await scheduleUpcoming();
     }
@@ -135,6 +152,7 @@ class DailyLocalNotificationService {
 
     final verseEnabled = await dailyVerseEnabled();
     final devotionalIsEnabled = await devotionalEnabled();
+    final eveningIsEnabled = await eveningReflectionEnabled();
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -147,13 +165,16 @@ class DailyLocalNotificationService {
       await _plugin.cancel(
         id: _notificationId(date, _devotionalNotificationOffset),
       );
+      await _plugin.cancel(
+        id: _notificationId(date, _eveningNotificationOffset),
+      );
     }
 
     for (var offset = 0; offset < _rollingDays; offset++) {
       final date = today.add(Duration(days: offset));
 
       if (verseEnabled) {
-        final scheduledAt = _scheduledTime(date, 7, 0);
+        final scheduledAt = _scheduledTime(date, 6, 30);
         if (scheduledAt.isAfter(now)) {
           final verse = await _wordForDate(date);
           if (verse != null) {
@@ -169,7 +190,7 @@ class DailyLocalNotificationService {
       }
 
       if (devotionalIsEnabled) {
-        final scheduledAt = _scheduledTime(date, 7, 30);
+        final scheduledAt = _scheduledTime(date, 7, 0);
         if (scheduledAt.isAfter(now)) {
           final devotional = await _devotionalForDate(date);
           if (devotional != null) {
@@ -181,6 +202,19 @@ class DailyLocalNotificationService {
               payload: 'devotional:${_dateKey(date)}',
             );
           }
+        }
+      }
+
+      if (eveningIsEnabled) {
+        final scheduledAt = _scheduledTime(date, 18, 0);
+        if (scheduledAt.isAfter(now)) {
+          await _schedule(
+            id: _notificationId(date, _eveningNotificationOffset),
+            title: 'NGN • Evening Reflection',
+            body: 'Have you read your Bible today? Have you gone through your devotion? What have you heard from God today? Take a moment to reflect.',
+            scheduledAt: scheduledAt,
+            payload: 'reflection:${_dateKey(date)}',
+          );
         }
       }
     }
