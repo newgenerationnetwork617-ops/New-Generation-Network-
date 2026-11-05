@@ -11,7 +11,7 @@ import 'package:timezone/timezone.dart' as tz;
 /// Offline daily notifications sourced entirely from NGN's bundled content.
 ///
 /// iOS retains at most 64 pending local notifications. NGN therefore keeps a
-/// rolling 30-day window (at most 60 reminders) and refreshes it whenever the
+/// rolling 21-day window (at most 63 reminders) and refreshes it whenever the
 /// app is opened or resumed.
 class DailyLocalNotificationService {
   DailyLocalNotificationService._();
@@ -140,7 +140,9 @@ class DailyLocalNotificationService {
   Future<void> requestPermissionAndSchedule() async {
     if (!await dailyVerseEnabled() &&
         !await devotionalEnabled() &&
-        !await eveningReflectionEnabled()) return;
+        !await eveningReflectionEnabled()) {
+      return;
+    }
     if (await requestPermissions()) {
       await scheduleUpcoming();
     }
