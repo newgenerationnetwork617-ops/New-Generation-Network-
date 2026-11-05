@@ -123,7 +123,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  bool _adminSaveInFlight = false;
+
   Future<bool> runSave(Future<void> Function() action, String success) async {
+    if (_adminSaveInFlight) return false;
+    _adminSaveInFlight = true;
     try {
       await action();
       notice(success);
@@ -134,6 +138,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     } catch (_) {
       notice('Could not save. Check your connection and try again.');
       return false;
+    } finally {
+      _adminSaveInFlight = false;
     }
   }
 
