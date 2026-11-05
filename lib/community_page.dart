@@ -441,7 +441,7 @@ class _CommunityChatPageState extends State<CommunityChatPage>{
        final directory = await getApplicationDocumentsDirectory();
        final extension = picked.files.single.extension?.toLowerCase() ?? 'jpg';
        final userId = supabase.auth.currentUser?.id ?? 'member';
-       final destination = File('${directory.path}/ngn_chat_wallpaper_${userId}.$extension');
+       final destination = File('${directory.path}/ngn_chat_wallpaper_$userId.$extension');
        await File(picked.files.single.path!).copy(destination.path);
        if (!mounted) return;
        setState(() => _chatWallpaperPath = destination.path);
