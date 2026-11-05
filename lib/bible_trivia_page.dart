@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -215,43 +216,71 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() => _selectedLevel =
-        ((prefs.getInt('ngn_bible_trivia_level') ?? 0) + 1).clamp(1, 15));
+        ((prefs.getInt('ngn_bible_trivia_level') ?? 0) + 1).clamp(1, 1000));
   }
 
   Future<void> _loadRemoteQuestions() async {
+    final prefs = await SharedPreferences.getInstance();
+    const cacheKey = 'ngn_bible_trivia_remote_cache';
+
+    // Restore downloaded questions first so they remain available offline.
+    final cached = prefs.getString(cacheKey);
+    if (cached != null) {
+      try {
+        final rows = List<Map<String, dynamic>>.from(jsonDecode(cached) as List);
+        final grouped = _groupRemoteQuestions(rows);
+        if (mounted) setState(() => _remoteQuestions = grouped);
+      } catch (_) {
+        await prefs.remove(cacheKey);
+      }
+    }
+
     try {
       final rows = await Supabase.instance.client
           .from('bible_trivia_questions')
           .select('question,options,correct_index,difficulty,bible_reference,explanation')
           .eq('is_published', true)
           .order('created_at');
-      final grouped = <String, List<_TriviaQuestion>>{
-        'Easy': [],
-        'Medium': [],
-        'Hard': [],
-      };
-      for (final row in List<Map<String, dynamic>>.from(rows)) {
-        final difficulty = row['difficulty']?.toString() ?? 'Easy';
-        final options = List<String>.from(row['options'] as List);
-        if (!grouped.containsKey(difficulty) ||
-            options.length != 4 ||
-            row['question'] == null ||
-            row['bible_reference'] == null ||
-            row['explanation'] == null) {
-          continue;
-        }
-        grouped[difficulty]!.add(_TriviaQuestion(
-          row['question'].toString(),
-          options,
-          (row['correct_index'] as num).toInt(),
-          row['bible_reference'].toString(),
-          row['explanation'].toString(),
-        ));
-      }
+      final remoteRows = List<Map<String, dynamic>>.from(rows);
+      final grouped = _groupRemoteQuestions(remoteRows);
+      await prefs.setString(cacheKey, jsonEncode(remoteRows));
       if (mounted) setState(() => _remoteQuestions = grouped);
     } catch (_) {
-      // Offline play continues with the bundled question bank.
+      // The bundled and cached questions remain available offline.
     }
+  }
+
+  Map<String, List<_TriviaQuestion>> _groupRemoteQuestions(
+      List<Map<String, dynamic>> rows) {
+    final grouped = <String, List<_TriviaQuestion>>{
+      'Easy': [],
+      'Medium': [],
+      'Hard': [],
+    };
+    for (final row in rows) {
+      final difficulty = row['difficulty']?.toString() ?? 'Easy';
+      final rawOptions = row['options'];
+      if (!grouped.containsKey(difficulty) ||
+          rawOptions is! List ||
+          rawOptions.length != 4 ||
+          row['question'] == null ||
+          row['bible_reference'] == null ||
+          row['explanation'] == null ||
+          row['correct_index'] is! num) {
+        continue;
+      }
+      final options = List<String>.from(rawOptions);
+      final answerIndex = (row['correct_index'] as num).toInt();
+      if (answerIndex < 0 || answerIndex >= options.length) continue;
+      grouped[difficulty]!.add(_TriviaQuestion(
+        row['question'].toString(),
+        options,
+        answerIndex,
+        row['bible_reference'].toString(),
+        row['explanation'].toString(),
+      ));
+    }
+    return grouped;
   }
 
   Future<void> _loadHighScore() async {
@@ -288,7 +317,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getInt('ngn_bible_trivia_level') ?? 0;
     await prefs.setInt('ngn_bible_trivia_level',
-        max(saved, _selectedLevel).clamp(0, 14).toInt());
+        max(saved, _selectedLevel).clamp(0, 999).toInt());
   }
 
   Future<void> _submitScore() async {
