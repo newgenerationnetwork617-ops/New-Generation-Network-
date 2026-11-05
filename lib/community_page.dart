@@ -117,11 +117,25 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
         });
       }
     } catch (saveError) {
+      final message = saveError.toString().toLowerCase();
+      final networkUnavailable = message.contains('failed host lookup') ||
+          message.contains('socketexception') ||
+          message.contains('network is unreachable') ||
+          message.contains('connection timed out') ||
+          message.contains('connection refused');
       if (mounted) {
         setState(() {
           loading = false;
           busy = false;
-          error = 'Your account is signed in, but your Community profile could not be saved: $saveError';
+          if (networkUnavailable) {
+            // A valid signed-in session can still open the device-only message
+            // archive when Supabase cannot be reached.
+            joined = true;
+            error = null;
+            notice = null;
+          } else {
+            error = 'Your account is signed in, but your Community profile could not be saved: $saveError';
+          }
         });
       }
     }
@@ -565,8 +579,8 @@ class _CommunityChatPageState extends State<CommunityChatPage>{
 
 @override void initState(){super.initState();InAppNotificationService.instance.markCommunityRead();_loadArchive();_loadMyName();_loadCommunityMode();_loadAdminStatus();_loadChatAppearance();_viewsSubscription=messageViews.listen((rows){if(!mounted)return;setState((){_seenCounts.clear();for(final row in rows){final id=row['message_id']?.toString();if(id!=null)_seenCounts[id]=(_seenCounts[id]??0)+1;}});});}
   Future<void> _loadArchive()async{try{final rows=await _archive.loadMessages();if(mounted)setState(()=>_archivedRows=rows);}catch(_){}finally{if(mounted)setState(()=>_archiveReady=true);}}
-  Future<void> _loadCommunityMode()async{final r=await supabase.from('app_settings').select('value').eq('id','community_chat').maybeSingle();final value=r?['value'];final mode=value?['mode']?.toString();if(mounted)setState(()=>communityMode=mode??'open');}
-  Future<void> _loadMyName()async{final user=supabase.auth.currentUser;if(user==null||user.isAnonymous)return;final r=await supabase.from('profiles').select('display_name,avatar_url').eq('id',user.id).maybeSingle();if(!mounted)return;setState((){myName=r?['display_name']?.toString();myAvatarUrl=r?['avatar_url']?.toString();});if((myName??'').trim().isEmpty)WidgetsBinding.instance.addPostFrameCallback((_)=>_editMyName(required:true));}
+  Future<void> _loadCommunityMode()async{try{final r=await supabase.from('app_settings').select('value').eq('id','community_chat').maybeSingle();final value=r?['value'];final mode=value?['mode']?.toString();if(mounted)setState(()=>communityMode=mode??'open');}catch(_){/* Keep the default mode while offline; cached messages remain readable. */}}
+  Future<void> _loadMyName()async{final user=supabase.auth.currentUser;if(user==null||user.isAnonymous)return;try{final r=await supabase.from('profiles').select('display_name,avatar_url').eq('id',user.id).maybeSingle();if(!mounted)return;setState((){myName=r?['display_name']?.toString();myAvatarUrl=r?['avatar_url']?.toString();});if((myName??'').trim().isEmpty)WidgetsBinding.instance.addPostFrameCallback((_)=>_editMyName(required:true));}catch(_){/* Profile details can be refreshed when the connection returns. */}}
   Future<void> _editMyName({bool required=false})async{final user=supabase.auth.currentUser;if(user==null)return;final c=TextEditingController(text:myName??'');final value=await showDialog<String>(context:context,barrierDismissible:!required,builder:(context)=>PopScope(canPop:!required,child:AlertDialog(title:const Text('Your Community name'),content:TextField(controller:c,autofocus:true,maxLength:40,decoration:const InputDecoration(hintText:'Enter the name people will see',border:OutlineInputBorder())),actions:[if(!required)TextButton(onPressed:()=>Navigator.pop(context),child:const Text('Cancel')),FilledButton(onPressed:()=>Navigator.pop(context,c.text.trim()),child:const Text('Save name'))])));c.dispose();if(value==null||value.trim().length<2){if(required&&mounted)_editMyName(required:true);return;}await supabase.from('profiles').update({'display_name':value.trim()}).eq('id',user.id);if(mounted)setState(()=>myName=value.trim());}
   Stream<List<Map<String,dynamic>>> get messages=>supabase.from('community_messages').stream(primaryKey:['id']).order('created_at', ascending: true).limit(100).map((rows)=>rows.map((r)=>Map<String,dynamic>.from(r)).toList());
   Stream<List<Map<String,dynamic>>> get messageViews=>supabase.from('community_message_views').stream(primaryKey:['id']).order('viewed_at',ascending:true).limit(5000).map((rows)=>rows.map((r)=>Map<String,dynamic>.from(r)).toList());
