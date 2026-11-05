@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
@@ -402,7 +403,165 @@ class _CommunityChatPageState extends State<CommunityChatPage>{
   final Set<String> _viewedMessageIds={};
   final supabase=Supabase.instance.client,message=TextEditingController(),recorder=AudioRecorder(),player=AudioPlayer(),chatScroll=ScrollController();
   bool recording=false,sending=false;int recordSeconds=0;Timer? timer;String? playingId;Map<String,dynamic>? replyingTo;String? myName;String? myAvatarUrl;String communityMode='open';
-  @override void initState(){super.initState();InAppNotificationService.instance.markCommunityRead();_loadArchive();_loadMyName();_loadCommunityMode();_loadAdminStatus();_viewsSubscription=messageViews.listen((rows){if(!mounted)return;setState((){_seenCounts.clear();for(final row in rows){final id=row['message_id']?.toString();if(id!=null)_seenCounts[id]=(_seenCounts[id]??0)+1;}});});}
+  Color _chatBackgroundColor = const Color(0xFFF4F6FA);
+  Color _chatBubbleColor = const Color(0xFF0B5ED7);
+  String? _chatWallpaperPath;
+     Future<void> _loadChatAppearance() async {
+     final prefs = await SharedPreferences.getInstance();
+     final userId = supabase.auth.currentUser?.id;
+     if (userId == null) return;
+     final background = prefs.getInt('ngn_chat_bg_$userId');
+     final bubble = prefs.getInt('ngn_chat_bubble_$userId');
+     final wallpaper = prefs.getString('ngn_chat_wallpaper_$userId');
+     if (!mounted) return;
+     setState(() {
+       if (background != null) _chatBackgroundColor = Color(background);
+       if (bubble != null) _chatBubbleColor = Color(bubble);
+       _chatWallpaperPath = wallpaper;
+     });
+   }
+
+   Future<void> _saveChatAppearance() async {
+     final prefs = await SharedPreferences.getInstance();
+     final userId = supabase.auth.currentUser?.id;
+     if (userId == null) return;
+     await prefs.setInt('ngn_chat_bg_$userId', _chatBackgroundColor.toARGB32());
+     await prefs.setInt('ngn_chat_bubble_$userId', _chatBubbleColor.toARGB32());
+     if (_chatWallpaperPath == null) {
+       await prefs.remove('ngn_chat_wallpaper_$userId');
+     } else {
+       await prefs.setString('ngn_chat_wallpaper_$userId', _chatWallpaperPath!);
+     }
+   }
+
+   Future<void> _chooseChatWallpaper() async {
+     final picked = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: false);
+     if (picked == null || picked.files.isEmpty || picked.files.single.path == null) return;
+     try {
+       final directory = await getApplicationDocumentsDirectory();
+       final extension = picked.files.single.extension?.toLowerCase() ?? 'jpg';
+       final userId = supabase.auth.currentUser?.id ?? 'member';
+       final destination = File('${directory.path}/ngn_chat_wallpaper_${userId}.$extension');
+       await File(picked.files.single.path!).copy(destination.path);
+       if (!mounted) return;
+       setState(() => _chatWallpaperPath = destination.path);
+       await _saveChatAppearance();
+       if (mounted) Navigator.pop(context);
+     } catch (error) {
+       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(content: Text('Could not set wallpaper: $error')),
+       );
+     }
+   }
+
+   Future<void> _showChatAppearance() async {
+     const backgrounds = <Color>[
+       Color(0xFFF4F6FA), Color(0xFFEAF4F1), Color(0xFFFFF3E5),
+       Color(0xFFEDEBFA), Color(0xFF172536), Color(0xFF101820),
+     ];
+     const bubbles = <Color>[
+       Color(0xFF0B5ED7), Color(0xFF168A62), Color(0xFF8A4CC2),
+       Color(0xFFB56A24), Color(0xFF334155), Color(0xFF202020),
+     ];
+     await showModalBottomSheet<void>(
+       context: context,
+       showDragHandle: true,
+       isScrollControlled: true,
+       builder: (sheetContext) => StatefulBuilder(
+         builder: (sheetContext, setSheetState) => SafeArea(
+           child: Padding(
+             padding: const EdgeInsets.fromLTRB(18, 4, 18, 24),
+             child: Column(
+               mainAxisSize: MainAxisSize.min,
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Text('Personalise your chat', style: Theme.of(sheetContext).textTheme.titleLarge),
+                 const SizedBox(height: 6),
+                 Text('These settings are saved on this device for your account only.',
+                     style: Theme.of(sheetContext).textTheme.bodySmall),
+                 const SizedBox(height: 18),
+                 const Text('Chat background', style: TextStyle(fontWeight: FontWeight.w700)),
+                 const SizedBox(height: 10),
+                 Wrap(
+                   spacing: 12,
+                   runSpacing: 12,
+                   children: backgrounds.map((color) => GestureDetector(
+                     onTap: () async {
+                       setState(() { _chatBackgroundColor = color; _chatWallpaperPath = null; });
+                       setSheetState(() {});
+                       await _saveChatAppearance();
+                     },
+                     child: Container(
+                       width: 38, height: 38,
+                       decoration: BoxDecoration(
+                         color: color, shape: BoxShape.circle,
+                         border: Border.all(
+                           color: _chatBackgroundColor.toARGB32() == color.toARGB32()
+                               ? Theme.of(sheetContext).colorScheme.primary
+                               : Colors.grey.shade400,
+                           width: _chatBackgroundColor.toARGB32() == color.toARGB32() ? 3 : 1,
+                         ),
+                       ),
+                       child: _chatBackgroundColor.toARGB32() == color.toARGB32()
+                           ? const Icon(Icons.check, size: 18) : null,
+                     ),
+                   )).toList(),
+                 ),
+                 const SizedBox(height: 18),
+                 const Text('Your message colour', style: TextStyle(fontWeight: FontWeight.w700)),
+                 const SizedBox(height: 10),
+                 Wrap(
+                   spacing: 12,
+                   children: bubbles.map((color) => GestureDetector(
+                     onTap: () async {
+                       setState(() => _chatBubbleColor = color);
+                       setSheetState(() {});
+                       await _saveChatAppearance();
+                     },
+                     child: Container(
+                       width: 34, height: 34,
+                       decoration: BoxDecoration(
+                         color: color, shape: BoxShape.circle,
+                         border: Border.all(
+                           color: _chatBubbleColor.toARGB32() == color.toARGB32()
+                               ? Theme.of(sheetContext).colorScheme.primary
+                               : Colors.grey.shade400,
+                           width: _chatBubbleColor.toARGB32() == color.toARGB32() ? 3 : 1,
+                         ),
+                       ),
+                       child: _chatBubbleColor.toARGB32() == color.toARGB32()
+                           ? const Icon(Icons.check, size: 17, color: Colors.white) : null,
+                     ),
+                   )).toList(),
+                 ),
+                 const SizedBox(height: 18),
+                 ListTile(
+                   contentPadding: EdgeInsets.zero,
+                   leading: const Icon(Icons.image_outlined),
+                   title: const Text('Choose a photo from my device'),
+                   subtitle: const Text('Use your own picture as the chat wallpaper'),
+                   onTap: _chooseChatWallpaper,
+                 ),
+                 if (_chatWallpaperPath != null)
+                   ListTile(
+                     contentPadding: EdgeInsets.zero,
+                     leading: const Icon(Icons.wallpaper_outlined),
+                     title: const Text('Remove my photo wallpaper'),
+                     onTap: () async {
+                       setState(() => _chatWallpaperPath = null);
+                       setSheetState(() {});
+                       await _saveChatAppearance();
+                     },
+                   ),
+               ],
+             ),
+           ),
+         ),
+       ),
+     );
+   }
+
+@override void initState(){super.initState();InAppNotificationService.instance.markCommunityRead();_loadArchive();_loadMyName();_loadCommunityMode();_loadAdminStatus();_loadChatAppearance();_viewsSubscription=messageViews.listen((rows){if(!mounted)return;setState((){_seenCounts.clear();for(final row in rows){final id=row['message_id']?.toString();if(id!=null)_seenCounts[id]=(_seenCounts[id]??0)+1;}});});}
   Future<void> _loadArchive()async{try{final rows=await _archive.loadMessages();if(mounted)setState(()=>_archivedRows=rows);}catch(_){}finally{if(mounted)setState(()=>_archiveReady=true);}}
   Future<void> _loadCommunityMode()async{final r=await supabase.from('app_settings').select('value').eq('id','community_chat').maybeSingle();final value=r?['value'];final mode=value?['mode']?.toString();if(mounted)setState(()=>communityMode=mode??'open');}
   Future<void> _loadMyName()async{final user=supabase.auth.currentUser;if(user==null||user.isAnonymous)return;final r=await supabase.from('profiles').select('display_name,avatar_url').eq('id',user.id).maybeSingle();if(!mounted)return;setState((){myName=r?['display_name']?.toString();myAvatarUrl=r?['avatar_url']?.toString();});if((myName??'').trim().isEmpty)WidgetsBinding.instance.addPostFrameCallback((_)=>_editMyName(required:true));}
@@ -488,10 +647,21 @@ class _CommunityChatPageState extends State<CommunityChatPage>{
   Future<void> report(Map<String,dynamic> row)async{final user=supabase.auth.currentUser;if(user==null)return;await supabase.from('community_reports').insert({'reporter_id':user.id,'message_id':row['id'],'reason':'Reported from community chat'});if(mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Message reported to N.G.N. administrators.')));}
   Future<void> _signOutFromCommunity()async{await supabase.auth.signOut();if(!mounted)return;Navigator.of(context).pushReplacement(MaterialPageRoute(builder:(_)=>const CommunityJoinPage()));}
   @override void dispose(){_viewsSubscription?.cancel();timer?.cancel();message.dispose();recorder.dispose();player.dispose();chatScroll.dispose();super.dispose();}
-  @override Widget build(BuildContext context){final me=supabase.auth.currentUser?.id;return Scaffold(appBar:AppBar(title:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('N.G.N. Community'),if(myName!=null)Text(myName!,style:const TextStyle(fontSize:11,fontWeight:FontWeight.normal))]),actions:[if(myAvatarUrl!=null&&myAvatarUrl!.isNotEmpty)Padding(padding:const EdgeInsets.symmetric(horizontal:6),child:CircleAvatar(radius:15,backgroundImage:NetworkImage(myAvatarUrl!))),IconButton(onPressed:()=>_editMyName(),tooltip:'Change my Community name',icon:const Icon(Icons.badge_outlined)),IconButton(onPressed:_signOutFromCommunity,tooltip:'Sign out of Community',icon:const Icon(Icons.logout_rounded))]),body:Column(children:[
+  @override Widget build(BuildContext context){final me=supabase.auth.currentUser?.id;return Scaffold(appBar:AppBar(title:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('N.G.N. Community'),if(myName!=null)Text(myName!,style:const TextStyle(fontSize:11,fontWeight:FontWeight.normal))]),actions:[if(myAvatarUrl!=null&&myAvatarUrl!.isNotEmpty)Padding(padding:const EdgeInsets.symmetric(horizontal:6),child:CircleAvatar(radius:15,backgroundImage:NetworkImage(myAvatarUrl!))),IconButton(onPressed:()=>_editMyName(),tooltip:'Change my Community name',icon:const Icon(Icons.badge_outlined)),IconButton(onPressed:_showChatAppearance,tooltip:'Personalise chat',icon:const Icon(Icons.palette_outlined)),IconButton(onPressed:_signOutFromCommunity,tooltip:'Sign out of Community',icon:const Icon(Icons.logout_rounded))]),body:Column(children:[
     Container(width:double.infinity,padding:const EdgeInsets.symmetric(horizontal:16,vertical:9),color:const Color(0xFFD4AF37).withValues(alpha:.12),child:Text(communityMode=='locked'?'Community chat is currently closed. You can read previous messages and check back for the next N.G.N. session.':communityMode=='meeting'?'N.G.N. Community meeting is now open • Fellowship with kindness':'Fellowship with kindness • Messages are automatically removed after 30 days',textAlign:TextAlign.center,style:const TextStyle(fontSize:12))),
     const CommunityStoriesWidget(),
-    Expanded(child:StreamBuilder<List<Map<String,dynamic>>>(stream:messages,builder:(context,snapshot){if(snapshot.hasData){InAppNotificationService.instance.markCommunityRead();unawaited(_archive.cacheMessages(snapshot.data!));unawaited(_flushPendingMessageViews());}final sourceRows=snapshot.hasData?snapshot.data!:_archivedRows;final rows=_archive.filterVisibleMessages(sourceRows);if(!_archiveReady)return const Center(child:CircularProgressIndicator());if(rows.isEmpty)return Center(child:Text(snapshot.hasError?'No saved messages yet. Connect to load the Community.':'Start the conversation. 👋'));scrollToLatest();return ListView.builder(controller:chatScroll,padding:const EdgeInsets.all(14),itemCount:rows.length,itemBuilder:(context,index){final row=rows[index],mine=row['author_id']==me;return VisibilityDetector(key:Key("community-message-${row['id']}"),onVisibilityChanged:(info){if(info.visibleFraction>=0.6&&row['author_id']!=me)unawaited(_recordMessageViewed(row['id'].toString()));},child:FutureBuilder<Map<String,dynamic>?>(future:profileFor(row['author_id'].toString()),builder:(context,n)=>Align(alignment:mine?Alignment.centerRight:Alignment.centerLeft,child:GestureDetector(onLongPress:()=>showModalBottomSheet(context:context,builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[ListTile(leading:const Icon(Icons.reply_rounded),title:const Text('Reply'),onTap:(){Navigator.pop(context);setState(()=>replyingTo=row);}),if(mine)ListTile(leading:const Icon(Icons.delete_outline),title:const Text('Delete my message'),onTap:(){Navigator.pop(context);deleteOwn(row);}),if(!mine)ListTile(leading:const Icon(Icons.flag_outlined),title:const Text('Report to admin'),onTap:(){Navigator.pop(context);report(row);})]))),child:Container(constraints:const BoxConstraints(maxWidth:310),margin:const EdgeInsets.only(bottom:10),padding:const EdgeInsets.all(13),decoration:BoxDecoration(color:mine?const Color(0xFF0B5ED7):Theme.of(context).cardColor,borderRadius:BorderRadius.circular(16),border:mine?null:Border.all(color:Theme.of(context).dividerColor)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[if(row['reply_to_id']!=null)Builder(builder:(context){final target=replyTarget(rows,row['reply_to_id']);final preview=target==null?'Original message unavailable':target['message_type']=='voice'?'Voice note':target['message_type']=='file'?'File: ${target['file_name']??'Attachment'}':(target['body']?.toString()??'Message');return Container(width:double.infinity,margin:const EdgeInsets.only(bottom:8),padding:const EdgeInsets.symmetric(horizontal:9,vertical:7),decoration:BoxDecoration(color:(mine?Colors.white:const Color(0xFF0B5ED7)).withValues(alpha:.12),borderRadius:BorderRadius.circular(9),border:Border(left:BorderSide(color:mine?const Color(0xFFD4AF37):const Color(0xFF0B5ED7),width:3))),child:Row(children:[const Icon(Icons.reply_rounded,size:14),const SizedBox(width:6),Expanded(child:Text(preview,maxLines:2,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:11,fontStyle:FontStyle.italic)))]));}),Row(children:[CircleAvatar(radius:12,backgroundImage:(n.data?['avatar_url']?.toString().isNotEmpty??false)?NetworkImage(n.data!['avatar_url'].toString()):null,child:(n.data?['avatar_url']?.toString().isNotEmpty??false)?null:const Icon(Icons.person_rounded,size:14)),const SizedBox(width:7),Expanded(child:Text(n.data?['display_name']?.toString()??'N.G.N. Member',style:TextStyle(fontSize:11,fontWeight:FontWeight.w700,color:mine?const Color(0xFFD4AF37):const Color(0xFF0B5ED7))))]),const SizedBox(height:5),if(row['message_type']=='voice')InkWell(onTap:()=>playVoice(row),child:Row(mainAxisSize:MainAxisSize.min,children:[Icon(playingId==row['id']?Icons.stop_circle_outlined:Icons.play_circle_outline,color:mine?Colors.white:const Color(0xFF0B5ED7)),const SizedBox(width:8),Text('Voice note • ${row['voice_duration_seconds']??0}s',style:TextStyle(color:mine?Colors.white:null))]))else if(row['message_type']=='file')fileAttachment(row,mine)else Text(row['body']?.toString()??'',style:TextStyle(color:mine?Colors.white:null,height:1.35)),if(mine&&_isAdmin)Align(alignment:Alignment.centerRight,child:InkWell(onTap:()=>_showMessageViewers(row['id'].toString()),borderRadius:BorderRadius.circular(12),child:Padding(padding:const EdgeInsets.only(top:7),child:Row(mainAxisSize:MainAxisSize.min,children:[const Icon(Icons.visibility_outlined,size:13,color:Colors.white70),const SizedBox(width:4),Text('${_seenCounts[row['id'].toString()]??0} seen',style:const TextStyle(color:Colors.white70,fontSize:10,fontWeight:FontWeight.w600))])) ))]))))));});})),
+    Expanded(child:Container(
+       decoration: BoxDecoration(
+         color: _chatBackgroundColor,
+         image: _chatWallpaperPath != null && File(_chatWallpaperPath!).existsSync()
+             ? DecorationImage(
+                 image: FileImage(File(_chatWallpaperPath!)),
+                 fit: BoxFit.cover,
+                 colorFilter: ColorFilter.mode(Colors.black.withValues(alpha: .12), BlendMode.darken),
+               )
+             : null,
+       ),
+       child:StreamBuilder<List<Map<String,dynamic>>>(stream:messages,builder:(context,snapshot){if(snapshot.hasData){InAppNotificationService.instance.markCommunityRead();unawaited(_archive.cacheMessages(snapshot.data!));unawaited(_flushPendingMessageViews());}final sourceRows=snapshot.hasData?snapshot.data!:_archivedRows;final rows=_archive.filterVisibleMessages(sourceRows);if(!_archiveReady)return const Center(child:CircularProgressIndicator());if(rows.isEmpty)return Center(child:Text(snapshot.hasError?'No saved messages yet. Connect to load the Community.':'Start the conversation. 👋'));scrollToLatest();return ListView.builder(controller:chatScroll,padding:const EdgeInsets.all(14),itemCount:rows.length,itemBuilder:(context,index){final row=rows[index],mine=row['author_id']==me;return VisibilityDetector(key:Key("community-message-${row['id']}"),onVisibilityChanged:(info){if(info.visibleFraction>=0.6&&row['author_id']!=me)unawaited(_recordMessageViewed(row['id'].toString()));},child:FutureBuilder<Map<String,dynamic>?>(future:profileFor(row['author_id'].toString()),builder:(context,n)=>Align(alignment:mine?Alignment.centerRight:Alignment.centerLeft,child:GestureDetector(onLongPress:()=>showModalBottomSheet(context:context,builder:(_)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[ListTile(leading:const Icon(Icons.reply_rounded),title:const Text('Reply'),onTap:(){Navigator.pop(context);setState(()=>replyingTo=row);}),if(mine)ListTile(leading:const Icon(Icons.delete_outline),title:const Text('Delete my message'),onTap:(){Navigator.pop(context);deleteOwn(row);}),if(!mine)ListTile(leading:const Icon(Icons.flag_outlined),title:const Text('Report to admin'),onTap:(){Navigator.pop(context);report(row);})]))),child:Container(constraints:const BoxConstraints(maxWidth:310),margin:const EdgeInsets.only(bottom:10),padding:const EdgeInsets.all(13),decoration:BoxDecoration(color:mine?_chatBubbleColor:Theme.of(context).cardColor,borderRadius:BorderRadius.circular(16),border:mine?null:Border.all(color:Theme.of(context).dividerColor)),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[if(row['reply_to_id']!=null)Builder(builder:(context){final target=replyTarget(rows,row['reply_to_id']);final preview=target==null?'Original message unavailable':target['message_type']=='voice'?'Voice note':target['message_type']=='file'?'File: ${target['file_name']??'Attachment'}':(target['body']?.toString()??'Message');return Container(width:double.infinity,margin:const EdgeInsets.only(bottom:8),padding:const EdgeInsets.symmetric(horizontal:9,vertical:7),decoration:BoxDecoration(color:(mine?Colors.white:const Color(0xFF0B5ED7)).withValues(alpha:.12),borderRadius:BorderRadius.circular(9),border:Border(left:BorderSide(color:mine?const Color(0xFFD4AF37):const Color(0xFF0B5ED7),width:3))),child:Row(children:[const Icon(Icons.reply_rounded,size:14),const SizedBox(width:6),Expanded(child:Text(preview,maxLines:2,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:11,fontStyle:FontStyle.italic)))]));}),Row(children:[CircleAvatar(radius:12,backgroundImage:(n.data?['avatar_url']?.toString().isNotEmpty??false)?NetworkImage(n.data!['avatar_url'].toString()):null,child:(n.data?['avatar_url']?.toString().isNotEmpty??false)?null:const Icon(Icons.person_rounded,size:14)),const SizedBox(width:7),Expanded(child:Text(n.data?['display_name']?.toString()??'N.G.N. Member',style:TextStyle(fontSize:11,fontWeight:FontWeight.w700,color:mine?const Color(0xFFD4AF37):const Color(0xFF0B5ED7))))]),const SizedBox(height:5),if(row['message_type']=='voice')InkWell(onTap:()=>playVoice(row),child:Row(mainAxisSize:MainAxisSize.min,children:[Icon(playingId==row['id']?Icons.stop_circle_outlined:Icons.play_circle_outline,color:mine?Colors.white:const Color(0xFF0B5ED7)),const SizedBox(width:8),Text('Voice note • ${row['voice_duration_seconds']??0}s',style:TextStyle(color:mine?Colors.white:null))]))else if(row['message_type']=='file')fileAttachment(row,mine)else Text(row['body']?.toString()??'',style:TextStyle(color:mine?Colors.white:null,height:1.35)),if(mine&&_isAdmin)Align(alignment:Alignment.centerRight,child:InkWell(onTap:()=>_showMessageViewers(row['id'].toString()),borderRadius:BorderRadius.circular(12),child:Padding(padding:const EdgeInsets.only(top:7),child:Row(mainAxisSize:MainAxisSize.min,children:[const Icon(Icons.visibility_outlined,size:13,color:Colors.white70),const SizedBox(width:4),Text('${_seenCounts[row['id'].toString()]??0} seen',style:const TextStyle(color:Colors.white70,fontSize:10,fontWeight:FontWeight.w600))])) ))]))))));});}))),
     SafeArea(top:false,child:Column(mainAxisSize:MainAxisSize.min,children:[if(replyingTo!=null)Container(margin:const EdgeInsets.fromLTRB(10,6,10,0),padding:const EdgeInsets.symmetric(horizontal:12,vertical:7),decoration:BoxDecoration(color:Theme.of(context).colorScheme.surfaceContainerHighest,borderRadius:BorderRadius.circular(12)),child:Row(children:[const Icon(Icons.reply_rounded,size:18),const SizedBox(width:8),Expanded(child:Text(replyingTo!['message_type']=='voice'?'Replying to voice note':replyingTo!['message_type']=='file'?'Replying to file: ${replyingTo!['file_name']??'Attachment'}':(replyingTo!['body']?.toString()??'Replying to message'),maxLines:1,overflow:TextOverflow.ellipsis)),IconButton(onPressed:()=>setState(()=>replyingTo=null),icon:const Icon(Icons.close_rounded),visualDensity:VisualDensity.compact)])),Padding(padding:const EdgeInsets.fromLTRB(10,8,10,10),child:Row(children:[IconButton.filledTonal(onPressed:sending||communityMode=='locked'?null:toggleRecording,icon:Icon(recording?Icons.stop_rounded:Icons.mic_none_rounded),tooltip:recording?'Stop voice note':'Record voice note'),const SizedBox(width:8),Expanded(child:TextField(controller:message,enabled:!recording&&communityMode!='locked',maxLength:2000,minLines:1,maxLines:4,decoration:InputDecoration(counterText:'',hintText:communityMode=='locked'?'Community chat is closed':recording?'Recording… $recordSeconds/120s':'Message the community',border:OutlineInputBorder(borderRadius:BorderRadius.circular(22))))),const SizedBox(width:8),IconButton.filled(onPressed:sending||recording||communityMode=='locked'?null:sendText,icon:sending?const SizedBox(width:18,height:18,child:CircularProgressIndicator(strokeWidth:2)):const Icon(Icons.send_rounded))]))]))
   ]));}
 }
