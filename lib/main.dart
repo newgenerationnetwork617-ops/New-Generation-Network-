@@ -30,10 +30,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabasePublishableKey);
   await DailyLocalNotificationService.instance.initialize();
-  await PushNotificationService.instance.initialize();
+
+  // Render the app before starting optional online push setup. If Firebase,
+  // Google Play services, or notification permissions are unavailable, NGN
+  // must still open normally instead of remaining on a black screen.
   runApp(const NewGenerationNetworkApp());
-  // In-app counters and guest chat identity can refresh after the first frame;
-  // local daily reminders must not wait on a network-dependent Supabase call.
+
+  unawaited(_initializePushNotificationsSafely());
+  // In-app counters and guest chat identity can refresh after the first frame.
   unawaited(InAppNotificationService.instance.initialize());
 }
 
