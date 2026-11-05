@@ -26,6 +26,16 @@ final appNavigatorKey = GlobalKey<NavigatorState>();
 const supabasePublishableKey =
     'sb_publishable_QiReFPxygdWtOlRy5Eol6Q_uuubGD7j';
 
+Future<void> _initializePushNotificationsSafely() async {
+  try {
+    await PushNotificationService.instance.initialize();
+  } catch (error, stackTrace) {
+    // Push is optional: log the issue but never prevent the app from opening.
+    debugPrint('NGN push notification setup failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabasePublishableKey);
