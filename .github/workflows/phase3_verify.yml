@@ -49,18 +49,18 @@ jobs:
           if "com.google.gms.google-services" not in settings_text:
               if "plugins {" not in settings_text:
                   raise SystemExit("Android settings plugins block was not found")
-              declaration = ('    id("com.google.gms.google-services") version "4.4.4" apply false\\n'
+              declaration = ('    id("com.google.gms.google-services") version "4.4.4" apply false\n'
                              if kotlin_dsl else
-                             "    id 'com.google.gms.google-services' version '4.4.4' apply false\\n")
-              settings_text = settings_text.replace("plugins {", "plugins {\\n" + declaration, 1)
+                             "    id 'com.google.gms.google-services' version '4.4.4' apply false\n")
+              settings_text = settings_text.replace("plugins {", "plugins {\n" + declaration, 1)
 
           if "com.google.gms.google-services" not in app_text:
               if "plugins {" not in app_text:
                   raise SystemExit("Android app plugins block was not found")
-              application_plugin = ('    id("com.google.gms.google-services")\\n'
+              application_plugin = ('    id("com.google.gms.google-services")\n'
                                     if app_gradle.suffix == ".kts" else
-                                    "    id 'com.google.gms.google-services'\\n")
-              app_text = app_text.replace("plugins {", "plugins {\\n" + application_plugin, 1)
+                                    "    id 'com.google.gms.google-services'\n")
+              app_text = app_text.replace("plugins {", "plugins {\n" + application_plugin, 1)
 
           settings.write_text(settings_text)
           app_gradle.write_text(app_text)
