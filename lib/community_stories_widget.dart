@@ -241,6 +241,7 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
   bool _loading = true;
   bool _deleting = false;
   int _viewCount = 0;
+  int _commentCount = 0;
   VideoPlayerController? _video;
 
   String get _storyId => widget.story['id'].toString();
@@ -274,6 +275,12 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
             .eq('story_id', _storyId);
         _viewCount = views.length;
       }
+
+      final comments = await _supabase
+          .from('community_story_comments')
+          .select('id')
+          .eq('story_id', _storyId);
+      _commentCount = comments.length;
 
       final signed = await _supabase.storage.from('ngn-downloads').createSignedUrl(_path, 3600);
       if (_isVideo) {
@@ -341,6 +348,194 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
     }
   }
 
+  Future<List<Map<String, dynamic>>> _fetchComments() async {
+    final rows = await _supabase
+        .from('community_story_comments')
+        .select('id,author_id,body,created_at')
+        .eq('story_id', _storyId)
+        .order('created_at', ascending: true);
+    final comments = List<Map<String, dynamic>>.from(rows);
+    final ids = comments.map((row) => row['author_id'].toString()).toSet().toList();
+    final profiles = ids.isEmpty
+        ? <Map<String, dynamic>>[]
+        : await _supabase.from('profiles').select('id,display_name,avatar_url').inFilter('id', ids);
+    final byId = {for (final profile in profiles) profile['id'].toString(): profile};
+    return comments.map((comment) {
+      final profile = byId[comment['author_id'].toString()];
+      return {
+        ...comment,
+        'display_name': profile?['display_name']?.toString() ?? 'N.G.N. Member',
+        'avatar_url': profile?['avatar_url']?.toString() ?? '',
+      };
+    }).toList();
+  }
+
+  Future<void> _showComments() async {
+    final controller = TextEditingController();
+    Future<List<Map<String, dynamic>>> commentsFuture = _fetchComments();
+    bool sending = false;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, setSheetState) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(sheetContext).viewInsets.bottom),
+            child: SizedBox(
+              height: MediaQuery.of(sheetContext).size.height * .72,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Story comments', style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Replies are visible to everyone who can view this story. They are not private chats.',
+                          style: Theme.of(sheetContext).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: FutureBuilder<List<Map<String, dynamic>>>(
+                      future: commentsFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Center(child: Text('Could not load comments: ' + snapshot.error.toString()));
+                        }
+                        final comments = snapshot.data ?? [];
+                        if (comments.isEmpty) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(24),
+                              child: Text('No comments yet. Be the first to respond.'),
+                            ),
+                          );
+                        }
+                        return ListView.separated(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          itemCount: comments.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1, indent: 68),
+                          itemBuilder: (context, index) {
+                            final comment = comments[index];
+                            final avatar = comment['avatar_url']?.toString() ?? '';
+                            final canDelete = comment['author_id']?.toString() == _supabase.auth.currentUser?.id || _isOwner;
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
+                                child: avatar.isEmpty ? const Icon(Icons.person_outline) : null,
+                              ),
+                              title: Text(comment['display_name']?.toString() ?? 'N.G.N. Member', style: const TextStyle(fontWeight: FontWeight.w700)),
+                              subtitle: Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(comment['body']?.toString() ?? ''),
+                              ),
+                              trailing: canDelete
+                                  ? PopupMenuButton<String>(
+                                      tooltip: 'Comment options',
+                                      onSelected: (value) async {
+                                        if (value != 'delete') return;
+                                        try {
+                                          await _supabase.from('community_story_comments').delete().eq('id', comment['id']);
+                                          final refreshed = _fetchComments();
+                                          setSheetState(() => commentsFuture = refreshed);
+                                          final updated = await refreshed;
+                                          if (mounted) setState(() => _commentCount = updated.length);
+                                        } catch (error) {
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Could not remove comment: ' + error.toString())),
+                                            );
+                                          }
+                                        }
+                                      },
+                                      itemBuilder: (_) => const [
+                                        PopupMenuItem(value: 'delete', child: Text('Remove comment')),
+                                      ],
+                                    )
+                                  : null,
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: controller,
+                            maxLength: 280,
+                            minLines: 1,
+                            maxLines: 3,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: InputDecoration(
+                              counterText: '',
+                              hintText: 'Write a short response…',
+                              filled: true,
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(22)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filled(
+                          tooltip: 'Post comment',
+                          onPressed: sending ? null : () async {
+                            final body = controller.text.trim();
+                            final user = _supabase.auth.currentUser;
+                            if (body.isEmpty || user == null) return;
+                            setSheetState(() => sending = true);
+                            try {
+                              await _supabase.from('community_story_comments').insert({
+                                'story_id': _storyId,
+                                'author_id': user.id,
+                                'body': body,
+                              });
+                              controller.clear();
+                              final refreshed = _fetchComments();
+                              setSheetState(() => commentsFuture = refreshed);
+                              final updated = await refreshed;
+                              if (mounted) setState(() => _commentCount = updated.length);
+                            } catch (error) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Could not post comment: ' + error.toString())),
+                                );
+                              }
+                            } finally {
+                              setSheetState(() => sending = false);
+                            }
+                          },
+                          icon: sending
+                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.send_rounded),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    controller.dispose();
+  }
+
   Future<void> _deleteStory() async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -375,71 +570,108 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: colors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: colors.surface,
+        foregroundColor: colors.onSurface,
+        elevation: 0,
         title: Text(_isOwner ? 'Your story' : 'Community story'),
         actions: [
           if (_isOwner)
             IconButton(
               onPressed: _deleting ? null : _showViewers,
-              tooltip: 'Viewers',
+              tooltip: 'See who viewed',
               icon: const Icon(Icons.visibility_outlined),
             ),
           if (_isOwner)
             IconButton(
               onPressed: _deleting ? null : _deleteStory,
               tooltip: 'Delete story',
-              icon: _deleting ? const CircularProgressIndicator() : const Icon(Icons.delete_outline),
+              icon: _deleting
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.delete_outline),
             ),
         ],
       ),
-      body: Center(
-        child: _loading
-            ? const CircularProgressIndicator()
-            : _error != null
-                ? Padding(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
+              ? Center(
+                  child: Padding(
                     padding: const EdgeInsets.all(24),
-                    child: Text(_error!, style: const TextStyle(color: Colors.white), textAlign: TextAlign.center),
-                  )
-                : Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      if (_isVideo && _video != null)
-                        Center(
-                          child: AspectRatio(
-                            aspectRatio: _video!.value.aspectRatio,
-                            child: VideoPlayer(_video!),
-                          ),
-                        )
-                      else if (_url != null)
-                        InteractiveViewer(child: Image.network(_url!, fit: BoxFit.contain)),
-                      if ((widget.story['caption']?.toString() ?? '').isNotEmpty)
-                        Positioned(
-                          left: 16,
-                          right: 16,
-                          bottom: 24,
-                          child: SafeArea(
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(12)),
-                              child: Text(widget.story['caption'].toString(), style: const TextStyle(color: Colors.white, fontSize: 15)),
-                            ),
-                          ),
-                        ),
-                      if (_isOwner)
-                        Positioned(
-                          right: 18,
-                          bottom: 20,
-                          child: SafeArea(
-                            child: Text('$_viewCount views', style: const TextStyle(color: Colors.white70)),
-                          ),
-                        ),
-                    ],
+                    child: Text(_error!, textAlign: TextAlign.center, style: TextStyle(color: colors.onSurface)),
                   ),
-      ),
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        width: double.infinity,
+                        color: colors.surfaceContainerHighest,
+                        alignment: Alignment.center,
+                        child: _isVideo && _video != null
+                            ? AspectRatio(
+                                aspectRatio: _video!.value.aspectRatio,
+                                child: VideoPlayer(_video!),
+                              )
+                            : _url != null
+                                ? InteractiveViewer(
+                                    minScale: 0.8,
+                                    maxScale: 4,
+                                    child: Image.network(
+                                      _url!,
+                                      fit: BoxFit.contain,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      errorBuilder: (_, __, ___) => Center(
+                                        child: Text('Story media could not be loaded.', style: TextStyle(color: colors.onSurface)),
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                      ),
+                    ),
+                    if ((widget.story['caption']?.toString() ?? '').isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.fromLTRB(18, 13, 18, 6),
+                        color: colors.surface,
+                        child: Text(
+                          widget.story['caption'].toString(),
+                          style: TextStyle(color: colors.onSurface, fontSize: 15, height: 1.4),
+                        ),
+                      ),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        border: Border(top: BorderSide(color: colors.outlineVariant)),
+                      ),
+                      child: SafeArea(
+                        top: false,
+                        child: Row(
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: _showComments,
+                              icon: const Icon(Icons.chat_bubble_outline_rounded),
+                              label: Text('Comments ($_commentCount)'),
+                            ),
+                            const Spacer(),
+                            if (_isOwner)
+                              TextButton.icon(
+                                onPressed: _showViewers,
+                                icon: const Icon(Icons.visibility_outlined),
+                                label: Text('$_viewCount views'),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
       floatingActionButton: _isVideo && _video != null && !_loading
           ? FloatingActionButton.small(
               onPressed: () => setState(() {
