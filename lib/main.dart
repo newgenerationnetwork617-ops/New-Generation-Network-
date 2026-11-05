@@ -217,6 +217,8 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
       );
     } else if (payload.startsWith('word:')) {
       setState(() => index = 0);
+    } else if (payload.startsWith('reflection:')) {
+      setState(() => index = 1);
     }
   }
 
