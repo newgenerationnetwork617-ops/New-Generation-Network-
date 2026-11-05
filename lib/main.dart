@@ -53,8 +53,8 @@ Future<void> main() async {
 
 class NewGenerationNetworkApp extends StatefulWidget {
   const NewGenerationNetworkApp({super.key});
-  static const primaryBlue = Color(0xFF1746A2);
-  static const accentGold = Color(0xFFFFC94A);
+  static const primaryBlue = Color(0xFF073B8C);
+  static const accentGold = Color(0xFFD4AF37);
 
 
   @override
@@ -90,6 +90,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'Roboto',
+        visualDensity: VisualDensity.standard,
         colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue).copyWith(
           primary: primaryBlue,
           secondary: accentGold,
@@ -97,15 +98,15 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           surface: Colors.white,
           onSurface: const Color(0xFF171A1F),
         ),
-        scaffoldBackgroundColor: const Color(0xFFF4F7FC),
-        dividerColor: const Color(0xFFE2E8F2),
+        scaffoldBackgroundColor: const Color(0xFFF2F5FA),
+        dividerColor: const Color(0xFFE3E8F0),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Color(0xFF111827),
+          backgroundColor: primaryBlue,
+          foregroundColor: Colors.white,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           centerTitle: false,
-          titleTextStyle: TextStyle(color: Color(0xFF111827), fontSize: 20, fontWeight: FontWeight.w700),
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.2),
         ),
         cardTheme: CardThemeData(
           color: Colors.white,
@@ -113,7 +114,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           elevation: 0,
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            side: const BorderSide(color: Color(0xFFE2E8F2)),
+            side: const BorderSide(color: Color(0xFFE3E8F0)),
             borderRadius: BorderRadius.circular(16),
           ),
         ),
@@ -131,7 +132,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           height: 68,
           elevation: 0,
           backgroundColor: Colors.white,
-          indicatorColor: Color(0xFFE8F0FE),
+          indicatorColor: Color(0xFFF3E7B5),
           labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
         ),
       ),
@@ -139,12 +140,12 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
         useMaterial3: true,
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue, brightness: Brightness.dark).copyWith(
-          primary: const Color(0xFF7CB0FF),
+          primary: const Color(0xFF9ABEFF),
           secondary: accentGold,
           tertiary: const Color(0xFF45C7A4),
-          surface: const Color(0xFF13233A),
+          surface: const Color(0xFF102A50),
         ),
-        scaffoldBackgroundColor: const Color(0xFF081629),
+        scaffoldBackgroundColor: const Color(0xFF061B3A),
         appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF081629), surfaceTintColor: Colors.transparent, elevation: 0),
         cardTheme: CardThemeData(color: const Color(0xFF13233A), surfaceTintColor: Colors.transparent, elevation: 0, shape: RoundedRectangleBorder(side: const BorderSide(color: Color(0xFF263B57)), borderRadius: BorderRadius.circular(16))),
         navigationBarTheme: const NavigationBarThemeData(height: 68, elevation: 0, backgroundColor: Color(0xFF0D1E33), indicatorColor: Color(0xFF1B3A62)),
