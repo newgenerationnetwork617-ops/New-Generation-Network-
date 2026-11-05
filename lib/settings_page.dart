@@ -14,6 +14,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool dailyVerseEnabled = true;
   bool devotionalEnabled = true;
+  bool eveningReflectionEnabled = true;
   bool notificationSettingsLoaded = false;
 
   @override
@@ -26,10 +27,12 @@ class _SettingsPageState extends State<SettingsPage> {
     final service = DailyLocalNotificationService.instance;
     final verse = await service.dailyVerseEnabled();
     final devotional = await service.devotionalEnabled();
+    final evening = await service.eveningReflectionEnabled();
     if (!mounted) return;
     setState(() {
       dailyVerseEnabled = verse;
       devotionalEnabled = devotional;
+      eveningReflectionEnabled = evening;
       notificationSettingsLoaded = true;
     });
   }
@@ -42,6 +45,11 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _setDevotional(bool enabled) async {
     setState(() => devotionalEnabled = enabled);
     await DailyLocalNotificationService.instance.setDevotionalEnabled(enabled);
+  }
+
+  Future<void> _setEveningReflection(bool enabled) async {
+    setState(() => eveningReflectionEnabled = enabled);
+    await DailyLocalNotificationService.instance.setEveningReflectionEnabled(enabled);
   }
 
   Future<void> openLink(String url) async {
@@ -83,16 +91,23 @@ class _SettingsPageState extends State<SettingsPage> {
             SwitchListTile(
               secondary: const Icon(Icons.auto_stories_rounded),
               title: const Text('Daily Bible verse'),
-              subtitle: const Text('Offline reminder at 7:00 AM'),
+              subtitle: const Text('Offline reminder at 6:30 AM'),
               value: dailyVerseEnabled,
               onChanged: notificationSettingsLoaded ? _setDailyVerse : null,
             ),
             SwitchListTile(
               secondary: const Icon(Icons.menu_book_rounded),
               title: const Text('Daily devotional'),
-              subtitle: const Text('Offline reminder at 7:30 AM'),
+              subtitle: const Text('Offline reminder at 7:00 AM'),
               value: devotionalEnabled,
               onChanged: notificationSettingsLoaded ? _setDevotional : null,
+            ),
+            SwitchListTile(
+              secondary: const Icon(Icons.nights_stay_rounded),
+              title: const Text('Evening spiritual reflection'),
+              subtitle: const Text('Daily reminder at 6:00 PM'),
+              value: eveningReflectionEnabled,
+              onChanged: notificationSettingsLoaded ? _setEveningReflection : null,
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
