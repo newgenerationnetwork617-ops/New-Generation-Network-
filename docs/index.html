@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1d3a">
+  <meta name="description" content="New Generation Network — Raising a Righteous Generation for Christ. Gospel inspiration, Christian movies, powerful messages, worship, faith and testimonies.">
+  <title>New Generation Network | Raising a Righteous Generation for Christ</title>
+  <link rel="icon" href="https://raw.githubusercontent.com/newgenerationnetwork617-ops/New-Generation-Network-/main/assets/branding/ngn_app_icon-3.png">
+  <style>
+    :root{--navy:#081a35;--blue:#123d78;--gold:#f2c14e;--ink:#17243a;--muted:#64748b;--paper:#f7f9fc;--white:#fff}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--white);line-height:1.65}
+    a{color:inherit;text-decoration:none}.wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+    .topbar{background:var(--navy);color:#dbe7f7;font-size:.88rem;padding:9px 0}.topbar .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    header{position:sticky;top:0;z-index:10;background:#ffffffed;backdrop-filter:blur(14px);border-bottom:1px solid #e8edf4}
+    nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:12px;font-weight:800;color:var(--navy);letter-spacing:.02em}.brand img{width:48px;height:48px;object-fit:contain;border-radius:12px}.brand span{display:block;font-size:.7rem;color:var(--muted);font-weight:600;letter-spacing:.13em}
+    .links{display:flex;align-items:center;gap:25px;font-size:.94rem;font-weight:650}.links a:hover{color:var(--blue)}.menu{display:none;border:0;background:none;font-size:1.6rem;color:var(--navy)}
+    .hero{position:relative;overflow:hidden;background:radial-gradient(circle at 82% 25%,#285b9a 0,transparent 34%),linear-gradient(120deg,#07172f,#123d78 68%,#174c86);color:white;padding:94px 0 88px}
+    .hero:after{content:"";position:absolute;width:420px;height:420px;border:1px solid #ffffff20;border-radius:50%;right:-120px;bottom:-250px;box-shadow:0 0 0 42px #ffffff08,0 0 0 88px #ffffff06}
+    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;align-items:center;gap:54px;position:relative;z-index:1}
+    .eyebrow{display:inline-flex;align-items:center;gap:9px;color:#ffe39a;text-transform:uppercase;font-size:.78rem;font-weight:800;letter-spacing:.18em}.eyebrow:before{content:"";width:28px;height:2px;background:var(--gold)}
+    h1{font-size:clamp(2.55rem,5.3vw,4.6rem);line-height:1.08;letter-spacing:-.045em;margin:20px 0}.hero p{font-size:1.12rem;color:#e2ebf7;max-width:650px;margin:0 0 30px}
+    .actions{display:flex;gap:13px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 21px;border-radius:9px;font-weight:800;transition:.2s}.btn-primary{background:var(--gold);color:#18243a}.btn-primary:hover{transform:translateY(-2px);background:#ffda76}.btn-outline{border:1px solid #ffffff80;color:white}.btn-outline:hover{background:#ffffff14}
+    .hero-mark{display:flex;justify-content:center;align-items:center}.hero-mark img{width:min(320px,75%);aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 24px 38px #0005);border-radius:28px}
+    section{padding:82px 0}.section-head{max-width:720px;margin:0 auto 42px;text-align:center}.kicker{color:#a97913;text-transform:uppercase;font-size:.76rem;font-weight:850;letter-spacing:.17em}.section-head h2{font-size:clamp(2rem,4vw,3rem);line-height:1.15;color:var(--navy);letter-spacing:-.035em;margin:10px 0 14px}.section-head p{color:var(--muted);margin:0}
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.info-card{padding:30px;border:1px solid #e6ebf2;border-radius:17px;background:white;box-shadow:0 12px 35px #10294a08}.info-card .symbol{width:46px;height:46px;border-radius:13px;background:#fff4d8;color:#95680d;display:grid;place-items:center;font-size:1.3rem}.info-card h3{color:var(--navy);font-size:1.35rem;margin:16px 0 8px}.info-card p{color:var(--muted);margin:0}
+    .purpose{background:var(--paper)}.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.pillar{background:white;border:1px solid #e7edf5;border-radius:15px;padding:23px}.pillar b{display:block;color:var(--navy);margin-bottom:7px}.pillar p{font-size:.93rem;color:var(--muted);margin:0}.num{font-size:.78rem;color:#b17c15;font-weight:900;letter-spacing:.1em}
+    .app-panel{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:44px;background:linear-gradient(120deg,#0a1d3b,#174b83);border-radius:24px;padding:48px;color:white;overflow:hidden}.app-panel h2{font-size:clamp(2rem,4vw,2.8rem);line-height:1.15;margin:12px 0}.app-panel p{color:#dce7f5}.app-icon{display:flex;justify-content:center}.app-icon img{width:190px;height:190px;object-fit:contain;border-radius:28px;box-shadow:0 20px 40px #0004}.download-note{font-size:.82rem;color:#d4dfed;margin-top:13px}
+    .contact{background:#f7f9fc}.contact-card{max-width:760px;margin:auto;text-align:center;background:white;border:1px solid #e6ebf2;border-radius:18px;padding:38px}.contact-card h2{color:var(--navy);margin:0 0 10px}.contact-card p{color:var(--muted)}
+    footer{background:#07172f;color:#dbe6f4;padding:32px 0}.foot{display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}.foot small{color:#aabbd1}.foot a{color:#ffe39a}
+    @media(max-width:800px){.hero-grid,.app-panel{grid-template-columns:1fr}.hero{padding:70px 0}.hero-mark{order:-1}.hero-mark img{width:170px}.pillars{grid-template-columns:1fr 1fr}.links{display:none;position:absolute;top:76px;left:0;right:0;background:white;padding:20px 24px 25px;border-bottom:1px solid #e8edf4;flex-direction:column;align-items:flex-start}.links.open{display:flex}.menu{display:block}.app-panel{padding:32px}.app-icon{order:-1}}
+    @media(max-width:520px){.wrap{width:min(100% - 30px,1120px)}section{padding:62px 0}.about-grid,.pillars{grid-template-columns:1fr}.topbar .wrap{justify-content:center;text-align:center}.brand img{width:42px;height:42px}.brand{font-size:.9rem}.hero p{font-size:1rem}.contact-card{padding:27px 20px}}
+  </style>
+</head>
+<body>
+  <div class="topbar"><div class="wrap"><span>Faith • Hope • Transformation</span><span>Raising a Righteous Generation for Christ</span></div></div>
+  <header><nav class="wrap">
+    <a class="brand" href="#home"><img src="https://raw.githubusercontent.com/newgenerationnetwork617-ops/New-Generation-Network-/main/assets/branding/ngn_team_logo.png" alt="New Generation Network logo"><div>NEW GENERATION NETWORK<span>N.G.N. MINISTRY</span></div></a>
+    <button class="menu" id="menuBtn" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <div class="links" id="navLinks"><a href="#home">Home</a><a href="#about">About Us</a><a href="#purpose">Our Focus</a><a href="#app">NGN App</a><a href="#contact">Contact</a></div>
+  </nav></header>
+  <main>
+    <section class="hero" id="home"><div class="wrap hero-grid">
+      <div><div class="eyebrow">Welcome to N.G.N.</div><h1>Raising a Righteous Generation for Christ.</h1>
+        <p>A home for Gospel inspiration, Christian movies, powerful messages, worship, faith, testimonies and life-changing content. We exist to spread the Gospel of Jesus Christ, inspire lives, strengthen faith and bring hope to people around the world.</p>
+        <div class="actions"><a class="btn btn-primary" href="#about">Discover Our Ministry <span>→</span></a><a class="btn btn-outline" href="#app">Explore the NGN App</a></div>
+      </div>
+      <div class="hero-mark"><img src="https://raw.githubusercontent.com/newgenerationnetwork617-ops/New-Generation-Network-/main/assets/branding/ngn_team_logo.png" alt="New Generation Network ministry emblem"></div>
+    </div></section>
+    <section id="about"><div class="wrap">
+      <div class="section-head"><div class="kicker">Who We Are</div><h2>A generation growing in Christ</h2><p>New Generation Network is a Christian ministry committed to sharing the message of Jesus Christ and encouraging people to live out their faith.</p></div>
+      <div class="about-grid">
+        <article class="info-card"><div class="symbol">✦</div><h3>Our Mission</h3><p>To spread the Gospel of Jesus Christ, inspire lives, strengthen faith, and bring hope to people around the world through impactful Christian content.</p></article>
+        <article class="info-card"><div class="symbol">◎</div><h3>Our Vision</h3><p>Raising a righteous generation for Christ — a generation grounded in faith and inspired to reflect Christ in everyday life.</p></article>
+      </div>
+    </div></section>
+    <section class="purpose" id="purpose"><div class="wrap">
+      <div class="section-head"><div class="kicker">What We Share</div><h2>Content that inspires faith</h2><p>We use impactful Christian content to encourage spiritual growth, share hope and point people to Jesus Christ.</p></div>
+      <div class="pillars">
+        <article class="pillar"><span class="num">01</span><b>Gospel Messages</b><p>Biblical teachings and powerful messages to strengthen faith.</p></article>
+        <article class="pillar"><span class="num">02</span><b>Worship & Praise</b><p>Worship content that encourages hearts to draw closer to God.</p></article>
+        <article class="pillar"><span class="num">03</span><b>Christian Movies</b><p>Faith-centred stories and films that inspire reflection.</p></article>
+        <article class="pillar"><span class="num">04</span><b>Testimonies & Hope</b><p>Stories and encouragement that remind us of God's goodness.</p></article>
+      </div>
+    </div></section>
+    <section id="app"><div class="wrap"><div class="app-panel">
+      <div><div class="eyebrow">Take NGN With You</div><h2>Grow in faith wherever you are.</h2><p>Get the New Generation Network Android app for Gospel inspiration and faith-building content in one place.</p>
+        <div class="actions"><a class="btn btn-primary" id="downloadBtn" href="https://github.com/newgenerationnetwork617-ops/New-Generation-Network-/releases" target="_blank" rel="noopener">View App Downloads ↗</a><a class="btn btn-outline" href="https://github.com/newgenerationnetwork617-ops/New-Generation-Network-/releases" target="_blank" rel="noopener">All releases</a></div>
+        <div class="download-note" id="releaseNote" aria-live="polite">Checking for the latest Android release…</div>
+      </div>
+      <div class="app-icon"><img src="https://raw.githubusercontent.com/newgenerationnetwork617-ops/New-Generation-Network-/main/assets/branding/ngn_app_icon-3.png" alt="NGN app icon"></div>
+    </div></div></section>
+    <section class="contact" id="contact"><div class="wrap"><div class="contact-card"><div class="kicker">Stay Connected</div><h2>Be part of the journey.</h2><p>Follow the ministry's updates and explore more New Generation Network content.</p><a class="btn btn-primary" href="https://ngn-official.wordpress.com/" target="_blank" rel="noopener">Visit NGN Official ↗</a></div></div></section>
+  </main>
+  <footer><div class="wrap foot"><div><strong>NEW GENERATION NETWORK</strong><br><small>Raising a Righteous Generation for Christ.</small></div><small>© <span id="year"></span> New Generation Network. All rights reserved.</small></div></footer>
+  <script>
+    const menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementById('navLinks');
+    menuBtn.addEventListener('click',()=>{const open=navLinks.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open));});
+    navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{navLinks.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');}));
+    document.getElementById('year').textContent=new Date().getFullYear();
+    async function loadLatestApk(){
+      const note=document.getElementById('releaseNote'),button=document.getElementById('downloadBtn');
+      try{
+        const response=await fetch('https://api.github.com/repos/newgenerationnetwork617-ops/New-Generation-Network-/releases?per_page=10');
+        if(!response.ok) throw new Error('No release feed');
+        const releases=await response.json();
+        const release=releases.find(r=>!r.draft && r.assets && r.assets.some(a=>a.name.toLowerCase().endsWith('.apk')));
+        if(release){
+          const apk=release.assets.find(a=>a.name.toLowerCase().endsWith('.apk'));
+          button.href=apk.browser_download_url;button.textContent='Download Android App ↓';
+          note.textContent='Latest version: '+release.tag_name+' · '+apk.name;
+        }else{
+          note.textContent='The Android download will appear here as soon as the first APK is published.';
+        }
+      }catch(e){note.textContent='App downloads are listed on the NGN GitHub Releases page.';}
+    }
+    loadLatestApk();
+  </script>
+</body>
+</html>
