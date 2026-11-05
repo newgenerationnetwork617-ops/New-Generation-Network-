@@ -130,9 +130,13 @@ class _CommunityStoriesWidgetState extends State<CommunityStoriesWidget> {
     return row == null ? null : Map<String, dynamic>.from(row);
   }
 
-  void _openStory(Map<String, dynamic> story) {
+  void _openStoryGroup(List<Map<String, dynamic>> stories) {
+    if (stories.isEmpty) return;
+    final ordered = [...stories]
+      ..sort((a, b) => DateTime.tryParse(a['created_at']?.toString() ?? '')!
+          .compareTo(DateTime.tryParse(b['created_at']?.toString() ?? '')!));
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => CommunityStoryViewerPage(story: story)),
+      MaterialPageRoute(builder: (_) => CommunityStoryViewerPage(stories: ordered)),
     );
   }
 
@@ -149,76 +153,133 @@ class _CommunityStoriesWidgetState extends State<CommunityStoriesWidget> {
             final expiry = DateTime.tryParse(story['expires_at']?.toString() ?? '');
             return expiry != null && expiry.isAfter(now);
           }).toList();
+          final grouped = <String, List<Map<String, dynamic>>>{};
+          for (final story in active) {
+            final authorId = story['author_id']?.toString() ?? '';
+            if (authorId.isNotEmpty) grouped.putIfAbsent(authorId, () => []).add(story);
+          }
+          final storyIds = active.map((story) => story['id'].toString()).toList();
+          final user = _supabase.auth.currentUser;
+          final seenFuture = user == null || storyIds.isEmpty
+              ? Future<Set<String>>.value(<String>{})
+              : _supabase
+                  .from('community_story_views')
+                  .select('story_id')
+                  .eq('viewer_id', user.id)
+                  .inFilter('story_id', storyIds)
+                  .then((rows) => rows.map((row) => row['story_id'].toString()).toSet());
 
-          return ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-            children: [
-              SizedBox(
-                width: 76,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: _uploading ? null : _addStory,
-                  child: Column(
-                    children: [
-                      Stack(
+          return FutureBuilder<Set<String>>(
+            future: seenFuture,
+            builder: (context, seenSnapshot) {
+              final seen = seenSnapshot.data ?? <String>{};
+              final ownStories = currentUserId == null
+                  ? <Map<String, dynamic>>[]
+                  : (grouped[currentUserId] ?? <Map<String, dynamic>>[]);
+              final otherIds = grouped.keys.where((id) => id != currentUserId).toList();
+              return ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                children: [
+                  SizedBox(
+                    width: 76,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: _uploading
+                          ? null
+                          : () => ownStories.isEmpty ? _addStory() : _openStoryGroup(ownStories),
+                      onLongPress: _uploading ? null : _addStory,
+                      child: Column(
                         children: [
-                          CircleAvatar(
-                            radius: 29,
-                            backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: .10),
-                            child: _uploading
-                                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                                : Icon(Icons.add_rounded, size: 30, color: Theme.of(context).colorScheme.primary),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      Text(_uploading ? 'Posting…' : 'Your story', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
-                    ],
-                  ),
-                ),
-              ),
-              ...active.map((story) {
-                final authorId = story['author_id'].toString();
-                return SizedBox(
-                  width: 76,
-                  child: FutureBuilder<Map<String, dynamic>?>(
-                    future: _profile(authorId),
-                    builder: (context, profileSnapshot) {
-                      final profile = profileSnapshot.data;
-                      final name = profile?['display_name']?.toString() ?? 'Member';
-                      final avatar = profile?['avatar_url']?.toString() ?? '';
-                      final own = authorId == currentUserId;
-                      return InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        onTap: () => _openStory(story),
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(2.5),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: own ? const Color(0xFFD4AF37) : Theme.of(context).colorScheme.primary,
-                                  width: 2.3,
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(2.5),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: ownStories.isNotEmpty
+                                        ? const Color(0xFFD4AF37)
+                                        : Theme.of(context).colorScheme.outlineVariant,
+                                    width: 2.3,
+                                  ),
+                                ),
+                                child: CircleAvatar(
+                                  radius: 26,
+                                  backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: .10),
+                                  child: _uploading
+                                      ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
+                                      : Icon(Icons.person_rounded, size: 27, color: Theme.of(context).colorScheme.primary),
                                 ),
                               ),
-                              child: CircleAvatar(
-                                radius: 26,
-                                backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
-                                child: avatar.isEmpty ? Text(name.isEmpty ? 'N' : name[0].toUpperCase()) : null,
+                              Positioned(
+                                right: -1,
+                                bottom: -1,
+                                child: GestureDetector(
+                                  onTap: _uploading ? null : _addStory,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 2),
+                                    ),
+                                    padding: const EdgeInsets.all(3),
+                                    child: const Icon(Icons.add, size: 14, color: Colors.white),
+                                  ),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(own ? 'Your story' : name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
-                          ],
-                        ),
-                      );
-                    },
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          Text(_uploading ? 'Posting…' : 'Your story', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
+                        ],
+                      ),
+                    ),
                   ),
-                );
-              }),
-            ],
+                  ...otherIds.map((authorId) {
+                    final authorStories = grouped[authorId]!;
+                    return SizedBox(
+                      width: 76,
+                      child: FutureBuilder<Map<String, dynamic>?>(
+                        future: _profile(authorId),
+                        builder: (context, profileSnapshot) {
+                          final profile = profileSnapshot.data;
+                          final name = profile?['display_name']?.toString() ?? 'Member';
+                          final avatar = profile?['avatar_url']?.toString() ?? '';
+                          final hasUnseen = authorStories.any((story) => !seen.contains(story['id'].toString()));
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () => _openStoryGroup(authorStories),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(2.5),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: hasUnseen ? const Color(0xFF16A34A) : Theme.of(context).colorScheme.outlineVariant,
+                                      width: 2.3,
+                                    ),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 26,
+                                    backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
+                                    child: avatar.isEmpty ? Text(name.isEmpty ? 'N' : name[0].toUpperCase()) : null,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11)),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }),
+                ],
+              );
+            },
           );
         },
       ),
@@ -227,8 +288,8 @@ class _CommunityStoriesWidgetState extends State<CommunityStoriesWidget> {
 }
 
 class CommunityStoryViewerPage extends StatefulWidget {
-  const CommunityStoryViewerPage({super.key, required this.story});
-  final Map<String, dynamic> story;
+  const CommunityStoryViewerPage({super.key, required this.stories});
+  final List<Map<String, dynamic>> stories;
 
   @override
   State<CommunityStoryViewerPage> createState() => _CommunityStoryViewerPageState();
@@ -243,11 +304,32 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
   int _viewCount = 0;
   int _commentCount = 0;
   VideoPlayerController? _video;
+  int _storyIndex = 0;
 
-  String get _storyId => widget.story['id'].toString();
-  String get _path => widget.story['media_path'].toString();
-  bool get _isOwner => _supabase.auth.currentUser?.id == widget.story['author_id']?.toString();
-  bool get _isVideo => widget.story['media_type'] == 'video';
+  Map<String, dynamic> get _currentStory => widget.stories[_storyIndex];
+  String get _storyId => _currentStory['id'].toString();
+  String get _path => _currentStory['media_path'].toString();
+  bool get _isOwner => _supabase.auth.currentUser?.id == _currentStory['author_id']?.toString();
+  bool get _isVideo => _currentStory['media_type'] == 'video';
+
+  Future<void> _showStoryAt(int index) async {
+    if (index < 0 || index >= widget.stories.length || index == _storyIndex) return;
+    await _video?.dispose();
+    _video = null;
+    if (!mounted) return;
+    setState(() {
+      _storyIndex = index;
+      _url = null;
+      _error = null;
+      _loading = true;
+      _viewCount = 0;
+      _commentCount = 0;
+    });
+    await _loadStory();
+  }
+
+  void _nextStory() => _showStoryAt(_storyIndex + 1);
+  void _previousStory() => _showStoryAt(_storyIndex - 1);
 
   @override
   void initState() {
@@ -572,7 +654,7 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final caption = widget.story['caption']?.toString() ?? '';
+    final caption = _currentStory['caption']?.toString() ?? '';
     return Scaffold(
       backgroundColor: const Color(0xFF081321),
       appBar: AppBar(
@@ -600,7 +682,13 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
             ),
         ],
       ),
-      body: _loading
+      body: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          final velocity = details.primaryVelocity ?? 0;
+          if (velocity < -150) _nextStory();
+          if (velocity > 150) _previousStory();
+        },
+        child: _loading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37)))
           : _error != null
               ? Center(
@@ -732,6 +820,7 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                     ),
                   ],
                 ),
+      ),
       floatingActionButton: _isVideo && _video != null && !_loading && _error == null
           ? FloatingActionButton.small(
               backgroundColor: const Color(0xFFD4AF37),
