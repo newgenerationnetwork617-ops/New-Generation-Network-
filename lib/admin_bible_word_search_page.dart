@@ -210,7 +210,7 @@ class _AdminBibleWordSearchPageState extends State<AdminBibleWordSearchPage> {
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('PUBLISH NEW OFFLINE PUZZLES', style: TextStyle(color: Color(0xFFFFC94A), fontWeight: FontWeight.w900, letterSpacing: .6)),
+                  const Text('PUBLISH NEW OFFLINE PUZZLES', style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.w900, letterSpacing: .6)),
                   const SizedBox(height: 7),
                   Text('${rows.length} managed here • $published published', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 6),
