@@ -5,6 +5,7 @@ import 'in_app_notifications.dart';
 import 'daily_local_notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'push_notification_service.dart';
 
 import 'settings_page.dart';
 import 'community_page.dart';
@@ -29,6 +30,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabasePublishableKey);
   await DailyLocalNotificationService.instance.initialize();
+  await PushNotificationService.instance.initialize();
   runApp(const NewGenerationNetworkApp());
   // In-app counters and guest chat identity can refresh after the first frame;
   // local daily reminders must not wait on a network-dependent Supabase call.
