@@ -53,8 +53,8 @@ class _PuzzleCategory {
 
 class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
   static const int size = 12;
-  static const blue = Color(0xFF1746A2);
-  static const gold = Color(0xFFFFC94A);
+  static const blue = Color(0xFF073B8C);
+  static const gold = Color(0xFFD4AF37);
   static const bestKey = 'ngn_bible_grid_search_best';
   static const queueKey = 'ngn_game_score_queue';
   static const cacheKey = 'ngn_word_search_downloaded_puzzles_v2';
