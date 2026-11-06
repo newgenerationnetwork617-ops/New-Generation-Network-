@@ -15,6 +15,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool dailyVerseEnabled = true;
   bool devotionalEnabled = true;
   bool eveningReflectionEnabled = true;
+  bool specialGreetingsEnabled = true;
   bool notificationSettingsLoaded = false;
 
   @override
@@ -28,11 +29,13 @@ class _SettingsPageState extends State<SettingsPage> {
     final verse = await service.dailyVerseEnabled();
     final devotional = await service.devotionalEnabled();
     final evening = await service.eveningReflectionEnabled();
+    final greetings = await service.specialGreetingsEnabled();
     if (!mounted) return;
     setState(() {
       dailyVerseEnabled = verse;
       devotionalEnabled = devotional;
       eveningReflectionEnabled = evening;
+      specialGreetingsEnabled = greetings;
       notificationSettingsLoaded = true;
     });
   }
@@ -50,6 +53,11 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _setEveningReflection(bool enabled) async {
     setState(() => eveningReflectionEnabled = enabled);
     await DailyLocalNotificationService.instance.setEveningReflectionEnabled(enabled);
+  }
+
+  Future<void> _setSpecialGreetings(bool enabled) async {
+    setState(() => specialGreetingsEnabled = enabled);
+    await DailyLocalNotificationService.instance.setSpecialGreetingsEnabled(enabled);
   }
 
   Future<void> openLink(String url) async {
@@ -108,6 +116,13 @@ class _SettingsPageState extends State<SettingsPage> {
               subtitle: const Text('Daily reminder at 6:00 PM'),
               value: eveningReflectionEnabled,
               onChanged: notificationSettingsLoaded ? _setEveningReflection : null,
+            ),
+            SwitchListTile(
+              secondary: const Icon(Icons.celebration_rounded),
+              title: const Text('Monthly & special greetings'),
+              subtitle: const Text('9:00 AM on new months, New Year, year-end, Good Friday, Easter and Christmas'),
+              value: specialGreetingsEnabled,
+              onChanged: notificationSettingsLoaded ? _setSpecialGreetings : null,
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
