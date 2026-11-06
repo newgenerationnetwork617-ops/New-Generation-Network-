@@ -251,7 +251,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     } else if (payload.startsWith('word:')) {
       setState(() => index = 0);
     } else if (payload.startsWith('reflection:')) {
-      setState(() => index = 1);
+      setState(() => index = 2);
     }
   }
 
@@ -291,9 +291,10 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     final pages = <Widget>[
       HomeContent(key: ValueKey(DateTime.now().toLocal().toIso8601String().substring(0, 10))),
       const BiblePage(),
+      const DevotionalsPage(),
       const TeachingsPage(),
-      const EventsPage(),
       const CommunityPage(),
+      const BibleGamesHubPage(),
     ];
     return Scaffold(
       body: IndexedStack(index: index, children: pages),
@@ -312,13 +313,15 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
               child: const Icon(Icons.menu_rounded),
             ),
       bottomNavigationBar: NavigationBar(
+        height: 76,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         selectedIndex: index,
         onDestinationSelected: (value) => setState(() => index = value),
         destinations: [
           const NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home_rounded), label: 'Home'),
           const NavigationDestination(icon: Icon(Icons.auto_stories_outlined), selectedIcon: Icon(Icons.auto_stories_rounded), label: 'Bible'),
-          const NavigationDestination(icon: Icon(Icons.play_circle_outline_rounded), selectedIcon: Icon(Icons.play_circle_fill_rounded), label: 'Media'),
-          const NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event_rounded), label: 'Events'),
+          const NavigationDestination(icon: Icon(Icons.wb_sunny_outlined), selectedIcon: Icon(Icons.wb_sunny_rounded), label: 'Devotion'),
+          const NavigationDestination(icon: Icon(Icons.play_circle_outline_rounded), selectedIcon: Icon(Icons.play_circle_fill_rounded), label: 'Teachings'),
           NavigationDestination(
             icon: _NotificationBadgeIcon(
               icon: Icons.groups_outlined,
@@ -330,6 +333,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
             ),
             label: 'Community',
           ),
+          const NavigationDestination(icon: Icon(Icons.extension_outlined), selectedIcon: Icon(Icons.extension_rounded), label: 'Games'),
         ],
       ),
     );
@@ -472,27 +476,19 @@ class HomeContent extends StatelessWidget {
               spacing: 9,
               runSpacing: 9,
               children: [
-                _HomeQuickLink(icon: Icons.auto_stories_rounded, label: 'Bible', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BiblePage()))),
-                _HomeQuickLink(icon: Icons.play_circle_fill_rounded, label: 'Teachings', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TeachingsPage()))),
-                _HomeQuickLink(icon: Icons.event_rounded, label: 'Events', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsPage()))),
+                _HomeQuickLink(icon: Icons.event_rounded, label: 'Upcoming Events', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsPage()))),
+                _HomeQuickLink(icon: Icons.campaign_rounded, label: 'Announcements', onTap: () {
+                  InAppNotificationService.instance.markAnnouncementsRead();
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AnnouncementsPage()));
+                }),
               ],
             ),
             const SizedBox(height: 18),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.45,
-              children: const [
-                _HomeFeatureCard(icon: Icons.groups_outlined, title: 'Community', subtitle: 'Connect together', page: CommunityPage()),
-                _HomeFeatureCard(icon: Icons.campaign_outlined, title: 'Announcements', subtitle: 'Latest updates', page: AnnouncementsPage()),
-                _HomeFeatureCard(icon: Icons.quiz_rounded, title: 'Bible Trivia', subtitle: 'Test your Bible knowledge', page: GameLobbyPage(title: 'Bible Trivia', subtitle: 'Choose a level, grow in the Word and challenge your best score.', gameId: 'bible_trivia', icon: Icons.quiz_rounded, bestKey: 'ngn_bible_trivia_high_score', levelKey: 'ngn_bible_trivia_level', totalLevels: 15, gamePage: BibleTriviaPage())),
-                _HomeFeatureCard(icon: Icons.extension_rounded, title: 'Bible Word Cookies', subtitle: 'Form Bible words from letter clues', page: GameLobbyPage(title: 'Bible Word Cookies', subtitle: 'Build Bible words, solve clues and advance through 1,000 levels.', gameId: 'bible_word_search', icon: Icons.extension_rounded, bestKey: 'ngn_bible_word_search_best', levelKey: 'ngn_bible_word_search_level', totalLevels: 1000, gamePage: BibleWordPuzzlePage())),
-                _HomeFeatureCard(icon: Icons.person_search_rounded, title: 'Guess the Bible Character', subtitle: 'Who am I? Bible clues', page: GameLobbyPage(title: 'Guess the Bible Character', subtitle: 'Read the clues, identify Bible people and start a fresh shuffled round.', gameId: 'guess_bible_character', icon: Icons.person_search_rounded, bestKey: 'ngn_guess_character_best', gamePage: GuessBibleCharacterPage())),
-                _HomeFeatureCard(icon: Icons.grid_on_rounded, title: 'Word Search Puzzle', subtitle: 'Choose a Bible category and find hidden words', page: BibleGridSearchPage()),
-              ],
+            _HomeFeatureCard(
+              icon: Icons.extension_rounded,
+              title: 'Bible Games',
+              subtitle: 'Learn and enjoy four Bible games',
+              page: const BibleGamesHubPage(),
             ),
             const SizedBox(height: 24),
             Container(
@@ -510,6 +506,91 @@ class HomeContent extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class BibleGamesHubPage extends StatelessWidget {
+  const BibleGamesHubPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Bible Games')),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 28),
+        children: [
+          const Text(
+            'Learn the Word through play',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Choose a game and enjoy a fun way to grow your Bible knowledge.',
+            style: TextStyle(height: 1.45),
+          ),
+          const SizedBox(height: 18),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.28,
+            children: const [
+              _HomeFeatureCard(
+                icon: Icons.quiz_rounded,
+                title: 'Bible Trivia',
+                subtitle: 'Test your Bible knowledge',
+                page: GameLobbyPage(
+                  title: 'Bible Trivia',
+                  subtitle: 'Choose a level, grow in the Word and challenge your best score.',
+                  gameId: 'bible_trivia',
+                  icon: Icons.quiz_rounded,
+                  bestKey: 'ngn_bible_trivia_high_score',
+                  levelKey: 'ngn_bible_trivia_level',
+                  totalLevels: 15,
+                  gamePage: BibleTriviaPage(),
+                ),
+              ),
+              _HomeFeatureCard(
+                icon: Icons.extension_rounded,
+                title: 'Bible Word Cookies',
+                subtitle: 'Form Bible words from letter clues',
+                page: GameLobbyPage(
+                  title: 'Bible Word Cookies',
+                  subtitle: 'Build Bible words, solve clues and advance through 1,000 levels.',
+                  gameId: 'bible_word_search',
+                  icon: Icons.extension_rounded,
+                  bestKey: 'ngn_bible_word_search_best',
+                  levelKey: 'ngn_bible_word_search_level',
+                  totalLevels: 1000,
+                  gamePage: BibleWordPuzzlePage(),
+                ),
+              ),
+              _HomeFeatureCard(
+                icon: Icons.person_search_rounded,
+                title: 'Guess the Bible Character',
+                subtitle: 'Who am I? Bible clues',
+                page: GameLobbyPage(
+                  title: 'Guess the Bible Character',
+                  subtitle: 'Read the clues, identify Bible people and start a fresh shuffled round.',
+                  gameId: 'guess_bible_character',
+                  icon: Icons.person_search_rounded,
+                  bestKey: 'ngn_guess_character_best',
+                  gamePage: GuessBibleCharacterPage(),
+                ),
+              ),
+              _HomeFeatureCard(
+                icon: Icons.grid_on_rounded,
+                title: 'Word Search Puzzle',
+                subtitle: 'Choose a Bible category and find hidden words',
+                page: BibleGridSearchPage(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
