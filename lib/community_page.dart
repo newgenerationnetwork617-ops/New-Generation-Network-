@@ -87,7 +87,8 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
           .from('profiles')
           .select('display_name')
           .eq('id', user.id)
-          .maybeSingle();
+          .maybeSingle()
+          .timeout(const Duration(seconds: 7));
       final existingName = profile?['display_name']?.toString().trim() ?? '';
       final accountName = (metadata['full_name'] ??
               metadata['name'] ??
@@ -105,7 +106,7 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
         'id': user.id,
         'display_name': displayName.isEmpty ? 'N.G.N. Member' : displayName,
         'avatar_url': avatar.isEmpty ? null : avatar,
-      });
+      }).timeout(const Duration(seconds: 7));
       if (mounted) {
         setState(() {
           joined = true;
@@ -121,6 +122,8 @@ class _CommunityJoinPageState extends State<CommunityJoinPage> {
           message.contains('socketexception') ||
           message.contains('network is unreachable') ||
           message.contains('connection timed out') ||
+          message.contains('timed out') ||
+          message.contains('timeoutexception') ||
           message.contains('connection refused');
       if (mounted) {
         setState(() {
