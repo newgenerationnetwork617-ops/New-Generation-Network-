@@ -39,9 +39,11 @@ Future<void> _initializePushNotificationsSafely() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabasePublishableKey);
-  await DailyLocalNotificationService.instance.initialize();
 
-  // Render the app before starting optional online push setup. If Firebase,
+  // Render NGN before initializing notification plugins. Device timezone and
+  // notification platform calls can be slow or unavailable on some phones;
+  // they must never hold the app on a blank startup screen.
+  // Render the app before starting optional notification setup. If Firebase,
   // Google Play services, or notification permissions are unavailable, NGN
   // must still open normally instead of remaining on a black screen.
   runApp(const NewGenerationNetworkApp());
@@ -216,10 +218,24 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     DailyLocalNotificationService.instance.openedPayload.addListener(_handleDailyNotificationTap);
     _scheduleLocalMidnightRefresh();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await DailyLocalNotificationService.instance.requestPermissionAndSchedule();
-      _handleDailyNotificationTap();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Notification scheduling is optional and can take time on some devices.
+      // Keep navigation and the first screen responsive even if it fails.
+      unawaited(_initializeDailyNotificationsSafely());
     });
+  }
+
+  Future<void> _initializeDailyNotificationsSafely() async {
+    try {
+      await DailyLocalNotificationService.instance.initialize();
+      if (!mounted) return;
+      _handleDailyNotificationTap();
+      await DailyLocalNotificationService.instance.requestPermissionAndSchedule();
+    } catch (error, stackTrace) {
+      // Notifications are an optional convenience, never a reason to block NGN.
+      debugPrint('NGN local notification setup failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   void _handleDailyNotificationTap() {
