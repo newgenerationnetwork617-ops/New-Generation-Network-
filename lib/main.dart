@@ -491,7 +491,7 @@ class HomeContent extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 18),
-            SizedBox(
+            const SizedBox(
               height: 126,
               child: _HomeFeatureCard(
                 icon: Icons.extension_rounded,
