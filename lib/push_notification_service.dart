@@ -170,19 +170,17 @@ class PushNotificationService {
               ? 'ios'
               : 'other';
 
-      await Supabase.instance.client.from('ngn_push_tokens').upsert(
-        {
-          'installation_id': installationId,
-          'device_token': token,
-          'platform': platform,
-          'updated_at': DateTime.now().toUtc().toIso8601String(),
-        },
-        onConflict: 'installation_id',
-      );
+      await Supabase.instance.client.from('ngn_push_tokens').insert({
+        'installation_id': installationId,
+        'device_token': token,
+        'platform': platform,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      });
       debugPrint('NGN FCM token registered for this installation.');
     } catch (error) {
-      // Do not block app startup if the database migration has not yet been
-      // applied or the device temporarily has no network connection.
+      // A repeated token may already exist; token refreshes insert the new
+      // token without requiring clients to read or update token records.
+      // Do not block startup if the network is temporarily unavailable.
       debugPrint('NGN FCM token registration failed: $error');
     }
   }
