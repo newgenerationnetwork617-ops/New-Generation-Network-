@@ -497,7 +497,7 @@ class HomeContent extends StatelessWidget {
                 icon: Icons.extension_rounded,
                 title: 'Bible Games',
                 subtitle: 'Learn and enjoy four Bible games',
-                page: const BibleGamesHubPage(),
+                page: BibleGamesHubPage(),
               ),
             ),
             const SizedBox(height: 24),
