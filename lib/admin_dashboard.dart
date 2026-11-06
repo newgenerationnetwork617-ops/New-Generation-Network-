@@ -123,6 +123,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _sendExternalPush(String type, dynamic recordId) async {
+    try {
+      await supabase.functions.invoke('send-push-notification', body: {
+        'type': type,
+        'record_id': recordId.toString(),
+      });
+    } catch (error) {
+      debugPrint('NGN external push ($type) could not be sent: $error');
+    }
+  }
+
   bool _adminSaveInFlight = false;
 
   Future<bool> runSave(Future<void> Function() action, String success) async {
@@ -263,7 +274,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           FilledButton(
             onPressed: () async {
               final ok = await runSave(() async {
-                await supabase.from('devotionals').insert({
+                final saved = await supabase.from('devotionals').insert({
                 'title': title.text.trim(),
                 'theme': theme.text.trim(),
                 'bible_reference': bible.text.trim(),
@@ -272,7 +283,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 'memory_verse': memoryVerse.text.trim(),
                 'prayer': prayer.text.trim(),
                 'published_at': DateTime.now().toIso8601String(),
-              });
+              }).select('id').single();
+              await _sendExternalPush('devotional', saved['id']);
               }, 'Devotional published.');
               if (ok && mounted) Navigator.pop(context);
             },
@@ -318,14 +330,15 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           FilledButton(
             onPressed: () async {
               final ok = await runSave(() async {
-                await supabase.from('teachings').insert({
+                final saved = await supabase.from('teachings').insert({
                 'title': title.text.trim(),
                 'speaker': speaker.text.trim(),
                 'description': description.text.trim(),
                 'youtube_url': url.text.trim(),
                 'media_url': mediaUrl.text.trim(),
                 'published_at': DateTime.now().toIso8601String(),
-              });
+              }).select('id').single();
+              await _sendExternalPush('teaching', saved['id']);
               }, 'Teaching published.');
               if (ok && mounted) Navigator.pop(context);
             },
@@ -462,11 +475,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           FilledButton(
             onPressed: () async {
               final ok = await runSave(() async {
-                await supabase.from('announcements').insert({
+                final saved = await supabase.from('announcements').insert({
                 'title': title.text.trim(),
                 'body': body.text.trim(),
                 'published_at': DateTime.now().toIso8601String(),
-              });
+              }).select('id').single();
+              await _sendExternalPush('announcement', saved['id']);
               }, 'Announcement published.');
               if (ok && mounted) Navigator.pop(context);
             },
@@ -530,14 +544,15 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             FilledButton(
               onPressed: () async {
                 final ok = await runSave(() async {
-                  await supabase.from('events').insert({
+                  final saved = await supabase.from('events').insert({
                     'title': title.text.trim(),
                     'description': description.text.trim(),
                     'venue': venue.text.trim(),
                     'starts_at': startsAt.toUtc().toIso8601String(),
                     'published': true,
                     'published_at': DateTime.now().toUtc().toIso8601String(),
-                  });
+                  }).select('id').single();
+                  await _sendExternalPush('event', saved['id']);
                 }, 'Event published.');
                 if (ok && dialogContext.mounted) Navigator.pop(dialogContext);
               },
