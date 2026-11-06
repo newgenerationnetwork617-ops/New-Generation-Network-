@@ -759,7 +759,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     }
 
     final pages = [dashboardHome(), publishSection(), manageSection(), toolsSection()];
-    final titles = ['Admin Home', 'Publish', 'Manage', 'Game Tools'];
+    final titles = ['Admin Home', 'Publish', 'Manage', 'Games'];
     return Scaffold(
       appBar: AppBar(
         title: Text(titles[selectedSection]),
