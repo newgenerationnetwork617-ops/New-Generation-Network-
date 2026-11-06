@@ -23,7 +23,12 @@ class DailyLocalNotificationService {
   static const String devotionalEnabledKey = 'ngn_local_devotional_enabled';
   static const String eveningReflectionEnabledKey = 'ngn_local_evening_reflection_enabled';
   // Keep at most 63 pending reminders for iOS compatibility (21 days × 3).
-  static const int _rollingDays = 21;
+  // Keep room under iOS's 64-pending-notification limit for greetings.
+  static const int _rollingDays = 15;
+  static const int _monthlyGreetingCount = 6;
+  static const int _greetingNotificationBase = 900100;
+  static const int _specialGreetingBase = 900200;
+  static const String specialGreetingsEnabledKey = 'ngn_special_greetings_enabled';
   static const int _verseNotificationOffset = 1;
   static const int _devotionalNotificationOffset = 2;
   static const int _eveningNotificationOffset = 3;
@@ -137,6 +142,18 @@ class DailyLocalNotificationService {
     await scheduleUpcoming();
   }
 
+  Future<bool> specialGreetingsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(specialGreetingsEnabledKey) ?? true;
+  }
+
+  Future<void> setSpecialGreetingsEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(specialGreetingsEnabledKey, enabled);
+    if (enabled && !await requestPermissions()) return;
+    await scheduleUpcoming();
+  }
+
   Future<void> requestPermissionAndSchedule() async {
     if (!await dailyVerseEnabled() &&
         !await devotionalEnabled() &&
@@ -155,6 +172,7 @@ class DailyLocalNotificationService {
     final verseEnabled = await dailyVerseEnabled();
     final devotionalIsEnabled = await devotionalEnabled();
     final eveningIsEnabled = await eveningReflectionEnabled();
+    final greetingsEnabled = await specialGreetingsEnabled();
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -170,6 +188,13 @@ class DailyLocalNotificationService {
       await _plugin.cancel(
         id: _notificationId(date, _eveningNotificationOffset),
       );
+    }
+
+    for (var i = 0; i < _monthlyGreetingCount; i++) {
+      await _plugin.cancel(id: _greetingNotificationBase + i);
+    }
+    for (var i = 0; i < 5; i++) {
+      await _plugin.cancel(id: _specialGreetingBase + i);
     }
 
     for (var offset = 0; offset < _rollingDays; offset++) {
@@ -220,6 +245,72 @@ class DailyLocalNotificationService {
         }
       }
     }
+
+    if (greetingsEnabled) {
+      await _scheduleMonthlyGreetings(now);
+      await _scheduleSpecialGreetings(now);
+    }
+  }
+
+  Future<void> _scheduleMonthlyGreetings(DateTime now) async {
+    for (var i = 0; i < _monthlyGreetingCount; i++) {
+      final date = DateTime(now.year, now.month + i + 1, 1);
+      await _schedule(
+        id: _greetingNotificationBase + i,
+        title: 'NGN • Happy New Month',
+        body: 'A new month, a fresh opportunity to grow in faith. May God guide your steps, strengthen your heart and fill your days with His peace. Welcome to a blessed new month!',
+        scheduledAt: _scheduledTime(date, 9, 0),
+        payload: 'special:new_month:${_dateKey(date)}',
+      );
+    }
+  }
+
+  Future<void> _scheduleSpecialGreetings(DateTime now) async {
+    final year = now.year;
+    final easter = _easterSunday(year);
+    final nextEaster = _easterSunday(year + 1);
+    final candidates = <({DateTime date, String title, String body, String payload})>[
+      (date: DateTime(year, 12, 31), title: 'NGN • Year-End Reflection', body: 'As this year comes to a close, thank God for His faithfulness and reflect on how far He has brought you. May your hope remain in Christ.', payload: 'special:year_end:$year'),
+      (date: DateTime(year + 1, 1, 1), title: 'NGN • Happy New Year', body: 'Welcome to a new year! May it be filled with God’s wisdom, grace, purpose and opportunities to grow stronger in Christ. Happy New Year from New Generation Network!', payload: 'special:new_year:${year + 1}'),
+      (date: easter.subtract(const Duration(days: 2)), title: 'NGN • Good Friday', body: 'Today we remember the love and sacrifice of Jesus Christ. May the meaning of the cross deepen your faith and fill your heart with gratitude.', payload: 'special:good_friday:${_dateKey(easter.subtract(const Duration(days: 2)))}'),
+      (date: easter, title: 'NGN • Easter Sunday', body: 'Christ is risen! May the hope and victory of the resurrection renew your faith and remind you that our hope is alive in Jesus.', payload: 'special:easter:${_dateKey(easter)}'),
+      (date: DateTime(year, 12, 25), title: 'NGN • Merry Christmas', body: 'Merry Christmas! We celebrate the birth of Jesus Christ, our Saviour. May His love, peace and joy fill your heart and home.', payload: 'special:christmas:$year'),
+      (date: nextEaster.subtract(const Duration(days: 2)), title: 'NGN • Good Friday', body: 'Today we remember the love and sacrifice of Jesus Christ. May the meaning of the cross deepen your faith and fill your heart with gratitude.', payload: 'special:good_friday:${_dateKey(nextEaster.subtract(const Duration(days: 2)))}'),
+      (date: nextEaster, title: 'NGN • Easter Sunday', body: 'Christ is risen! May the hope and victory of the resurrection renew your faith and remind you that our hope is alive in Jesus.', payload: 'special:easter:${_dateKey(nextEaster)}'),
+    ];
+    final upcoming = candidates
+        .where((item) => _scheduledTime(item.date, 9, 0).isAfter(now))
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+    for (var i = 0; i < upcoming.length && i < 5; i++) {
+      final item = upcoming[i];
+      await _schedule(
+        id: _specialGreetingBase + i,
+        title: item.title,
+        body: item.body,
+        scheduledAt: _scheduledTime(item.date, 9, 0),
+        payload: item.payload,
+      );
+    }
+  }
+
+  DateTime _easterSunday(int year) {
+    // Gregorian Easter calculation.
+    final a = year % 19;
+    final b = year ~/ 100;
+    final c = year % 100;
+    final d = b ~/ 4;
+    final e = b % 4;
+    final f = (b + 8) ~/ 25;
+    final g = (b - f + 1) ~/ 3;
+    final h = (19 * a + b - d - g + 15) % 30;
+    final i = c ~/ 4;
+    final k = c % 4;
+    final l = (32 + 2 * e + 2 * i - h - k) % 7;
+    final m = (a + 11 * h + 22 * l) ~/ 451;
+    final month = (h + l - 7 * m + 114) ~/ 31;
+    final day = ((h + l - 7 * m + 114) % 31) + 1;
+    return DateTime(year, month, day);
   }
 
   Future<void> _schedule({
