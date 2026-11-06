@@ -312,7 +312,13 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
               foregroundColor: const Color(0xFF081629),
               child: const Icon(Icons.menu_rounded),
             ),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: NavigationBarTheme(
+        data: const NavigationBarThemeData(
+          labelTextStyle: WidgetStatePropertyAll(
+            TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600),
+          ),
+        ),
+        child: NavigationBar(
         height: 76,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         selectedIndex: index,
@@ -335,6 +341,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
           ),
           const NavigationDestination(icon: Icon(Icons.extension_outlined), selectedIcon: Icon(Icons.extension_rounded), label: 'Games'),
         ],
+        ),
       ),
     );
   }
@@ -484,11 +491,14 @@ class HomeContent extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 18),
-            _HomeFeatureCard(
-              icon: Icons.extension_rounded,
-              title: 'Bible Games',
-              subtitle: 'Learn and enjoy four Bible games',
-              page: const BibleGamesHubPage(),
+            SizedBox(
+              height: 126,
+              child: _HomeFeatureCard(
+                icon: Icons.extension_rounded,
+                title: 'Bible Games',
+                subtitle: 'Learn and enjoy four Bible games',
+                page: const BibleGamesHubPage(),
+              ),
             ),
             const SizedBox(height: 24),
             Container(
