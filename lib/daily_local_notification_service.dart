@@ -157,7 +157,8 @@ class DailyLocalNotificationService {
   Future<void> requestPermissionAndSchedule() async {
     if (!await dailyVerseEnabled() &&
         !await devotionalEnabled() &&
-        !await eveningReflectionEnabled()) {
+        !await eveningReflectionEnabled() &&
+        !await specialGreetingsEnabled()) {
       return;
     }
     if (await requestPermissions()) {
