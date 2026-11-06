@@ -36,7 +36,12 @@ class ContentRepository {
       if (orderColumn == 'published_at') {
         query = query.lte('published_at', DateTime.now().toUtc().toIso8601String());
       }
-      final rows = await query.order(orderColumn, ascending: false);
+      // A stalled or unavailable connection must not leave content screens
+      // showing an endless loading indicator. On timeout, fall back to the
+      // last successful on-device cache in the catch block below.
+      final rows = await query
+          .order(orderColumn, ascending: false)
+          .timeout(const Duration(seconds: 7));
       final remote = List<Map<String, dynamic>>.from(
         (rows as List).map((row) => Map<String, dynamic>.from(row)),
       );
