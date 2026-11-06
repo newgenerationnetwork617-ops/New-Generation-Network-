@@ -434,14 +434,15 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         fileOptions: FileOptions(contentType: mime, upsert: false),
       );
       final publicUrl = supabase.storage.from('ngn-media').getPublicUrl(storagePath);
-      await supabase.from('teachings').insert({
+      final saved = await supabase.from('teachings').insert({
         'title': title.text.trim(),
         'speaker': speaker.text.trim().isEmpty ? null : speaker.text.trim(),
         'description': description.text.trim().isEmpty ? null : description.text.trim(),
         'content_type': 'book',
         'media_url': publicUrl,
         'published_at': DateTime.now().toUtc().toIso8601String(),
-      });
+      }).select('id').single();
+      await _sendExternalPush('teaching', saved['id']);
       notice('Teaching book uploaded and published.');
     } catch (e) {
       try {
