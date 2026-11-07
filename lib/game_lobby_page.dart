@@ -50,35 +50,41 @@ class _GameLobbyPageState extends State<GameLobbyPage> {
   }
 
   Future<void> _loadProgress() async {
+    // Local progress is the source of truth for starting a game. Never make
+    // gameplay wait for Supabase: the leaderboard is an optional online extra.
     final prefs = await SharedPreferences.getInstance();
-    var rank = 'UNRANKED';
     final user = Supabase.instance.client.auth.currentUser;
-    if (user != null) {
-      try {
-        final row = await Supabase.instance.client
-            .from('game_leaderboard')
-            .select('player_rank')
-            .eq('game_id', widget.gameId)
-            .eq('user_id', user.id)
-            .maybeSingle();
-        final value = row?['player_rank'];
-        if (value != null) rank = '#$value';
-      } catch (_) {
-        rank = 'RANK UNAVAILABLE';
-      }
-    } else {
-      rank = 'GUEST';
-    }
     if (!mounted) return;
+
     setState(() {
       _best = prefs.getInt(widget.bestKey) ?? 0;
       _currentLevel = widget.levelKey == null
           ? 1
           : ((prefs.getInt(widget.levelKey!) ?? 0) + 1)
               .clamp(1, widget.totalLevels ?? 1);
-      _rank = rank;
+      _rank = user == null ? 'GUEST' : 'OFFLINE';
       _loading = false;
     });
+
+    if (user == null) return;
+
+    // Fetch rank only after the lobby is already usable. A slow or missing
+    // connection must never leave the player staring at a loading spinner.
+    try {
+      final row = await Supabase.instance.client
+          .from('game_leaderboard')
+          .select('player_rank')
+          .eq('game_id', widget.gameId)
+          .eq('user_id', user.id)
+          .maybeSingle()
+          .timeout(const Duration(seconds: 3));
+      final value = row?['player_rank'];
+      if (mounted) {
+        setState(() => _rank = value == null ? 'UNRANKED' : '#$value');
+      }
+    } catch (_) {
+      if (mounted) setState(() => _rank = 'OFFLINE');
+    }
   }
 
   String _playerName() {
