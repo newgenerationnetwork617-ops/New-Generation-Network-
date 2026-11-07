@@ -343,7 +343,8 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   }
 
   final Set<String> _found = {};
-  late _CookiePuzzle _puzzle;
+  // Start with bundled content immediately; saved progress is restored after prefs load.
+  _CookiePuzzle _puzzle = _bank.first;
   int _index = 0, _score = 0, _best = 0;
   String _difficulty = 'All';
   String? _message;
