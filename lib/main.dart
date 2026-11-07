@@ -566,11 +566,11 @@ class BibleGamesHubPage extends StatelessWidget {
               ),
               _HomeFeatureCard(
                 icon: Icons.extension_rounded,
-                title: 'Bible Word Cookies',
-                subtitle: 'Form Bible words from letter clues',
+                title: 'Bible Word Search',
+                subtitle: 'Find Bible words using Scripture clues',
                 page: GameLobbyPage(
-                  title: 'Bible Word Cookies',
-                  subtitle: 'Build Bible words, solve clues and advance through 1,000 levels.',
+                  title: 'Bible Word Search',
+                  subtitle: 'Read the clues, type the hidden Bible words and advance through 1,000 levels.',
                   gameId: 'bible_word_search',
                   icon: Icons.extension_rounded,
                   bestKey: 'ngn_bible_word_search_best',
