@@ -130,7 +130,7 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
       const SizedBox(height: 14),
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         const Icon(Icons.offline_bolt_rounded, color: Color(0xFF65D6A8), size: 16), const SizedBox(width: 6),
-        Text('PLAYABLE OFFLINE • PROGRESS SAVED ON THIS DEVICE', style: TextStyle(color: Colors.white.withValues(alpha: .55), fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: .5)),
+        Text('PLAYABLE OFFLINE • BEST SCORE SAVED ON THIS DEVICE', style: TextStyle(color: Colors.white.withValues(alpha: .55), fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: .5)),
       ]),
     ]);
   }
