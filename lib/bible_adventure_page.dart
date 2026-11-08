@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'bible_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BibleAdventurePage extends StatefulWidget {
@@ -32,6 +35,9 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
     _Stage('Pentecost','🕊️','Acts 2:1–4','What happened when the Holy Spirit came upon the disciples?',['They spoke in other languages','They left Jerusalem','The temple disappeared','The sea became calm'],0,'At Pentecost, the disciples were empowered to witness about Jesus.'),
   ];
 
+  final List<_Stage> _offlineStages = [];
+  List<_Stage> get allStages => [...stages, ..._offlineStages];
+
   int stage = 0, score = 0, best = 0;
   int? selected;
   bool answered = false, finished = false, loading = true;
@@ -41,8 +47,72 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
 
   Future<void> _restore() async {
     final prefs = await SharedPreferences.getInstance();
+    best = prefs.getInt(bestKey) ?? 0;
+    await _loadOfflineChallenges();
     if (!mounted) return;
-    setState(() { best = prefs.getInt(bestKey) ?? 0; loading = false; });
+    setState(() => loading = false);
+  }
+
+  Future<void> _loadOfflineChallenges() async {
+    // Add 288 verse-based stages to the 12 hand-authored story stages.
+    // Every prompt, answer and reference is built from Bible files bundled
+    // inside the app, so the full 300-stage adventure works offline.
+    try {
+      final repository = BibleRepository();
+      final verses = <({String reference, String text})>[];
+      for (final bookName in repository.bookNames) {
+        final raw = await rootBundle.loadString('assets/bible/books/$bookName.json');
+        final book = BibleBook.fromJson(
+          jsonDecode(raw) as Map<String, dynamic>,
+        );
+        for (final chapter in book.chapters) {
+          for (final verse in chapter.verses) {
+            final text = verse.text.trim();
+            if (text.split(RegExp(r'\\s+')).length < 5) continue;
+            verses.add((
+              reference: '${book.name} ${chapter.number}:${verse.number}',
+              text: text,
+            ));
+          }
+        }
+      }
+      if (verses.length < 288) return;
+      final step = verses.length / 288;
+      final selected = List.generate(
+        288,
+        (index) => verses[(index * step).floor()],
+      );
+      for (var i = 0; i < selected.length; i++) {
+        final item = selected[i];
+        final correctIndex = i % 4;
+        final options = <String>[];
+        var offset = 1;
+        while (options.length < 4) {
+          final candidate = verses[(i * 37 + offset * 113) % verses.length].reference;
+          if (!options.contains(candidate) &&
+              (candidate != item.reference || options.length == correctIndex)) {
+            options.add(candidate);
+          }
+          offset++;
+        }
+        options.remove(item.reference);
+        options.insert(correctIndex, item.reference);
+        final excerpt = item.text.length > 180
+            ? '${item.text.substring(0, 177)}…'
+            : item.text;
+        _offlineStages.add(_Stage(
+          'Scripture Trail ${i + 1}',
+          '📜',
+          item.reference,
+          'Which Bible reference contains this passage?\n“$excerpt”',
+          options,
+          correctIndex,
+          'This passage is from ${item.reference}. Read the surrounding verses to understand its full context.',
+        ));
+      }
+    } catch (_) {
+      // The 12 hand-authored story stages remain as a safe fallback.
+    }
   }
 
   void _choose(int index) {
@@ -51,7 +121,7 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
   }
 
   Future<void> _next() async {
-    if (stage == stages.length - 1) {
+    if (stage == allStages.length - 1) {
       if (score > best) { best = score; final p = await SharedPreferences.getInstance(); await p.setInt(bestKey, best); }
       if (mounted) setState(() => finished = true);
     } else if (mounted) {
@@ -73,14 +143,14 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
   }
 
   Widget _game() {
-    final s = stages[stage];
+    final s = allStages[stage];
     return ListView(padding: const EdgeInsets.fromLTRB(18, 12, 18, 28), children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text('CHAPTER ${stage + 1} OF ${stages.length}', style: const TextStyle(color: gold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+        Text('CHALLENGE ${stage + 1} OF ${allStages.length}', style: const TextStyle(color: gold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
         Text('$score PTS', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
       ]),
       const SizedBox(height: 10),
-      ClipRRect(borderRadius: BorderRadius.circular(20), child: LinearProgressIndicator(value: (stage + 1) / stages.length, minHeight: 8, backgroundColor: Colors.white12, color: gold)),
+      ClipRRect(borderRadius: BorderRadius.circular(20), child: LinearProgressIndicator(value: (stage + 1) / allStages.length, minHeight: 8, backgroundColor: Colors.white12, color: gold)),
       const SizedBox(height: 20),
       Container(height: 205, decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26),
