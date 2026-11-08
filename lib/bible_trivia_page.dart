@@ -209,6 +209,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     _loadHighScore();
     _loadSelectedLevel();
     _loadRemoteQuestions();
+    _syncQueuedScores();
     _startRound();
   }
 
@@ -319,6 +320,29 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     final saved = prefs.getInt('ngn_bible_trivia_level') ?? 0;
     await prefs.setInt('ngn_bible_trivia_level',
         max(saved, _selectedLevel).clamp(0, 999).toInt());
+  }
+
+  Future<void> _syncQueuedScores() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    final queue = prefs.getStringList('ngn_game_score_queue') ?? [];
+    if (queue.isEmpty) return;
+    final keep = <String>[];
+    for (final item in queue) {
+      final parts = item.split('|');
+      if (parts.length != 2) continue;
+      try {
+        await Supabase.instance.client.from('game_scores').insert({
+          'user_id': user.id,
+          'game_id': parts[0],
+          'score': int.parse(parts[1]),
+        }).timeout(const Duration(seconds: 2));
+      } catch (_) {
+        keep.add(item);
+      }
+    }
+    await prefs.setStringList('ngn_game_score_queue', keep);
   }
 
   Future<void> _submitScore() async {
