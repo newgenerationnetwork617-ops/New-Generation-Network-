@@ -20,6 +20,7 @@ class _Stage {
 class _BibleAdventurePageState extends State<BibleAdventurePage> {
   static const navy = Color(0xFF071A35), gold = Color(0xFFFFC94A);
   static const bestKey = 'ngn_bible_adventure_best';
+  static const progressKey = 'ngn_bible_adventure_stage';
   static const stages = <_Stage>[
     _Stage('The Ark of Promise','🛶','Genesis 6–9','What sign did God place in the clouds as a reminder of His covenant?',['A bright star','A rainbow','A pillar of fire','A dove'],1,'The rainbow was the sign of God’s covenant with Noah and every living creature.'),
     _Stage('The Call of Moses','🔥','Exodus 3','What did Moses see in the wilderness?',['A burning bush that was not consumed','A golden ladder','A river flowing uphill','A cloud of birds'],0,'God called Moses from the burning bush and gave him a mission to lead His people.'),
@@ -50,7 +51,11 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
     best = prefs.getInt(bestKey) ?? 0;
     await _loadOfflineChallenges();
     if (!mounted) return;
-    setState(() => loading = false);
+    final savedStage = prefs.getInt(progressKey) ?? 0;
+    setState(() {
+      stage = savedStage.clamp(0, allStages.length - 1);
+      loading = false;
+    });
   }
 
   Future<void> _loadOfflineChallenges() async {
@@ -101,7 +106,7 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
         _offlineStages.add(_Stage(
           'Scripture Trail ${i + 1}',
           '📜',
-          item.reference,
+          'SCRIPTURE CHALLENGE',
           'Which Bible reference contains this passage?\n“$excerpt”',
           options,
           correctIndex,
@@ -115,19 +120,36 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
 
   void _choose(int index) {
     if (answered) return;
-    setState(() { selected = index; answered = true; if (index == stages[stage].answer) score += 100; });
+    setState(() { selected = index; answered = true; if (index == allStages[stage].answer) score += 100; });
   }
 
   Future<void> _next() async {
     if (stage == allStages.length - 1) {
-      if (score > best) { best = score; final p = await SharedPreferences.getInstance(); await p.setInt(bestKey, best); }
+      final p = await SharedPreferences.getInstance();
+      if (score > best) {
+        best = score;
+        await p.setInt(bestKey, best);
+      }
+      await p.setInt(progressKey, 0);
       if (mounted) setState(() => finished = true);
     } else if (mounted) {
       setState(() { stage++; selected = null; answered = false; });
+      final p = await SharedPreferences.getInstance();
+      await p.setInt(progressKey, stage);
     }
   }
 
-  void _restart() => setState(() { stage = 0; score = 0; selected = null; answered = false; finished = false; });
+  Future<void> _restart() async {
+    setState(() {
+      stage = 0;
+      score = 0;
+      selected = null;
+      answered = false;
+      finished = false;
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(progressKey, 0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -191,8 +213,8 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
             const SizedBox(height: 14),
             SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _next,
               style: FilledButton.styleFrom(backgroundColor: gold, foregroundColor: navy, padding: const EdgeInsets.symmetric(vertical: 15)),
-              icon: Icon(stage == stages.length - 1 ? Icons.emoji_events_rounded : Icons.arrow_forward_rounded),
-              label: Text(stage == stages.length - 1 ? 'COMPLETE ADVENTURE' : 'CONTINUE JOURNEY', style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: .5)))),
+              icon: Icon(stage == allStages.length - 1 ? Icons.emoji_events_rounded : Icons.arrow_forward_rounded),
+              label: Text(stage == allStages.length - 1 ? 'COMPLETE ADVENTURE' : 'CONTINUE JOURNEY', style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: .5)))),
           ],
         ])),
       const SizedBox(height: 14),
