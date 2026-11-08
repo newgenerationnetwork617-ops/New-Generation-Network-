@@ -76,7 +76,7 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
     final s = stages[stage];
     return ListView(padding: const EdgeInsets.fromLTRB(18, 12, 18, 28), children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text('CHAPTER ' + (stage + 1).toString() + ' OF ' + stages.length.toString(), style: const TextStyle(color: gold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+        Text('CHAPTER ${stage + 1} OF ${stages.length}', style: const TextStyle(color: gold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
         Text('$score PTS', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
       ]),
       const SizedBox(height: 10),
@@ -89,7 +89,7 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
         boxShadow: [BoxShadow(color: const Color(0xFF1746A2).withValues(alpha: .25), blurRadius: 24, offset: const Offset(0, 10))]),
         child: Stack(children: [
           Positioned(right: -12, top: -25, child: Icon(Icons.auto_awesome, size: 150, color: Colors.white.withValues(alpha: .05))),
-          Positioned(left: 18, top: 16, child: Text('NGN • SCRIPTURE QUEST', style: TextStyle(color: gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5))),
+          const Positioned(left: 18, top: 16, child: Text('NGN • SCRIPTURE QUEST', style: TextStyle(color: gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5))),
           Center(child: Text(s.emoji, style: const TextStyle(fontSize: 84))),
           Positioned(left: 20, right: 20, bottom: 17, child: Text(s.title, style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w900))),
         ])),
