@@ -660,7 +660,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
         ]),
         const SizedBox(height: 8),
         Text(
-          'Question bank: ${_allQuestions.length} bundled/downloaded questions • 300-question target',
+          'Question bank: $_knowledgeQuestionCount knowledge • $_verseQuestionCount verse questions • 300 target',
           style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54, height: 1.4),
         ),
         const SizedBox(height: 14),
