@@ -240,7 +240,8 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
           .from('bible_trivia_questions')
           .select('question,options,correct_index,difficulty,bible_reference,explanation')
           .eq('is_published', true)
-          .order('created_at');
+          .order('created_at')
+          .timeout(const Duration(seconds: 3));
       final remoteRows = List<Map<String, dynamic>>.from(rows);
       final grouped = _groupRemoteQuestions(remoteRows);
       await prefs.setString(cacheKey, jsonEncode(remoteRows));
@@ -328,9 +329,12 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
         'user_id': user.id,
         'game_id': 'bible_trivia',
         'score': _score,
-      });
+      }).timeout(const Duration(seconds: 3));
     } catch (_) {
-      // Local best score remains saved if the player is offline.
+      final prefs = await SharedPreferences.getInstance();
+      final queue = prefs.getStringList('ngn_game_score_queue') ?? [];
+      queue.add('bible_trivia|$_score');
+      await prefs.setStringList('ngn_game_score_queue', queue);
     }
   }
 
