@@ -192,7 +192,7 @@ _Person('Hagar','Medium',['I was an Egyptian servant in Abraham’s household.',
       items.shuffle(Random());
       session = mode == 'Quick Guess' ? items.take(5).toList() : items;
     }
-    setState(() { index = 0; clue = 0; score = 0; solved = false; finished = false; message = null; answer.clear(); });
+    setState(() { index = 0; clue = 0; score = 0; streak = 0; solved = false; finished = false; message = null; answer.clear(); });
   }
 
   void _submit() {
