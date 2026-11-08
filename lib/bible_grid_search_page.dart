@@ -154,9 +154,9 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
         downloaded = [];
       }
     }
+    await _loadOfflineVersePacks();
     if (mounted) setState(() => loading = false);
     _syncScores();
-    _loadOfflineVersePacks();
     _downloadPublishedPuzzles(prefs);
   }
 
