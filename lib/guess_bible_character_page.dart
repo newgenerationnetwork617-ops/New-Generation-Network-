@@ -114,9 +114,16 @@ _Person('Hagar','Medium',['I was an Egyptian servant in Abraham’s household.',
     final p = await SharedPreferences.getInstance();
     if (mounted) setState(() => best = p.getInt('ngn_guess_character_best') ?? 0);
   }
-  List<_Person> get pool => difficulty == 'All'
-      ? List.of(allCharacters)
-      : allCharacters.where((p) => p.level == difficulty).toList();
+  List<_Person> get pool {
+    final unique = <String, _Person>{};
+    for (final person in allCharacters) {
+      unique[person.name.toLowerCase()] = person;
+    }
+    final people = unique.values.toList();
+    return difficulty == 'All'
+        ? people
+        : people.where((person) => person.level == difficulty).toList();
+  }
 
   Future<void> _syncRemoteCharacters() async {
     final prefs = await SharedPreferences.getInstance();
