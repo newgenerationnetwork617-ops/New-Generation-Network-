@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'bible_repository.dart';
 import 'game_leaderboard_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -340,6 +341,8 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
   String _category = 'All Questions';
   int _selectedLevel = 1;
   Map<String, List<_TriviaQuestion>> _remoteQuestions = {};
+  List<_TriviaQuestion> _scriptureQuestionExpansion = const [];
+  bool _scriptureQuestionsLoaded = false;
 
   bool _isVerseChallenge(_TriviaQuestion question) =>
       question.isVerseChallenge;
@@ -347,6 +350,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
   Iterable<_TriviaQuestion> get _allQuestions => [
         ..._questions.values.expand((items) => items),
         ..._characterQuestionExpansion,
+        ..._scriptureQuestionExpansion,
         ..._remoteQuestions.values.expand((items) => items),
       ];
 
@@ -371,6 +375,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     _loadHighScore();
     _loadSelectedLevel();
     _loadRemoteQuestions();
+    _loadScriptureQuestionExpansion();
     _syncQueuedScores();
     _startRound();
   }
@@ -380,6 +385,85 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     if (!mounted) return;
     setState(() => _selectedLevel =
         ((prefs.getInt('ngn_bible_trivia_level') ?? 0) + 1).clamp(1, 1000));
+  }
+
+  Future<void> _loadScriptureQuestionExpansion() async {
+    // Build 700 additional reference-identification questions from the Bible
+    // JSON files bundled in the app. This is fully offline and uses the same
+    // packaged WEB text as the in-app Bible reader.
+    const bookNames = <String>[
+      'Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth',
+      '1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra',
+      'Nehemiah','Esther','Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon',
+      'Isaiah','Jeremiah','Lamentations','Ezekiel','Daniel','Hosea','Joel','Amos',
+      'Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah',
+      'Malachi','Matthew','Mark','Luke','John','Acts','Romans','1 Corinthians',
+      '2 Corinthians','Galatians','Ephesians','Philippians','Colossians',
+      '1 Thessalonians','2 Thessalonians','1 Timothy','2 Timothy','Titus','Philemon',
+      'Hebrews','James','1 Peter','2 Peter','1 John','2 John','3 John','Jude',
+      'Revelation',
+    ];
+    final verses = <({String reference, String text})>[];
+    try {
+      for (final bookName in bookNames) {
+        final raw = await rootBundle.loadString('assets/bible/books/$bookName.json');
+        final book = BibleBook.fromJson(
+          jsonDecode(raw) as Map<String, dynamic>,
+        );
+        for (final chapter in book.chapters) {
+          for (final verse in chapter.verses) {
+            final clean = verse.text.replaceAll(RegExp(r'\\s+'), ' ').trim();
+            if (clean.length < 18) continue;
+            verses.add((
+              reference: '${book.name} ${chapter.number}:${verse.number}',
+              text: clean,
+            ));
+          }
+        }
+      }
+      if (verses.length < 700) {
+        throw StateError('The bundled Bible data contains fewer than 700 usable verses.');
+      }
+      verses.shuffle(Random(20261109));
+      final selected = verses.take(700).toList();
+      final generated = <_TriviaQuestion>[];
+      for (var i = 0; i < selected.length; i++) {
+        final verse = selected[i];
+        final distractors = <String>[];
+        var offset = 1;
+        while (distractors.length < 3 && offset < selected.length) {
+          final candidate = selected[(i + offset * 37) % selected.length].reference;
+          if (candidate != verse.reference && !distractors.contains(candidate)) {
+            distractors.add(candidate);
+          }
+          offset++;
+        }
+        final options = <String>[verse.reference, ...distractors];
+        final answerIndex = (i * 7) % 4;
+        final correct = options.removeAt(0);
+        options.insert(answerIndex, correct);
+        final excerpt = verse.text.length > 125
+            ? '${verse.text.substring(0, 122).trimRight()}…'
+            : verse.text;
+        generated.add(_TriviaQuestion(
+          'Which Bible reference contains this passage? “$excerpt”',
+          options,
+          answerIndex,
+          verse.reference,
+          'This passage is found in $correct in the bundled World English Bible.',
+          isVerseChallenge: true,
+        ));
+      }
+      if (!mounted) return;
+      setState(() {
+        _scriptureQuestionExpansion = generated;
+        _scriptureQuestionsLoaded = true;
+      });
+      _startRound();
+    } catch (_) {
+      // Never block the game if an optional bundled asset is unavailable.
+      if (mounted) setState(() => _scriptureQuestionsLoaded = true);
+    }
   }
 
   Future<void> _loadRemoteQuestions() async {
@@ -462,7 +546,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
     final generated = _difficulty == 'All' || _difficulty == 'Easy'
         ? _characterQuestionExpansion
         : _characterQuestionExpansion.where((q) => q.reference.isNotEmpty);
-    final pool = [...local, ...remote, ...generated]
+    final pool = [...local, ...remote, ...generated, ..._scriptureQuestionExpansion]
         .where((question) => _category == 'All Questions' ||
             (_category == 'Bible Knowledge'
                 ? !_isVerseChallenge(question)
@@ -660,7 +744,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
         ]),
         const SizedBox(height: 8),
         Text(
-          'Question bank: $_knowledgeQuestionCount knowledge • $_verseQuestionCount verse questions • 300 target',
+          'Question bank: $_knowledgeQuestionCount knowledge • $_verseQuestionCount verse questions • 1,000 target',
           style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54, height: 1.4),
         ),
         const SizedBox(height: 14),
