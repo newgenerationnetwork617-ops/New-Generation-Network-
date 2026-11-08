@@ -126,6 +126,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
   bool submitted = false;
   String? selectedCategory;
   String? message;
+  String _difficulty = 'Easy';
   _Puzzle? puzzle;
   int? dragStart;
   List<int> selection = [];
@@ -300,7 +301,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
       words: List.unmodifiable(paths.keys),
       grid: grid,
       paths: paths,
-      prompt: pack.prompt,
+      prompt: _difficulty == 'Hard' ? '' : pack.prompt,
       reference: pack.reference,
     );
   }
@@ -485,6 +486,36 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
                   Text('Explore Scripture one puzzle at a time.', style: TextStyle(color: Colors.white70, fontSize: 13)),
                 ],
               ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                const Text('DIFFICULTY', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: .8)),
+                const Spacer(),
+                DropdownButton<String>(
+                  value: _difficulty,
+                  underline: const SizedBox.shrink(),
+                  items: const [
+                    DropdownMenuItem(value: 'Easy', child: Text('Easy')),
+                    DropdownMenuItem(value: 'Medium', child: Text('Medium')),
+                    DropdownMenuItem(value: 'Hard', child: Text('Hard')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) setState(() => _difficulty = value);
+                  },
+                ),
+              ],
+            ),
+            Text(
+              _difficulty == 'Hard'
+                  ? 'Hard mode hides the verse text. Find the words using the reference.'
+                  : 'The Bible verse is shown in Easy and Medium modes.',
+              style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Offline Bible verse bank: ${offlineVersePacks.length} / 300 puzzles',
+              style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 18),
             for (final category in categories)
