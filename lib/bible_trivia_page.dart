@@ -460,7 +460,6 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
         _scriptureQuestionExpansion = generated;
         _scriptureQuestionsLoaded = true;
       });
-      _startRound();
     } catch (_) {
       // Never block the game if an optional bundled asset is unavailable.
       if (mounted) setState(() => _scriptureQuestionsLoaded = true);
@@ -745,7 +744,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
         ]),
         const SizedBox(height: 8),
         Text(
-          'Question bank: $_knowledgeQuestionCount knowledge • $_verseQuestionCount verse questions • 1,000 target',
+          'Question bank: $_knowledgeQuestionCount knowledge • $_verseQuestionCount verse questions • 1,000 target${_scriptureQuestionsLoaded ? '' : ' • preparing offline bank'}',
           style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54, height: 1.4),
         ),
         const SizedBox(height: 14),
