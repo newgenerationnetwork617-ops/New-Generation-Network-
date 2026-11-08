@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'bible_repository.dart';
 import 'game_leaderboard_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -412,7 +413,7 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
         );
         for (final chapter in book.chapters) {
           for (final verse in chapter.verses) {
-            final clean = verse.text.replaceAll(RegExp(r'\\s+'), ' ').trim();
+            final clean = verse.text.replaceAll(RegExp(r'\s+'), ' ').trim();
             if (clean.length < 18) continue;
             verses.add((
               reference: '${book.name} ${chapter.number}:${verse.number}',
