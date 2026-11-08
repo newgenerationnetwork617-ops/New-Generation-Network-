@@ -161,7 +161,8 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
           .select('id,category,theme,verse_text,bible_reference,words,explanation,difficulty,created_at')
           .eq('is_published', true)
           .order('created_at', ascending: false)
-          .limit(500);
+          .limit(500)
+          .timeout(const Duration(seconds: 3));
       final fresh = List<Map<String, dynamic>>.from(rows);
       await prefs.setString(cacheKey, jsonEncode(fresh));
       if (mounted) setState(() => downloaded = fresh);
@@ -355,7 +356,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
         'user_id': user.id,
         'game_id': 'bible_grid_search',
         'score': score,
-      });
+      }).timeout(const Duration(seconds: 3));
     } catch (_) {
       final prefs = await SharedPreferences.getInstance();
       final queue = prefs.getStringList(queueKey) ?? [];
@@ -378,7 +379,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
           'user_id': user.id,
           'game_id': parts[0],
           'score': int.parse(parts[1]),
-        });
+        }).timeout(const Duration(seconds: 2));
       } catch (_) {
         keep.add(item);
       }
