@@ -61,7 +61,7 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
   Future<void> _loadOfflineChallenges() async {
     // Add 988 verse-based stages to the 12 hand-authored story stages.
     // Every prompt, answer and reference is built from Bible files bundled
-    // inside the app, so the full 300-stage adventure works offline.
+    // inside the app, so the full 1,000-stage adventure works offline.
     try {
       final repository = BibleRepository();
       final verses = <({String reference, String text})>[];
