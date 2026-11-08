@@ -27,8 +27,11 @@ class GameLevelHub extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final safeCurrent = currentLevel.clamp(1, totalLevels);
-    final progress = totalLevels == 0 ? 0.0 : (safeCurrent - 1) / totalLevels;
+    // Guard the level selector against invalid configuration so a zero-level
+    // game cannot crash while building the progress screen.
+    final safeTotalLevels = totalLevels < 1 ? 1 : totalLevels;
+    final safeCurrent = currentLevel.clamp(1, safeTotalLevels);
+    final progress = totalLevels < 1 ? 0.0 : (safeCurrent - 1) / safeTotalLevels;
     return Scaffold(
       backgroundColor: _background,
       appBar: AppBar(
@@ -68,7 +71,7 @@ class GameLevelHub extends StatelessWidget {
                           child: Icon(icon, color: accent, size: 25),
                         ),
                         const Spacer(),
-                        Text('$safeCurrent / $totalLevels',
+                        Text('$safeCurrent / $safeTotalLevels',
                           style: TextStyle(color: accent, fontWeight: FontWeight.w800)),
                       ]),
                       const SizedBox(height: 20),
@@ -177,7 +180,7 @@ class GameLevelHub extends StatelessWidget {
                       ),
                     );
                   },
-                  childCount: totalLevels,
+                  childCount: safeTotalLevels,
                 ),
               ),
             ),
