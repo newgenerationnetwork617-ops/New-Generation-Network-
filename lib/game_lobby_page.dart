@@ -61,7 +61,7 @@ class _GameLobbyPageState extends State<GameLobbyPage> {
             .eq('game_id', widget.gameId)
             .eq('user_id', user.id)
             .maybeSingle()
-            .timeout(const Duration(seconds: 4));
+            .timeout(const Duration(seconds: 2));
         final value = row?['player_rank'];
         if (value != null) rank = '#$value';
       } catch (_) {
