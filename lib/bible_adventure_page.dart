@@ -59,7 +59,7 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
   }
 
   Future<void> _loadOfflineChallenges() async {
-    // Add 288 verse-based stages to the 12 hand-authored story stages.
+    // Add 988 verse-based stages to the 12 hand-authored story stages.
     // Every prompt, answer and reference is built from Bible files bundled
     // inside the app, so the full 300-stage adventure works offline.
     try {
@@ -81,10 +81,10 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
           }
         }
       }
-      if (verses.length < 288) return;
-      final step = verses.length / 288;
+      if (verses.length < 988) return;
+      final step = verses.length / 988;
       final selected = List.generate(
-        288,
+        988,
         (index) => verses[(index * step).floor()],
       );
       for (var i = 0; i < selected.length; i++) {
