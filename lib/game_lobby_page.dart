@@ -60,11 +60,12 @@ class _GameLobbyPageState extends State<GameLobbyPage> {
             .select('player_rank')
             .eq('game_id', widget.gameId)
             .eq('user_id', user.id)
-            .maybeSingle();
+            .maybeSingle()
+            .timeout(const Duration(seconds: 4));
         final value = row?['player_rank'];
         if (value != null) rank = '#$value';
       } catch (_) {
-        rank = 'RANK UNAVAILABLE';
+        rank = 'OFFLINE';
       }
     } else {
       rank = 'GUEST';
