@@ -15,7 +15,6 @@ import 'bible_page.dart';
 import 'content_pages.dart';
 import 'content_repository.dart';
 import 'bible_trivia_page.dart';
-import 'bible_word_puzzle_page.dart';
 import 'bible_adventure_page.dart';
 import 'bible_grid_search_page.dart';
 import 'guess_bible_character_page.dart';
@@ -566,7 +565,7 @@ class BibleGamesHubPage extends StatelessWidget {
                 ),
               ),
               _HomeFeatureCard(
-                icon: Icons.extension_rounded,
+                icon: Icons.explore_rounded,
                 title: 'Bible Adventure',
                 subtitle: 'Explore Bible stories through fun offline challenges',
                 page: GameLobbyPage(
