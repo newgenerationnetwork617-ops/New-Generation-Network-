@@ -169,7 +169,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
         'THE', 'AND', 'FOR', 'YOU', 'YOUR', 'THAT', 'WAS', 'ARE', 'WITH',
         'HIS', 'HER', 'HIM', 'SHE', 'WHO', 'NOT', 'BUT', 'HAVE', 'HAS',
         'HATH', 'THIS', 'THEY', 'THEM', 'THEN', 'FROM', 'WILL', 'SHALL',
-        'THERE', 'THEIR', 'THOU', 'THY', 'unto', 'unto'.toUpperCase(),
+        'THERE', 'THEIR', 'THOU', 'THY', 'UNTO',
       };
       for (final bookName in repository.bookNames) {
         final raw = await rootBundle.loadString('assets/bible/books/$bookName.json');
