@@ -129,7 +129,8 @@ _Person('Hagar','Medium',['I was an Egyptian servant in Abraham’s household.',
           .from('bible_characters')
           .select('name,difficulty,clues,bible_references,explanation')
           .eq('is_published', true)
-          .order('name');
+          .order('name')
+          .timeout(const Duration(seconds: 3));
       final remoteRows = List<Map<String, dynamic>>.from(rows);
       if (remoteRows.isEmpty) return;
       await prefs.setString(_characterCacheKey, jsonEncode(remoteRows));
