@@ -198,10 +198,10 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
           }
         }
       }
-      if (candidates.length < 300) return;
-      final step = candidates.length / 300;
+      if (candidates.length < 1000) return;
+      final step = candidates.length / 1000;
       final selected = List.generate(
-        300,
+        1000,
         (index) => candidates[(index * step).floor()],
       );
       if (mounted) setState(() => offlineVersePacks = selected);
@@ -514,7 +514,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Offline Bible verse bank: ${offlineVersePacks.length} / 300 puzzles',
+              'Offline Bible verse bank: ${offlineVersePacks.length} / 1,000 puzzles',
               style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : Colors.black54, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 18),
