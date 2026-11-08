@@ -101,7 +101,7 @@ _Person('Hagar','Medium',['I was an Egyptian servant in Abraham’s household.',
   static const _characterCacheKey = 'ngn_guess_character_remote_cache';
   String difficulty = 'All', mode = 'Quick Guess';
   List<_Person> session = [];
-  int index = 0, clue = 0, score = 0, best = 0;
+  int index = 0, clue = 0, score = 0, best = 0, streak = 0;
   bool solved = false, finished = false;
   String? message;
   _Person get current => session[index];
@@ -201,12 +201,14 @@ _Person('Hagar','Medium',['I was an Egyptian servant in Abraham’s household.',
     if (guess.isEmpty) { setState(() => message = 'Enter a name first.'); return; }
     if (guess == current.name.toLowerCase()) {
       final points = [100, 75, 50, 25][clue];
-      setState(() { score += points; solved = true; message = 'Correct! +$points points'; });
+      final streakBonus = min(streak, 5) * 5;
+      final earned = points + streakBonus;
+      setState(() { streak++; score += earned; solved = true; message = streakBonus > 0 ? 'Correct! +$points + $streakBonus streak bonus' : 'Correct! +$earned points'; });
     } else if (mode == 'Endless Challenge') {
-      setState(() { finished = true; message = 'Incorrect answer. This Endless run has ended.'; });
+      setState(() { streak = 0; finished = true; message = 'Incorrect answer. This Endless run has ended.'; });
       _saveBest();
     } else {
-      setState(() => message = 'Not quite. Try again or reveal the next clue.');
+      setState(() { streak = 0; message = 'Not quite. Try again or reveal the next clue.'; });
     }
   }
 
@@ -248,7 +250,9 @@ _Person('Hagar','Medium',['I was an Egyptian servant in Abraham’s household.',
         const SizedBox(height: 4),
         Text('$totalCharacterCount Bible characters • ${totalCharacterCount * 4} clues', style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700)),
         const SizedBox(height: 6),
-        Text('Character ${index + 1} of ${session.length}  •  Score: $score', style: const TextStyle(color: Colors.white)),
+        Text('Character ${index + 1} of ${session.length}  •  Score: $score  •  Streak: $streak', style: const TextStyle(color: Colors.white)),
+        const SizedBox(height: 12),
+        ClipRRect(borderRadius: BorderRadius.circular(20), child: LinearProgressIndicator(value: (index + (solved ? 1 : 0)) / session.length, minHeight: 7, backgroundColor: Colors.white24, valueColor: const AlwaysStoppedAnimation<Color>(gold))),
       ]),
     ),
     const SizedBox(height: 14),
@@ -263,7 +267,7 @@ _Person('Hagar','Medium',['I was an Egyptian servant in Abraham’s household.',
     const SizedBox(height: 20),
     Text('CLUE ${clue + 1} OF 4', style: const TextStyle(color: blue, fontWeight: FontWeight.w900)),
     const SizedBox(height: 8),
-    Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: dark ? const Color(0xFF172438) : const Color(0xFFEAF1FF), borderRadius: BorderRadius.circular(16)), child: Text(current.clues[clue], style: const TextStyle(fontSize: 18, height: 1.45, fontWeight: FontWeight.w700))),
+    AnimatedSwitcher(duration: const Duration(milliseconds: 280), transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0, .08), end: Offset.zero).animate(animation), child: child)), child: Container(key: ValueKey('${current.name}-$clue'), width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: LinearGradient(colors: dark ? [const Color(0xFF172438), const Color(0xFF203858)] : [const Color(0xFFEAF1FF), const Color(0xFFDCE9FF)]), borderRadius: BorderRadius.circular(16), border: Border.all(color: blue.withValues(alpha: .18))), child: Text(current.clues[clue], style: const TextStyle(fontSize: 18, height: 1.45, fontWeight: FontWeight.w700)))), 
     const SizedBox(height: 8),
     Text('Points available: ${[100, 75, 50, 25][clue]}', style: TextStyle(color: dark ? Colors.white70 : Colors.black54)),
     const SizedBox(height: 16),
