@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'bible_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -129,6 +132,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
   final Set<String> found = {};
   final Set<int> foundCells = {};
   List<Map<String, dynamic>> downloaded = [];
+  List<_PuzzlePack> offlineVersePacks = [];
 
   @override
   void initState() {
@@ -151,7 +155,58 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
     }
     if (mounted) setState(() => loading = false);
     _syncScores();
+    _loadOfflineVersePacks();
     _downloadPublishedPuzzles(prefs);
+  }
+
+  Future<void> _loadOfflineVersePacks() async {
+    // Build a local verse-based puzzle bank from the Bible files bundled in
+    // the APK. This never calls the network and works in airplane mode.
+    try {
+      final repository = BibleRepository();
+      final candidates = <_PuzzlePack>[];
+      const stopWords = {
+        'THE', 'AND', 'FOR', 'YOU', 'YOUR', 'THAT', 'WAS', 'ARE', 'WITH',
+        'HIS', 'HER', 'HIM', 'SHE', 'WHO', 'NOT', 'BUT', 'HAVE', 'HAS',
+        'HATH', 'THIS', 'THEY', 'THEM', 'THEN', 'FROM', 'WILL', 'SHALL',
+        'THERE', 'THEIR', 'THOU', 'THY', 'unto', 'unto'.toUpperCase(),
+      };
+      for (final bookName in repository.bookNames) {
+        final raw = await rootBundle.loadString('assets/bible/books/$bookName.json');
+        final book = BibleBook.fromJson(
+          jsonDecode(raw) as Map<String, dynamic>,
+        );
+        for (final chapter in book.chapters) {
+          for (final verse in chapter.verses) {
+            final reference = '${book.name} ${chapter.number}:${verse.number}';
+            final words = RegExp(r'[A-Za-z]{3,10}')
+                .allMatches(verse.text)
+                .map((match) => match.group(0)!.toUpperCase())
+                .where((word) => !stopWords.contains(word))
+                .toSet()
+                .take(8)
+                .toList();
+            if (words.length < 3) continue;
+            candidates.add(_PuzzlePack(
+              'Verses & Chapters',
+              reference,
+              words.join(' '),
+              prompt: verse.text,
+              reference: reference,
+            ));
+          }
+        }
+      }
+      if (candidates.length < 300) return;
+      final step = candidates.length / 300;
+      final selected = List.generate(
+        300,
+        (index) => candidates[(index * step).floor()],
+      );
+      if (mounted) setState(() => offlineVersePacks = selected);
+    } catch (_) {
+      // Keep the smaller hand-curated pack if a Bible asset is unavailable.
+    }
   }
 
   Future<void> _downloadPublishedPuzzles(SharedPreferences prefs) async {
@@ -173,6 +228,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
 
   List<_PuzzlePack> _packsFor(String category) {
     final local = packs.where((p) => p.category == category).toList();
+    final offlineVerses = offlineVersePacks.where((p) => p.category == category);
     final remote = downloaded.where((r) => r['category'] == category).map((r) {
       final words = List<String>.from(r['words'] as List)
           .map((w) => w.toUpperCase().replaceAll(RegExp(r'[^A-Z]'), ''))
@@ -189,7 +245,7 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
         reference: r['bible_reference']?.toString() ?? '',
       );
     }).where((p) => p.words.split(' ').where((w) => w.isNotEmpty).length >= 3);
-    return [...local, ...remote];
+    return [...local, ...offlineVerses, ...remote];
   }
 
   _Puzzle _makePuzzle(_PuzzlePack pack) {
