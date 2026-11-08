@@ -68,7 +68,7 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
         for (final chapter in book.chapters) {
           for (final verse in chapter.verses) {
             final text = verse.text.trim();
-            if (text.split(RegExp(r'\\s+')).length < 5) continue;
+            if (text.split(RegExp(r'\s+')).length < 5) continue;
             verses.add((
               reference: '${book.name} ${chapter.number}:${verse.number}',
               text: text,
@@ -87,15 +87,13 @@ class _BibleAdventurePageState extends State<BibleAdventurePage> {
         final correctIndex = i % 4;
         final options = <String>[];
         var offset = 1;
-        while (options.length < 4) {
+        while (options.length < 3) {
           final candidate = verses[(i * 37 + offset * 113) % verses.length].reference;
-          if (!options.contains(candidate) &&
-              (candidate != item.reference || options.length == correctIndex)) {
+          if (candidate != item.reference && !options.contains(candidate)) {
             options.add(candidate);
           }
           offset++;
         }
-        options.remove(item.reference);
         options.insert(correctIndex, item.reference);
         final excerpt = item.text.length > 180
             ? '${item.text.substring(0, 177)}…'
