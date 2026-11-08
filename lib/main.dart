@@ -560,7 +560,7 @@ class BibleGamesHubPage extends StatelessWidget {
                   icon: Icons.quiz_rounded,
                   bestKey: 'ngn_bible_trivia_high_score',
                   levelKey: 'ngn_bible_trivia_level',
-                  totalLevels: 15,
+                  totalLevels: 1000,
                   gamePage: BibleTriviaPage(),
                 ),
               ),
