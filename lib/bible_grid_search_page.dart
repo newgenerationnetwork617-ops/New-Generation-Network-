@@ -673,7 +673,9 @@ class _BibleGridSearchPageState extends State<BibleGridSearchPage> {
                                     final isFound = foundCells.contains(n);
                                     final isSelected = selection.contains(n);
                                     return Expanded(
-                                      child: Container(
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 160),
+                                        curve: Curves.easeOut,
                                         margin: const EdgeInsets.all(1),
                                         alignment: Alignment.center,
                                         decoration: BoxDecoration(
