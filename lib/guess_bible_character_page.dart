@@ -114,6 +114,10 @@ _Person('Hagar','Medium',['I was an Egyptian servant in Abraham’s household.',
     final p = await SharedPreferences.getInstance();
     if (mounted) setState(() => best = p.getInt('ngn_guess_character_best') ?? 0);
   }
+  int get totalCharacterCount => {
+        for (final person in allCharacters) person.name.toLowerCase(): person,
+      }.length;
+
   List<_Person> get pool {
     final unique = <String, _Person>{};
     for (final person in allCharacters) {
@@ -241,6 +245,8 @@ _Person('Hagar','Medium',['I was an Egyptian servant in Abraham’s household.',
         const Row(children: [Icon(Icons.person_search_rounded, color: gold), SizedBox(width: 8), Text('WHO AM I?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)), Spacer(), Icon(Icons.wifi_off_rounded, color: Colors.white70, size: 16), SizedBox(width: 5), Text('OFFLINE', style: TextStyle(color: Colors.white70, fontSize: 10))]),
         const SizedBox(height: 12),
         Text(mode.toUpperCase(), style: const TextStyle(color: gold, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 4),
+        Text('${totalCharacterCount} Bible characters • ${totalCharacterCount * 4} clues', style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700)),
         const SizedBox(height: 6),
         Text('Character ${index + 1} of ${session.length}  •  Score: $score', style: const TextStyle(color: Colors.white)),
       ]),
