@@ -16,6 +16,7 @@ import 'content_pages.dart';
 import 'content_repository.dart';
 import 'bible_trivia_page.dart';
 import 'bible_word_puzzle_page.dart';
+import 'bible_adventure_page.dart';
 import 'bible_grid_search_page.dart';
 import 'guess_bible_character_page.dart';
 import 'game_lobby_page.dart';
@@ -566,17 +567,15 @@ class BibleGamesHubPage extends StatelessWidget {
               ),
               _HomeFeatureCard(
                 icon: Icons.extension_rounded,
-                title: 'Bible Word Cookies',
-                subtitle: 'Form Bible words from letter clues',
+                title: 'Bible Adventure',
+                subtitle: 'Explore Bible stories through fun offline challenges',
                 page: GameLobbyPage(
-                  title: 'Bible Word Cookies',
-                  subtitle: 'Build Bible words, solve clues and advance through 1,000 levels.',
-                  gameId: 'bible_word_search',
-                  icon: Icons.extension_rounded,
-                  bestKey: 'ngn_bible_word_search_best',
-                  levelKey: 'ngn_bible_word_search_level',
-                  totalLevels: 1000,
-                  gamePage: BibleWordPuzzlePage(),
+                  title: 'Bible Adventure',
+                  subtitle: 'Explore Bible stories through fun offline challenges.',
+                  gameId: 'bible_adventure',
+                  icon: Icons.explore_rounded,
+                  bestKey: 'ngn_bible_adventure_best',
+                  gamePage: BibleAdventurePage(),
                 ),
               ),
               _HomeFeatureCard(
@@ -594,7 +593,7 @@ class BibleGamesHubPage extends StatelessWidget {
               ),
               _HomeFeatureCard(
                 icon: Icons.grid_on_rounded,
-                title: 'Word Search Puzzle',
+                title: 'Bible Word Search',
                 subtitle: 'Choose a Bible category and find hidden words',
                 page: BibleGridSearchPage(),
               ),
