@@ -32,7 +32,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import android.widget.RemoteViews
-import es.antonborri.home_widget.HomeWidgetPlugin\nimport es.antonborri.home_widget.HomeWidgetLaunchIntent
+import es.antonborri.home_widget.HomeWidgetPlugin
+import es.antonborri.home_widget.HomeWidgetLaunchIntent
 
 class DevotionalWidgetProvider : AppWidgetProvider() {{
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {{
