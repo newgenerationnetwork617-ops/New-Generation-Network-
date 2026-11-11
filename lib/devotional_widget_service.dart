@@ -43,7 +43,7 @@ class DevotionalWidgetService {
         'ngn_devotional_reference',
         item?['bible_reference']?.toString().trim() ?? '',
       );
-      final message = item?['message']?.toString().replaceAll(RegExp(r'\\s+'), ' ').trim() ?? '';
+      final message = item?['message']?.toString().replaceAll(RegExp(r'\s+'), ' ').trim() ?? '';
       final excerpt = message.length > 210 ? '${message.substring(0, 207).trimRight()}…' : message;
       await HomeWidget.saveWidgetData<String>(
         'ngn_devotional_message',
