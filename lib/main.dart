@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'in_app_notifications.dart';
 import 'daily_local_notification_service.dart';
+import 'devotional_widget_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'push_notification_service.dart';
@@ -49,6 +50,7 @@ Future<void> main() async {
   runApp(const NewGenerationNetworkApp());
 
   unawaited(_initializePushNotificationsSafely());
+  unawaited(DevotionalWidgetService.instance.refreshToday());
   // In-app counters and guest chat identity can refresh after the first frame.
   unawaited(InAppNotificationService.instance.initialize());
 }
@@ -262,6 +264,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     _dayRefreshTimer = Timer(nextMidnight.difference(now), () {
       if (!mounted) return;
       setState(() {});
+      unawaited(DevotionalWidgetService.instance.refreshToday());
       _scheduleLocalMidnightRefresh();
     });
   }
@@ -271,6 +274,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       InAppNotificationService.instance.refreshCounts();
       DailyLocalNotificationService.instance.scheduleUpcoming();
+      unawaited(DevotionalWidgetService.instance.refreshToday());
       if (mounted) {
         setState(() {});
         _scheduleLocalMidnightRefresh();
