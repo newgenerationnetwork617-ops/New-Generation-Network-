@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:home_widget/home_widget.dart';
 import 'in_app_notifications.dart';
 import 'daily_local_notification_service.dart';
+import 'devotional_widget_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'push_notification_service.dart';
@@ -49,6 +51,7 @@ Future<void> main() async {
   runApp(const NewGenerationNetworkApp());
 
   unawaited(_initializePushNotificationsSafely());
+  unawaited(DevotionalWidgetService.instance.refreshToday());
   // In-app counters and guest chat identity can refresh after the first frame.
   unawaited(InAppNotificationService.instance.initialize());
 }
@@ -211,12 +214,15 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   int index = 0;
   Timer? _dayRefreshTimer;
+  StreamSubscription<Uri?>? _widgetClickSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     DailyLocalNotificationService.instance.openedPayload.addListener(_handleDailyNotificationTap);
+    _widgetClickSubscription = HomeWidget.widgetClicked.listen(_handleWidgetLaunch);
+    HomeWidget.initiallyLaunchedFromHomeWidget().then(_handleWidgetLaunch);
     _scheduleLocalMidnightRefresh();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Notification scheduling is optional and can take time on some devices.
@@ -236,6 +242,17 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
       debugPrint('NGN local notification setup failed: $error');
       debugPrintStack(stackTrace: stackTrace);
     }
+  }
+
+  void _handleWidgetLaunch(Uri? uri) {
+    if (uri?.host != 'devotional' || !mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const DevotionalsPage()),
+      );
+    });
   }
 
   void _handleDailyNotificationTap() {
@@ -262,6 +279,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     _dayRefreshTimer = Timer(nextMidnight.difference(now), () {
       if (!mounted) return;
       setState(() {});
+      unawaited(DevotionalWidgetService.instance.refreshToday());
       _scheduleLocalMidnightRefresh();
     });
   }
@@ -271,6 +289,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       InAppNotificationService.instance.refreshCounts();
       DailyLocalNotificationService.instance.scheduleUpcoming();
+      unawaited(DevotionalWidgetService.instance.refreshToday());
       if (mounted) {
         setState(() {});
         _scheduleLocalMidnightRefresh();
@@ -282,6 +301,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     DailyLocalNotificationService.instance.openedPayload.removeListener(_handleDailyNotificationTap);
+    _widgetClickSubscription?.cancel();
     _dayRefreshTimer?.cancel();
     super.dispose();
   }

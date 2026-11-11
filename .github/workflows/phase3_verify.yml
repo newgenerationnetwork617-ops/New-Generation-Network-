@@ -2,7 +2,7 @@ name: Phase 3 - Verify and Build Android
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/devotional-home-widget]
   workflow_dispatch:
 
 jobs:
@@ -27,6 +27,9 @@ jobs:
 
       - name: Generate Flutter Android files
         run: flutter create --platforms=android .
+
+      - name: Configure NGN devotional home-screen widget
+        run: python3 scripts/configure_devotional_widget.py
 
       - name: Configure Firebase for Android
         run: |
