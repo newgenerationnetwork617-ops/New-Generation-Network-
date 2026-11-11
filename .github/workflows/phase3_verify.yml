@@ -2,7 +2,7 @@ name: Phase 3 - Verify and Build Android
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/devotional-home-widget]
   workflow_dispatch:
 
 jobs:
