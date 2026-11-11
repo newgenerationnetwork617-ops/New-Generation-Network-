@@ -15,7 +15,7 @@ if not activity_files:
     raise SystemExit("Could not find generated MainActivity to determine Android package")
 
 activity_text = activity_files[0].read_text()
-match = re.search(r"^package\\s+([A-Za-z0-9_.]+)", activity_text, re.MULTILINE)
+match = re.search(r"^package\s+([A-Za-z0-9_.]+)", activity_text, re.MULTILINE)
 if not match:
     raise SystemExit("Could not determine Android package from MainActivity")
 package_name = match.group(1)
@@ -26,10 +26,10 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
-import android.content.Intent
+import android.net.Uri
 import android.graphics.Color
 import android.widget.RemoteViews
-import es.antonborri.home_widget.HomeWidgetPlugin
+import es.antonborri.home_widget.HomeWidgetPlugin\nimport es.antonborri.home_widget.HomeWidgetLaunchIntent
 
 class DevotionalWidgetProvider : AppWidgetProvider() {{
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {{
@@ -40,10 +40,11 @@ class DevotionalWidgetProvider : AppWidgetProvider() {{
             "gold" -> intArrayOf(Color.rgb(255, 247, 224), Color.rgb(34, 37, 43), Color.rgb(80, 83, 90), Color.rgb(7, 59, 140))
             else -> intArrayOf(Color.rgb(7, 59, 140), Color.WHITE, Color.rgb(224, 235, 255), Color.rgb(255, 201, 74))
         }}
-        val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val pendingIntent = launchIntent?.let {{
-            PendingIntent.getActivity(context, 4107, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        }}
+        val pendingIntent = HomeWidgetLaunchIntent.getActivity(
+            context,
+            MainActivity::class.java,
+            Uri.parse("ngn://devotional")
+        )
         ids.forEach {{ id ->
             val views = RemoteViews(context.packageName, R.layout.ngn_devotional_widget).apply {{
                 setInt(R.id.widget_container, "setBackgroundColor", palette[0])
@@ -148,6 +149,13 @@ receiver = f'''    <receiver
             android:resource="@xml/ngn_devotional_widget_info" />
     </receiver>
 '''
+if 'es.antonborri.home_widget.action.LAUNCH' not in manifest_text:
+    launch_filter = """            <intent-filter>
+                <action android:name="es.antonborri.home_widget.action.LAUNCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+"""
+    manifest_text = manifest_text.replace("</activity>", launch_filter + "        </activity>", 1)
 if "DevotionalWidgetProvider" not in manifest_text:
     if "</application>" not in manifest_text:
         raise SystemExit("Could not find application closing tag in AndroidManifest.xml")
