@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'daily_local_notification_service.dart';
+import 'devotional_widget_service.dart';
 import 'community_archive_manager_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -17,6 +18,8 @@ class _SettingsPageState extends State<SettingsPage> {
   bool eveningReflectionEnabled = true;
   bool specialGreetingsEnabled = true;
   bool notificationSettingsLoaded = false;
+  String widgetStyle = 'classic';
+  bool widgetStyleLoaded = false;
 
   @override
   void initState() {
@@ -30,6 +33,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final devotional = await service.devotionalEnabled();
     final evening = await service.eveningReflectionEnabled();
     final greetings = await service.specialGreetingsEnabled();
+    final selectedWidgetStyle = await DevotionalWidgetService.instance.selectedStyle();
     if (!mounted) return;
     setState(() {
       dailyVerseEnabled = verse;
@@ -37,6 +41,8 @@ class _SettingsPageState extends State<SettingsPage> {
       eveningReflectionEnabled = evening;
       specialGreetingsEnabled = greetings;
       notificationSettingsLoaded = true;
+      widgetStyle = selectedWidgetStyle;
+      widgetStyleLoaded = true;
     });
   }
 
@@ -58,6 +64,16 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _setSpecialGreetings(bool enabled) async {
     setState(() => specialGreetingsEnabled = enabled);
     await DailyLocalNotificationService.instance.setSpecialGreetingsEnabled(enabled);
+  }
+
+  Future<void> _setWidgetStyle(String? style) async {
+    if (style == null) return;
+    setState(() => widgetStyle = style);
+    await DevotionalWidgetService.instance.setStyle(style);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Devotional widget appearance updated.')),
+    );
   }
 
   Future<void> openLink(String url) async {
@@ -128,6 +144,33 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
               child: Text(
                 'These reminders use reading content stored in the app and do not need mobile data. Your phone must allow NGN to send notifications. Reminder times follow your device timezone.',
+                style: TextStyle(fontSize: 12, height: 1.45),
+              ),
+            ),
+          ]),
+          section('Home-screen devotional widget', [
+            ListTile(
+              leading: const Icon(Icons.widgets_rounded),
+              title: const Text('Widget appearance'),
+              subtitle: const Text('Choose how today’s devotional appears on your phone home screen.'),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
+              child: DropdownButtonFormField<String>(
+                value: widgetStyle,
+                decoration: const InputDecoration(labelText: 'Widget style'),
+                items: const [
+                  DropdownMenuItem(value: 'classic', child: Text('NGN Blue')),
+                  DropdownMenuItem(value: 'midnight', child: Text('Midnight')),
+                  DropdownMenuItem(value: 'gold', child: Text('Warm Gold')),
+                ],
+                onChanged: widgetStyleLoaded ? _setWidgetStyle : null,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
+              child: Text(
+                'To add the widget, long-press an empty area of your Android home screen, open Widgets, then choose NGN Daily Devotional. Tap the widget to open Holy Word [NGN].',
                 style: TextStyle(fontSize: 12, height: 1.45),
               ),
             ),
