@@ -28,6 +28,9 @@ jobs:
       - name: Generate Flutter Android files
         run: flutter create --platforms=android .
 
+      - name: Configure NGN devotional home-screen widget
+        run: python3 scripts/configure_devotional_widget.py
+
       - name: Configure Firebase for Android
         run: |
           test -f google-services.json || (echo "google-services.json is missing from the repository root" && exit 1)
