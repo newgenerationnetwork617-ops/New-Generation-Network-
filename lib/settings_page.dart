@@ -149,15 +149,15 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ]),
           section('Home-screen devotional widget', [
-            ListTile(
-              leading: const Icon(Icons.widgets_rounded),
+            const ListTile(
+              leading: Icon(Icons.widgets_rounded),
               title: const Text('Widget appearance'),
               subtitle: const Text('Choose how today’s devotional appears on your phone home screen.'),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
               child: DropdownButtonFormField<String>(
-                value: widgetStyle,
+                initialValue: widgetStyle,
                 decoration: const InputDecoration(labelText: 'Widget style'),
                 items: const [
                   DropdownMenuItem(value: 'classic', child: Text('NGN Blue')),
