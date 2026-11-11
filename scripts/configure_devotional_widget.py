@@ -43,15 +43,15 @@ class DevotionalWidgetProvider : AppWidgetProvider() {{
         // access or requiring the Flutter app to be opened each morning.
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
         val month = today.substring(0, 7)
-        try {
+        try {{
             val jsonText = context.assets
                 .open("flutter_assets/assets/devotionals/spurgeon-morning/$month.json")
-                .bufferedReader().use { it.readText() }
+                .bufferedReader().use {{ it.readText() }}
             val entries = JSONObject(jsonText).optJSONArray("entries")
-            if (entries != null) {
-                for (index in 0 until entries.length()) {
+            if (entries != null) {{
+                for (index in 0 until entries.length()) {{
                     val entry = entries.optJSONObject(index) ?: continue
-                    if (entry.optString("published_at").startsWith(today)) {
+                    if (entry.optString("published_at").startsWith(today)) {{
                         val fullMessage = entry.optString("message").replace(Regex("\\s+"), " ").trim()
                         val excerpt = if (fullMessage.length > 210) fullMessage.substring(0, 207).trimEnd() + "…" else fullMessage
                         data.edit()
@@ -61,12 +61,12 @@ class DevotionalWidgetProvider : AppWidgetProvider() {{
                             .putString("ngn_devotional_date", today)
                             .apply()
                         break
-                    }
-                }
-            }
-        } catch (_: Exception) {
+                    }}
+                }}
+            }}
+        }} catch (_: Exception) {{
             // Keep the last saved reading if this month's bundled file is absent.
-        }
+        }}
         val style = data.getString("ngn_devotional_widget_style", "classic") ?: "classic"
         val palette = when (style) {{
             "midnight" -> intArrayOf(Color.rgb(9, 20, 38), Color.WHITE, Color.rgb(190, 205, 225), Color.rgb(255, 201, 74))
