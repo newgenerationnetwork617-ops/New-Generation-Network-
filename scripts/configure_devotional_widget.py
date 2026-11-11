@@ -52,7 +52,7 @@ class DevotionalWidgetProvider : AppWidgetProvider() {{
                 for (index in 0 until entries.length()) {{
                     val entry = entries.optJSONObject(index) ?: continue
                     if (entry.optString("published_at").startsWith(today)) {{
-                        val fullMessage = entry.optString("message").replace(Regex("\\s+"), " ").trim()
+                        val fullMessage = entry.optString("message").replace(Regex("""\\s+"""), " ").trim()
                         val excerpt = if (fullMessage.length > 210) fullMessage.substring(0, 207).trimEnd() + "…" else fullMessage
                         data.edit()
                             .putString("ngn_devotional_title", entry.optString("title", "Today's Devotional"))
