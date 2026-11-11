@@ -329,6 +329,8 @@ class DailyLocalNotificationService {
             'Daily Bible verse and devotional reminders from NGN',
         importance: Importance.high,
         priority: Priority.high,
+        visibility: NotificationVisibility.public,
+        category: AndroidNotificationCategory.reminder,
         styleInformation: BigTextStyleInformation(body),
       ),
       iOS: const DarwinNotificationDetails(
