@@ -22,18 +22,50 @@ package_name = match.group(1)
 source_dir = activity_files[0].parent
 (source_dir / "DevotionalWidgetProvider.kt").write_text(f'''package {package_name}
 
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.net.Uri
 import android.graphics.Color
+import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin\nimport es.antonborri.home_widget.HomeWidgetLaunchIntent
 
 class DevotionalWidgetProvider : AppWidgetProvider() {{
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {{
         val data = HomeWidgetPlugin.getData(context)
+        // The launcher refreshes this widget periodically. Read the bundled
+        // monthly devotional directly so it stays current without internet
+        // access or requiring the Flutter app to be opened each morning.
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+        val month = today.substring(0, 7)
+        try {
+            val jsonText = context.assets
+                .open("flutter_assets/assets/devotionals/spurgeon-morning/$month.json")
+                .bufferedReader().use { it.readText() }
+            val entries = JSONObject(jsonText).optJSONArray("entries")
+            if (entries != null) {
+                for (index in 0 until entries.length()) {
+                    val entry = entries.optJSONObject(index) ?: continue
+                    if (entry.optString("published_at").startsWith(today)) {
+                        val fullMessage = entry.optString("message").replace(Regex("\\s+"), " ").trim()
+                        val excerpt = if (fullMessage.length > 210) fullMessage.substring(0, 207).trimEnd() + "…" else fullMessage
+                        data.edit()
+                            .putString("ngn_devotional_title", entry.optString("title", "Today's Devotional"))
+                            .putString("ngn_devotional_reference", entry.optString("bible_reference", ""))
+                            .putString("ngn_devotional_message", excerpt)
+                            .putString("ngn_devotional_date", today)
+                            .apply()
+                        break
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            // Keep the last saved reading if this month's bundled file is absent.
+        }
         val style = data.getString("ngn_devotional_widget_style", "classic") ?: "classic"
         val palette = when (style) {{
             "midnight" -> intArrayOf(Color.rgb(9, 20, 38), Color.WHITE, Color.rgb(190, 205, 225), Color.rgb(255, 201, 74))
