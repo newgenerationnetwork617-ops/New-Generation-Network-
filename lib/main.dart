@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'notes_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'in_app_notifications.dart';
@@ -6,6 +7,7 @@ import 'daily_local_notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'push_notification_service.dart';
+import 'home_screen_widget_service.dart';
 
 import 'settings_page.dart';
 import 'community_page.dart';
@@ -36,6 +38,16 @@ Future<void> _initializePushNotificationsSafely() async {
   }
 }
 
+Future<void> _refreshHomeScreenWidgetsSafely() async {
+  try {
+    await HomeScreenWidgetService.refresh();
+  } catch (error, stackTrace) {
+    // Home-screen widgets are optional and must never block app startup.
+    debugPrint('NGN home-screen widget refresh failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabasePublishableKey);
@@ -49,14 +61,15 @@ Future<void> main() async {
   runApp(const NewGenerationNetworkApp());
 
   unawaited(_initializePushNotificationsSafely());
+  unawaited(_refreshHomeScreenWidgetsSafely());
   // In-app counters and guest chat identity can refresh after the first frame.
   unawaited(InAppNotificationService.instance.initialize());
 }
 
 class NewGenerationNetworkApp extends StatefulWidget {
   const NewGenerationNetworkApp({super.key});
-  static const primaryBlue = Color(0xFF073B8C);
-  static const accentGold = Color(0xFFD4AF37);
+  static const primaryBlue = Color(0xFF1746A2);
+  static const accentGold = Color(0xFFE0AD25);
 
 
   @override
@@ -66,7 +79,7 @@ class NewGenerationNetworkApp extends StatefulWidget {
 class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
   ThemeMode themeMode = ThemeMode.system;
   static const primaryBlue = Color(0xFF1746A2);
-  static const accentGold = Color(0xFFFFC94A);
+  static const accentGold = Color(0xFFE0AD25);
 
   @override
   void initState() {
@@ -100,15 +113,16 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           surface: Colors.white,
           onSurface: const Color(0xFF171A1F),
         ),
-        scaffoldBackgroundColor: const Color(0xFFF2F5FA),
+        scaffoldBackgroundColor: const Color(0xFFFFFEFA),
         dividerColor: const Color(0xFFE3E8F0),
         appBarTheme: const AppBarTheme(
-          backgroundColor: primaryBlue,
+          backgroundColor: Color(0xFF081B3A),
           foregroundColor: Colors.white,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           centerTitle: false,
           titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.2),
+          iconTheme: IconThemeData(color: Color(0xFFE0AD25)),
         ),
         cardTheme: CardThemeData(
           color: Colors.white,
@@ -126,7 +140,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFD8DDE6))),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFD8DDE6))),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryBlue, width: 1.5)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE0AD25), width: 1.5)),
         ),
         filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(minimumSize: const Size(0, 48), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), textStyle: const TextStyle(fontWeight: FontWeight.w700))),
         outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), textStyle: const TextStyle(fontWeight: FontWeight.w700))),
@@ -134,7 +148,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           height: 68,
           elevation: 0,
           backgroundColor: Colors.white,
-          indicatorColor: Color(0xFFF3E7B5),
+          indicatorColor: Color(0xFFE1EAF8),
           labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
         ),
       ),
@@ -142,16 +156,16 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
         useMaterial3: true,
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(seedColor: primaryBlue, brightness: Brightness.dark).copyWith(
-          primary: const Color(0xFF9ABEFF),
+          primary: primaryBlue,
           secondary: accentGold,
           tertiary: const Color(0xFF45C7A4),
-          surface: const Color(0xFF102A50),
+          surface: const Color(0xFF0D2040),
         ),
-        scaffoldBackgroundColor: const Color(0xFF061B3A),
-        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF081629), surfaceTintColor: Colors.transparent, elevation: 0),
-        cardTheme: CardThemeData(color: const Color(0xFF13233A), surfaceTintColor: Colors.transparent, elevation: 0, shape: RoundedRectangleBorder(side: const BorderSide(color: Color(0xFF263B57)), borderRadius: BorderRadius.circular(16))),
-        navigationBarTheme: const NavigationBarThemeData(height: 68, elevation: 0, backgroundColor: Color(0xFF0D1E33), indicatorColor: Color(0xFF1B3A62)),
-        inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: const Color(0xFF13233A), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF304660)))),
+        scaffoldBackgroundColor: const Color(0xFF07152B),
+        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF081B3A), foregroundColor: Colors.white, surfaceTintColor: Colors.transparent, elevation: 0, titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -.2), iconTheme: IconThemeData(color: Color(0xFFE0AD25))),
+        cardTheme: CardThemeData(color: const Color(0xFF10284B), surfaceTintColor: Colors.transparent, elevation: 0, shape: RoundedRectangleBorder(side: const BorderSide(color: Color(0xFF244B7A)), borderRadius: BorderRadius.circular(18))),
+        navigationBarTheme: NavigationBarThemeData(height: 72, elevation: 0, backgroundColor: const Color(0xFF081A36), indicatorColor: const Color(0xFF183E75), iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(color: states.contains(WidgetState.selected) ? const Color(0xFFE0AD25) : const Color(0xFFDCE6F7))), labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFDCE6F7)))), 
+        inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: const Color(0xFF10284B), hintStyle: const TextStyle(color: Color(0xFF9AABC5)), border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF244B7A))), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF244B7A))), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFE0AD25), width: 1.5))),
       ),
       home: SplashScreen(onDone: () => Navigator.of(appNavigatorKey.currentContext!).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()))),
       navigatorKey: appNavigatorKey,
@@ -217,12 +231,28 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     DailyLocalNotificationService.instance.openedPayload.addListener(_handleDailyNotificationTap);
+    PushNotificationService.instance.openedRoute.addListener(_handlePushNotificationTap);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _handlePushNotificationTap());
     _scheduleLocalMidnightRefresh();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Notification scheduling is optional and can take time on some devices.
       // Keep navigation and the first screen responsive even if it fails.
       unawaited(_initializeDailyNotificationsSafely());
     });
+  }
+
+  void _handlePushNotificationTap() {
+    final service = PushNotificationService.instance;
+    final route = service.openedRoute.value;
+    if (route == null || !mounted) return;
+    service.openedRoute.value = null;
+    final destination = switch (route) {
+      'community' => 4,
+      'devotionals' => 2,
+      'teachings' => 3,
+      _ => 0,
+    };
+    setState(() => index = destination);
   }
 
   Future<void> _initializeDailyNotificationsSafely() async {
@@ -271,6 +301,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       InAppNotificationService.instance.refreshCounts();
       DailyLocalNotificationService.instance.scheduleUpcoming();
+      unawaited(_refreshHomeScreenWidgetsSafely());
       if (mounted) {
         setState(() {});
         _scheduleLocalMidnightRefresh();
@@ -282,6 +313,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     DailyLocalNotificationService.instance.openedPayload.removeListener(_handleDailyNotificationTap);
+    PushNotificationService.instance.openedRoute.removeListener(_handlePushNotificationTap);
     _dayRefreshTimer?.cancel();
     super.dispose();
   }
@@ -395,8 +427,8 @@ class HomeContent extends StatelessWidget {
                 return Container(
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF123A82), Color(0xFF1764C0), Color(0xFF0D2D64)],
+                    gradient: LinearGradient(
+                      colors: dark ? const [Color(0xFF174A91), Color(0xFF10356D), Color(0xFF0A234B)] : const [Color(0xFFFFD76A), Color(0xFFE0AD25), Color(0xFFC18B12)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -408,27 +440,27 @@ class HomeContent extends StatelessWidget {
                     Row(children: [
                       Container(
                         width: 38, height: 38,
-                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: .12), borderRadius: BorderRadius.circular(11)),
-                        child: const Icon(Icons.auto_stories_rounded, color: NewGenerationNetworkApp.accentGold, size: 21),
+                        decoration: BoxDecoration(color: dark ? NewGenerationNetworkApp.accentGold.withValues(alpha: .16) : Colors.black.withValues(alpha: .08), borderRadius: BorderRadius.circular(11)),
+                        child: Icon(Icons.auto_stories_rounded, color: dark ? NewGenerationNetworkApp.accentGold : NewGenerationNetworkApp.primaryBlue, size: 21),
                       ),
                       const SizedBox(width: 11),
-                      const Expanded(child: Text('WORD FOR TODAY', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
+                      Expanded(child: Text('WORD FOR TODAY', style: TextStyle(color: dark ? NewGenerationNetworkApp.accentGold : const Color(0xFF171717), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
                     ]),
                     const SizedBox(height: 18),
                     if (snapshot.connectionState == ConnectionState.waiting)
                       const LinearProgressIndicator()
                     else if (verse == null)
-                      const Text('Your offline Word for Today is not available for this date.', style: TextStyle(color: Colors.white, height: 1.55))
+                      Text('Your offline Word for Today is not available for this date.', style: TextStyle(color: dark ? Colors.white70 : const Color(0xFF171717), height: 1.55))
                     else ...[
-                      Text(verse['word']?.toString() ?? '', style: const TextStyle(color: NewGenerationNetworkApp.accentGold, fontSize: 25, fontWeight: FontWeight.w900)),
+                      Text(verse['word']?.toString() ?? '', style: TextStyle(color: dark ? Colors.white : const Color(0xFF171717), fontSize: 25, fontWeight: FontWeight.w900)), 
                       const SizedBox(height: 7),
-                      Text(verse['meaning']?.toString() ?? '', style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.45)),
+                      Text(verse['meaning']?.toString() ?? '', style: TextStyle(color: dark ? const Color(0xFFDCE6F7) : const Color(0xFF171717), fontSize: 14, height: 1.45)), 
                       const SizedBox(height: 16),
-                      Text('“${verse['verse_text']?.toString() ?? ''}”', style: const TextStyle(color: Colors.white, fontSize: 17, height: 1.5, fontWeight: FontWeight.w500)),
+                      Text('“${verse['verse_text']?.toString() ?? ''}”', style: TextStyle(color: dark ? Colors.white : const Color(0xFF171717), fontSize: 17, height: 1.5, fontWeight: FontWeight.w500)), 
                       const SizedBox(height: 10),
-                      Text(verse['reference']?.toString() ?? '', style: const TextStyle(color: NewGenerationNetworkApp.accentGold, fontSize: 14, fontWeight: FontWeight.w900)),
+                      Text(verse['reference']?.toString() ?? '', style: TextStyle(color: dark ? NewGenerationNetworkApp.accentGold : const Color(0xFF171717), fontSize: 14, fontWeight: FontWeight.w900)), 
                       const SizedBox(height: 5),
-                      Text(verse['translation']?.toString() ?? 'World English Bible (WEB)', style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w600)),
+                      Text(verse['translation']?.toString() ?? 'World English Bible (WEB)', style: TextStyle(color: dark ? const Color(0xFFB9C8DE) : const Color(0xFF333333), fontSize: 10, fontWeight: FontWeight.w600)), 
                     ],
                     const SizedBox(height: 16),
                     Container(width: 42, height: 3, decoration: BoxDecoration(color: NewGenerationNetworkApp.accentGold, borderRadius: BorderRadius.circular(99))),
@@ -484,6 +516,7 @@ class HomeContent extends StatelessWidget {
               runSpacing: 9,
               children: [
                 _HomeQuickLink(icon: Icons.event_rounded, label: 'Upcoming Events', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsPage()))),
+                _HomeQuickLink(icon: Icons.edit_note_rounded, label: 'My Notes', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotesPage()))),
                 _HomeQuickLink(icon: Icons.campaign_rounded, label: 'Announcements', onTap: () {
                   InAppNotificationService.instance.markAnnouncementsRead();
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const AnnouncementsPage()));
@@ -613,11 +646,11 @@ class _HomeQuickLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionChip(
-      avatar: Icon(icon, size: 17, color: NewGenerationNetworkApp.primaryBlue),
+      avatar: Icon(icon, size: 17, color: Theme.of(context).brightness == Brightness.dark ? NewGenerationNetworkApp.accentGold : NewGenerationNetworkApp.primaryBlue),
       label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
       onPressed: onTap,
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF162238) : Colors.white,
-      side: BorderSide(color: NewGenerationNetworkApp.primaryBlue.withValues(alpha: .18)),
+      side: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? NewGenerationNetworkApp.accentGold : NewGenerationNetworkApp.primaryBlue).withValues(alpha: .3)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
@@ -651,7 +684,7 @@ class _HomeFeatureCard extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Container(
             width: 40, height: 40,
-            decoration: BoxDecoration(color: const Color(0xFF0B5ED7).withValues(alpha: .09), borderRadius: BorderRadius.circular(11)),
+            decoration: BoxDecoration(color: (dark ? const Color(0xFF24528A) : const Color(0xFF0B5ED7)).withValues(alpha: .18), borderRadius: BorderRadius.circular(11)),
             child: title == 'Community'
                 ? _NotificationBadgeIcon(
                     icon: icon,
@@ -664,7 +697,7 @@ class _HomeFeatureCard extends StatelessWidget {
                         unread: InAppNotificationService.instance.announcementsUnread,
                         color: NewGenerationNetworkApp.primaryBlue,
                       )
-                    : Icon(icon, color: NewGenerationNetworkApp.primaryBlue, size: 22),
+                    : Icon(icon, color: dark ? NewGenerationNetworkApp.accentGold : NewGenerationNetworkApp.primaryBlue, size: 22),
           ),
           const Spacer(),
           Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),

@@ -10,7 +10,7 @@ class GameLevelHub extends StatelessWidget {
     required this.currentLevel,
     required this.totalLevels,
     required this.onSelectLevel,
-    this.accent = const Color(0xFFFFC94A),
+    this.accent = const Color(0xFFE0AD25),
   });
 
   final String title;
@@ -21,8 +21,8 @@ class GameLevelHub extends StatelessWidget {
   final ValueChanged<int> onSelectLevel;
   final Color accent;
 
-  static const _background = Color(0xFF081629);
-  static const _surface = Color(0xFF151F30);
+  static const _background = Color(0xFF07152B);
+  static const _surface = Color(0xFF10284B);
   static const _muted = Color(0xFF9AA8BA);
 
   @override

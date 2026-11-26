@@ -200,7 +200,7 @@ class _CommunityStoriesWidgetState extends State<CommunityStoriesWidget> {
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                     color: ownStories.isNotEmpty
-                                        ? const Color(0xFFD4AF37)
+                                        ? const Color(0xFFE0AD25)
                                         : Theme.of(context).colorScheme.outlineVariant,
                                     width: 2.3,
                                   ),
@@ -656,9 +656,9 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
   Widget build(BuildContext context) {
     final caption = _currentStory['caption']?.toString() ?? '';
     return Scaffold(
-      backgroundColor: const Color(0xFF081321),
+      backgroundColor: const Color(0xFF07152B),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1B2A),
+        backgroundColor: const Color(0xFF081B3A),
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 4,
@@ -689,7 +689,7 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
           if (velocity > 150) _previousStory();
         },
         child: _loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37)))
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFFE0AD25)))
           : _error != null
               ? Center(
                   child: Padding(
@@ -724,7 +724,7 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Color(0xFF14283E), Color(0xFF081321), Color(0xFF050B13)],
+                          colors: [Color(0xFF10284B), Color(0xFF07152B), Color(0xFF07152B)],
                         ),
                       ),
                     ),
@@ -744,7 +744,7 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                                     loadingBuilder: (context, child, progress) => progress == null
                                         ? child
                                         : const Center(
-                                            child: CircularProgressIndicator(color: Color(0xFFD4AF37)),
+                                            child: CircularProgressIndicator(color: Color(0xFFE0AD25)),
                                           ),
                                     errorBuilder: (_, __, ___) => const Icon(
                                       Icons.broken_image_outlined,
@@ -764,7 +764,7 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
                             decoration: BoxDecoration(
-                              color: const Color(0xE6101D2C),
+                              color: const Color(0xE610284B),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(color: Colors.white.withValues(alpha: .16)),
                               boxShadow: const [
@@ -794,7 +794,7 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                                 label: Text('$_viewCount views'),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.white,
-                                  backgroundColor: const Color(0xCC10243A),
+                                  backgroundColor: const Color(0xCC10284B),
                                   side: BorderSide(color: Colors.white.withValues(alpha: .28)),
                                   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -808,7 +808,7 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
                               label: Text(_isOwner ? 'Comments ($_commentCount)' : 'Leave a comment ($_commentCount)'),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.white,
-                                backgroundColor: const Color(0xCC10243A),
+                                backgroundColor: const Color(0xCC10284B),
                                 side: BorderSide(color: Colors.white.withValues(alpha: .28)),
                                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -823,8 +823,8 @@ class _CommunityStoryViewerPageState extends State<CommunityStoryViewerPage> {
       ),
       floatingActionButton: _isVideo && _video != null && !_loading && _error == null
           ? FloatingActionButton.small(
-              backgroundColor: const Color(0xFFD4AF37),
-              foregroundColor: const Color(0xFF10243A),
+              backgroundColor: const Color(0xFFE0AD25),
+              foregroundColor: const Color(0xFF10284B),
               onPressed: () => setState(() {
                 _video!.value.isPlaying ? _video!.pause() : _video!.play();
               }),

@@ -19,7 +19,7 @@ class BibleTriviaPage extends StatefulWidget {
 
 class _BibleTriviaPageState extends State<BibleTriviaPage> {
   static const _blue = Color(0xFF073B8C);
-  static const _gold = Color(0xFFD4AF37);
+  static const _gold = Color(0xFFE0AD25);
   static const _highScoreKey = 'ngn_bible_trivia_high_score';
 
   final Map<String, List<_TriviaQuestion>> _questions = {
@@ -773,9 +773,9 @@ class _BibleTriviaPageState extends State<BibleTriviaPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
                 decoration: BoxDecoration(
-                  color: fill ?? (dark ? const Color(0xFF17191D) : Colors.white),
+                  color: fill ?? (dark ? const Color(0xFF07152B) : Colors.white),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: border ?? (dark ? const Color(0xFF343941) : const Color(0xFFE1E6EF)), width: border == null ? 1 : 1.7),
+                  border: Border.all(color: border ?? (dark ? const Color(0xFF10284B) : const Color(0xFFE1E6EF)), width: border == null ? 1 : 1.7),
                 ),
                 child: Row(children: [
                   Container(

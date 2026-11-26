@@ -23,7 +23,7 @@ class _CookiePuzzle {
 
 class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
   static const _blue = Color(0xFF073B8C);
-  static const _gold = Color(0xFFD4AF37);
+  static const _gold = Color(0xFFE0AD25);
   static const _bestKey = 'ngn_bible_word_search_best';
   static const _levelKey = 'ngn_bible_word_search_level';
   static const _queueKey = 'ngn_game_score_queue';
@@ -473,7 +473,7 @@ class _BibleWordPuzzlePageState extends State<BibleWordPuzzlePage> {
       body: SafeArea(child: ListView(padding: const EdgeInsets.all(16), children: [
         Container(
           padding: const EdgeInsets.all(17),
-          decoration: BoxDecoration(gradient: const LinearGradient(colors: [_blue, Color(0xFF173E80)]), borderRadius: BorderRadius.circular(18)),
+          decoration: BoxDecoration(gradient: const LinearGradient(colors: [_blue, Color(0xFF174A91)]), borderRadius: BorderRadius.circular(18)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Row(children: [Icon(Icons.search_rounded, color: _gold), SizedBox(width: 8), Text('TYPE THE BIBLE WORDS', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)), Spacer(), Icon(Icons.wifi_off, color: Colors.white70, size: 16), SizedBox(width: 4), Text('OFFLINE', style: TextStyle(color: Colors.white70, fontSize: 10))]),
             const SizedBox(height: 10),

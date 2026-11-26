@@ -34,8 +34,8 @@ class GameLobbyPage extends StatefulWidget {
 }
 
 class _GameLobbyPageState extends State<GameLobbyPage> {
-  static const _navy = Color(0xFF081629);
-  static const _gold = Color(0xFFFFC94A);
+  static const _navy = Color(0xFF081B3A);
+  static const _gold = Color(0xFFE0AD25);
   static const _blue = Color(0xFF1746A2);
 
   int _best = 0;
@@ -143,7 +143,7 @@ class _GameLobbyPageState extends State<GameLobbyPage> {
     final dark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: dark ? const Color(0xFF081629) : const Color(0xFFF4F6FA),
+      backgroundColor: dark ? const Color(0xFF081B3A) : const Color(0xFFF4F6FA),
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: dark ? _navy : Colors.white,
@@ -175,7 +175,7 @@ class _GameLobbyPageState extends State<GameLobbyPage> {
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF172B49), Color(0xFF081629)],
+                        colors: [Color(0xFF172B49), Color(0xFF081B3A)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -307,7 +307,7 @@ class _GameLobbyPageState extends State<GameLobbyPage> {
                   Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: dark ? const Color(0xFF151F30) : Colors.white,
+                      color: dark ? const Color(0xFF10284B) : Colors.white,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: dark
@@ -440,7 +440,7 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: dark ? const Color(0xFF151F30) : Colors.white,
+          color: dark ? const Color(0xFF10284B) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: dark ? Colors.white12 : const Color(0xFFE4E8EF),
@@ -448,7 +448,7 @@ class _StatCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: const Color(0xFFFFC94A), size: 21),
+            Icon(icon, color: const Color(0xFFE0AD25), size: 21),
             const SizedBox(width: 9),
             Expanded(
               child: Column(
