@@ -230,12 +230,28 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     DailyLocalNotificationService.instance.openedPayload.addListener(_handleDailyNotificationTap);
+    PushNotificationService.instance.openedRoute.addListener(_handlePushNotificationTap);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _handlePushNotificationTap());
     _scheduleLocalMidnightRefresh();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Notification scheduling is optional and can take time on some devices.
       // Keep navigation and the first screen responsive even if it fails.
       unawaited(_initializeDailyNotificationsSafely());
     });
+  }
+
+  void _handlePushNotificationTap() {
+    final service = PushNotificationService.instance;
+    final route = service.openedRoute.value;
+    if (route == null || !mounted) return;
+    service.openedRoute.value = null;
+    final destination = switch (route) {
+      'community' => 4,
+      'devotionals' => 2,
+      'teachings' => 3,
+      _ => 0,
+    };
+    setState(() => index = destination);
   }
 
   Future<void> _initializeDailyNotificationsSafely() async {
@@ -296,6 +312,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     DailyLocalNotificationService.instance.openedPayload.removeListener(_handleDailyNotificationTap);
+    PushNotificationService.instance.openedRoute.removeListener(_handlePushNotificationTap);
     _dayRefreshTimer?.cancel();
     super.dispose();
   }
