@@ -21,7 +21,9 @@ class PushNotificationService {
 
   static final PushNotificationService instance = PushNotificationService._();
 
-  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  // Resolve the plugin lazily: accessing the push service's route notifier
+  // must remain safe in tests and before Firebase has initialized.
+  FirebaseMessaging get _messaging => FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
