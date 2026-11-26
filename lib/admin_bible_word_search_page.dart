@@ -206,11 +206,11 @@ class _AdminBibleWordSearchPageState extends State<AdminBibleWordSearchPage> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF123A82), Color(0xFF1764C0)]),
+                  gradient: const LinearGradient(colors: [Color(0xFF174A91), Color(0xFF10356D)]),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('PUBLISH NEW OFFLINE PUZZLES', style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.w900, letterSpacing: .6)),
+                  const Text('PUBLISH NEW OFFLINE PUZZLES', style: TextStyle(color: Color(0xFFE0AD25), fontWeight: FontWeight.w900, letterSpacing: .6)),
                   const SizedBox(height: 7),
                   Text('${rows.length} managed here • $published published', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 6),
