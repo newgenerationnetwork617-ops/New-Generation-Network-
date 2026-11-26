@@ -68,7 +68,7 @@ Future<void> main() async {
 
 class NewGenerationNetworkApp extends StatefulWidget {
   const NewGenerationNetworkApp({super.key});
-  static const primaryBlue = Color(0xFFE0AD25);
+  static const primaryBlue = Color(0xFF1746A2);
   static const accentGold = Color(0xFFE0AD25);
 
 
@@ -158,13 +158,13 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           primary: const Color(0xFFE0AD25),
           secondary: accentGold,
           tertiary: const Color(0xFF45C7A4),
-          surface: const Color(0xFF171717),
+          surface: const Color(0xFF0D2040),
         ),
-        scaffoldBackgroundColor: const Color(0xFF171717),
-        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFFE0AD25), foregroundColor: Color(0xFF171717), surfaceTintColor: Colors.transparent, elevation: 0),
-        cardTheme: CardThemeData(color: const Color(0xFF242424), surfaceTintColor: Colors.transparent, elevation: 0, shape: RoundedRectangleBorder(side: const BorderSide(color: Color(0xFF263B57)), borderRadius: BorderRadius.circular(16))),
-        navigationBarTheme: const NavigationBarThemeData(height: 68, elevation: 0, backgroundColor: Color(0xFF171717), indicatorColor: Color(0xFF4A3A12)),
-        inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: const Color(0xFF13233A), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF304660)))),
+        scaffoldBackgroundColor: const Color(0xFF07152B),
+        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF081B3A), foregroundColor: Colors.white, surfaceTintColor: Colors.transparent, elevation: 0, titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -.2), iconTheme: IconThemeData(color: Color(0xFFE0AD25))),
+        cardTheme: CardThemeData(color: const Color(0xFF10284B), surfaceTintColor: Colors.transparent, elevation: 0, shape: RoundedRectangleBorder(side: const BorderSide(color: Color(0xFF244B7A)), borderRadius: BorderRadius.circular(18))),
+        navigationBarTheme: const NavigationBarThemeData(height: 72, elevation: 0, backgroundColor: Color(0xFF081A36), indicatorColor: Color(0xFF183E75), iconTheme: WidgetStatePropertyAll(IconThemeData(color: Color(0xFFE8EEF9))), labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFDCE6F7)))), 
+        inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: const Color(0xFF10284B), hintStyle: const TextStyle(color: Color(0xFF9AABC5)), border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF244B7A))), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF244B7A))), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFE0AD25), width: 1.5))),
       ),
       home: SplashScreen(onDone: () => Navigator.of(appNavigatorKey.currentContext!).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()))),
       navigatorKey: appNavigatorKey,
@@ -427,7 +427,7 @@ class HomeContent extends StatelessWidget {
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFFFD76A), Color(0xFFE0AD25), Color(0xFFC18B12)],
+                      colors: dark ? const [Color(0xFF174A91), Color(0xFF10356D), Color(0xFF0A234B)] : const [Color(0xFFFFD76A), Color(0xFFE0AD25), Color(0xFFC18B12)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -439,27 +439,27 @@ class HomeContent extends StatelessWidget {
                     Row(children: [
                       Container(
                         width: 38, height: 38,
-                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: .08), borderRadius: BorderRadius.circular(11)),
-                        child: const Icon(Icons.auto_stories_rounded, color: NewGenerationNetworkApp.accentGold, size: 21),
+                        decoration: BoxDecoration(color: dark ? NewGenerationNetworkApp.accentGold.withValues(alpha: .16) : Colors.black.withValues(alpha: .08), borderRadius: BorderRadius.circular(11)),
+                        child: Icon(Icons.auto_stories_rounded, color: dark ? NewGenerationNetworkApp.accentGold : NewGenerationNetworkApp.primaryBlue, size: 21),
                       ),
                       const SizedBox(width: 11),
-                      const Expanded(child: Text('WORD FOR TODAY', style: TextStyle(color: Color(0xFF171717), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
+                      Expanded(child: Text('WORD FOR TODAY', style: TextStyle(color: dark ? NewGenerationNetworkApp.accentGold : const Color(0xFF171717), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
                     ]),
                     const SizedBox(height: 18),
                     if (snapshot.connectionState == ConnectionState.waiting)
                       const LinearProgressIndicator()
                     else if (verse == null)
-                      const Text('Your offline Word for Today is not available for this date.', style: TextStyle(color: Color(0xFF171717), height: 1.55))
+                      Text('Your offline Word for Today is not available for this date.', style: TextStyle(color: dark ? Colors.white70 : const Color(0xFF171717), height: 1.55))
                     else ...[
-                      Text(verse['word']?.toString() ?? '', style: const TextStyle(color: Color(0xFF171717), fontSize: 25, fontWeight: FontWeight.w900)),
+                      Text(verse['word']?.toString() ?? '', style: TextStyle(color: dark ? Colors.white : const Color(0xFF171717), fontSize: 25, fontWeight: FontWeight.w900)), 
                       const SizedBox(height: 7),
-                      Text(verse['meaning']?.toString() ?? '', style: const TextStyle(color: Color(0xFF171717), fontSize: 14, height: 1.45)),
+                      Text(verse['meaning']?.toString() ?? '', style: TextStyle(color: dark ? const Color(0xFFDCE6F7) : const Color(0xFF171717), fontSize: 14, height: 1.45)), 
                       const SizedBox(height: 16),
-                      Text('“${verse['verse_text']?.toString() ?? ''}”', style: const TextStyle(color: Color(0xFF171717), fontSize: 17, height: 1.5, fontWeight: FontWeight.w500)),
+                      Text('“${verse['verse_text']?.toString() ?? ''}”', style: TextStyle(color: dark ? Colors.white : const Color(0xFF171717), fontSize: 17, height: 1.5, fontWeight: FontWeight.w500)), 
                       const SizedBox(height: 10),
-                      Text(verse['reference']?.toString() ?? '', style: const TextStyle(color: Color(0xFF171717), fontSize: 14, fontWeight: FontWeight.w900)),
+                      Text(verse['reference']?.toString() ?? '', style: TextStyle(color: dark ? NewGenerationNetworkApp.accentGold : const Color(0xFF171717), fontSize: 14, fontWeight: FontWeight.w900)), 
                       const SizedBox(height: 5),
-                      Text(verse['translation']?.toString() ?? 'World English Bible (WEB)', style: const TextStyle(color: Color(0xFF333333), fontSize: 10, fontWeight: FontWeight.w600)),
+                      Text(verse['translation']?.toString() ?? 'World English Bible (WEB)', style: TextStyle(color: dark ? const Color(0xFFB9C8DE) : const Color(0xFF333333), fontSize: 10, fontWeight: FontWeight.w600)), 
                     ],
                     const SizedBox(height: 16),
                     Container(width: 42, height: 3, decoration: BoxDecoration(color: NewGenerationNetworkApp.accentGold, borderRadius: BorderRadius.circular(99))),
