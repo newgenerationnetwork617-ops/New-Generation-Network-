@@ -53,7 +53,7 @@ class _NotesPageState extends State<NotesPage> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (pageContext) => Scaffold(
-          backgroundColor: const Color(0xFFFFFEFA),
+          backgroundColor: Theme.of(pageContext).scaffoldBackgroundColor,
           appBar: AppBar(
             title: Text(existing == null ? 'Add Note' : 'Edit Note'),
             actions: [
@@ -66,7 +66,7 @@ class _NotesPageState extends State<NotesPage> {
                   Navigator.pop(pageContext, true);
                 },
                 child: const Text('Save', style: TextStyle(
-                  color: Color(0xFF171717), fontWeight: FontWeight.w800)),
+                  color: Theme.of(pageContext).colorScheme.secondary, fontWeight: FontWeight.w800)),
               ),
             ],
           ),
@@ -84,7 +84,7 @@ class _NotesPageState extends State<NotesPage> {
                   prefixIcon: const Icon(Icons.title_rounded),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: Color(0xFFE8D7A8)),
+                    borderSide: BorderSide(color: Theme.of(pageContext).colorScheme.outlineVariant),
                   ),
                 ),
               ),
@@ -104,7 +104,7 @@ class _NotesPageState extends State<NotesPage> {
                   contentPadding: const EdgeInsets.all(16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: Color(0xFFE8D7A8)),
+                    borderSide: BorderSide(color: Theme.of(pageContext).colorScheme.outlineVariant),
                   ),
                 ),
               ),
@@ -154,8 +154,8 @@ class _NotesPageState extends State<NotesPage> {
               child: const Text('Cancel')),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFE0AD25),
-              foregroundColor: const Color(0xFF171717),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              foregroundColor: Theme.of(context).colorScheme.onSecondary,
             ),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Delete'),
@@ -177,7 +177,7 @@ class _NotesPageState extends State<NotesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFEFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('My Notes'),
         actions: [
@@ -190,8 +190,8 @@ class _NotesPageState extends State<NotesPage> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _editNote(),
-        backgroundColor: const Color(0xFFE0AD25),
-        foregroundColor: const Color(0xFF171717),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).colorScheme.onSecondary,
         icon: const Icon(Icons.add_rounded),
         label: const Text('Add Note', style: TextStyle(fontWeight: FontWeight.w800)),
       ),
@@ -208,11 +208,11 @@ class _NotesPageState extends State<NotesPage> {
                           width: 76,
                           height: 76,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFEFC4),
+                            color: Theme.of(context).colorScheme.secondaryContainer,
                             borderRadius: BorderRadius.circular(24),
                           ),
                           child: const Icon(Icons.edit_note_rounded,
-                              size: 42, color: Color(0xFF171717)),
+                              size: 42, color: Theme.of(context).colorScheme.onSecondaryContainer),
                         ),
                         const SizedBox(height: 18),
                         const Text('Your notebook starts here',
@@ -229,8 +229,8 @@ class _NotesPageState extends State<NotesPage> {
                           icon: const Icon(Icons.add_rounded),
                           label: const Text('Add your first note'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFFE0AD25),
-                            foregroundColor: const Color(0xFF171717),
+                            backgroundColor: Theme.of(context).colorScheme.secondary,
+                            foregroundColor: Theme.of(context).colorScheme.onSecondary,
                           ),
                         ),
                       ],
@@ -246,11 +246,11 @@ class _NotesPageState extends State<NotesPage> {
                     final title = note['title']?.toString().trim() ?? '';
                     final body = note['body']?.toString() ?? '';
                     return Card(
-                      color: Colors.white,
+                      color: Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
-                        side: const BorderSide(color: Color(0xFFEADDBB)),
+                        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(16),
@@ -265,11 +265,11 @@ class _NotesPageState extends State<NotesPage> {
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF1C9),
+                                  color: Theme.of(context).colorScheme.secondaryContainer,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(Icons.description_outlined,
-                                    color: Color(0xFF171717)),
+                                    color: Theme.of(context).colorScheme.onSecondaryContainer),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -286,11 +286,11 @@ class _NotesPageState extends State<NotesPage> {
                                         maxLines: 3,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                            color: Color(0xFF555555), height: 1.4)),
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4)),
                                     const SizedBox(height: 8),
                                     Text(_dateLabel(note['updatedAt']),
                                         style: const TextStyle(
-                                            color: Color(0xFF888888), fontSize: 11)),
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 11)),
                                   ],
                                 ),
                               ),
