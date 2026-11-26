@@ -421,13 +421,13 @@ class HomeContent extends StatelessWidget {
                     else if (verse == null)
                       const Text('Your offline Word for Today is not available for this date.', style: TextStyle(color: Color(0xFF171717), height: 1.55))
                     else ...[
-                      Text(verse['word']?.toString() ?? '', style: const TextStyle(color: NewGenerationNetworkApp.accentGold, fontSize: 25, fontWeight: FontWeight.w900)),
+                      Text(verse['word']?.toString() ?? '', style: const TextStyle(color: Color(0xFF171717), fontSize: 25, fontWeight: FontWeight.w900)),
                       const SizedBox(height: 7),
                       Text(verse['meaning']?.toString() ?? '', style: const TextStyle(color: Color(0xFF171717), fontSize: 14, height: 1.45)),
                       const SizedBox(height: 16),
                       Text('“${verse['verse_text']?.toString() ?? ''}”', style: const TextStyle(color: Color(0xFF171717), fontSize: 17, height: 1.5, fontWeight: FontWeight.w500)),
                       const SizedBox(height: 10),
-                      Text(verse['reference']?.toString() ?? '', style: const TextStyle(color: NewGenerationNetworkApp.accentGold, fontSize: 14, fontWeight: FontWeight.w900)),
+                      Text(verse['reference']?.toString() ?? '', style: const TextStyle(color: Color(0xFF171717), fontSize: 14, fontWeight: FontWeight.w900)),
                       const SizedBox(height: 5),
                       Text(verse['translation']?.toString() ?? 'World English Bible (WEB)', style: const TextStyle(color: Color(0xFF333333), fontSize: 10, fontWeight: FontWeight.w600)),
                     ],
