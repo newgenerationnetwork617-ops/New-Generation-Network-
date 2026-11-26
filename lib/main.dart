@@ -78,7 +78,7 @@ class NewGenerationNetworkApp extends StatefulWidget {
 
 class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
   ThemeMode themeMode = ThemeMode.system;
-  static const primaryBlue = Color(0xFFE0AD25);
+  static const primaryBlue = Color(0xFF1746A2);
   static const accentGold = Color(0xFFE0AD25);
 
   @override
@@ -163,7 +163,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
         scaffoldBackgroundColor: const Color(0xFF07152B),
         appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF081B3A), foregroundColor: Colors.white, surfaceTintColor: Colors.transparent, elevation: 0, titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -.2), iconTheme: IconThemeData(color: Color(0xFFE0AD25))),
         cardTheme: CardThemeData(color: const Color(0xFF10284B), surfaceTintColor: Colors.transparent, elevation: 0, shape: RoundedRectangleBorder(side: const BorderSide(color: Color(0xFF244B7A)), borderRadius: BorderRadius.circular(18))),
-        navigationBarTheme: const NavigationBarThemeData(height: 72, elevation: 0, backgroundColor: Color(0xFF081A36), indicatorColor: Color(0xFF183E75), iconTheme: WidgetStatePropertyAll(IconThemeData(color: Color(0xFFE8EEF9))), labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFDCE6F7)))), 
+        navigationBarTheme: const NavigationBarThemeData(height: 72, elevation: 0, backgroundColor: Color(0xFF081A36), indicatorColor: Color(0xFF183E75), iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(color: states.contains(WidgetState.selected) ? const Color(0xFFE0AD25) : const Color(0xFFDCE6F7))), labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFDCE6F7)))), 
         inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: const Color(0xFF10284B), hintStyle: const TextStyle(color: Color(0xFF9AABC5)), border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF244B7A))), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF244B7A))), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFE0AD25), width: 1.5))),
       ),
       home: SplashScreen(onDone: () => Navigator.of(appNavigatorKey.currentContext!).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()))),
@@ -645,11 +645,11 @@ class _HomeQuickLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionChip(
-      avatar: Icon(icon, size: 17, color: NewGenerationNetworkApp.primaryBlue),
+      avatar: Icon(icon, size: 17, color: Theme.of(context).brightness == Brightness.dark ? NewGenerationNetworkApp.accentGold : NewGenerationNetworkApp.primaryBlue),
       label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
       onPressed: onTap,
       backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF162238) : Colors.white,
-      side: BorderSide(color: NewGenerationNetworkApp.primaryBlue.withValues(alpha: .18)),
+      side: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? NewGenerationNetworkApp.accentGold : NewGenerationNetworkApp.primaryBlue).withValues(alpha: .3)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
@@ -683,7 +683,7 @@ class _HomeFeatureCard extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Container(
             width: 40, height: 40,
-            decoration: BoxDecoration(color: const Color(0xFF0B5ED7).withValues(alpha: .09), borderRadius: BorderRadius.circular(11)),
+            decoration: BoxDecoration(color: (dark ? const Color(0xFF24528A) : const Color(0xFF0B5ED7)).withValues(alpha: .18), borderRadius: BorderRadius.circular(11)),
             child: title == 'Community'
                 ? _NotificationBadgeIcon(
                     icon: icon,
@@ -696,7 +696,7 @@ class _HomeFeatureCard extends StatelessWidget {
                         unread: InAppNotificationService.instance.announcementsUnread,
                         color: NewGenerationNetworkApp.primaryBlue,
                       )
-                    : Icon(icon, color: NewGenerationNetworkApp.primaryBlue, size: 22),
+                    : Icon(icon, color: dark ? NewGenerationNetworkApp.accentGold : NewGenerationNetworkApp.primaryBlue, size: 22),
           ),
           const Spacer(),
           Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
