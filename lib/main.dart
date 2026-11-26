@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'notes_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'in_app_notifications.dart';
@@ -55,8 +56,8 @@ Future<void> main() async {
 
 class NewGenerationNetworkApp extends StatefulWidget {
   const NewGenerationNetworkApp({super.key});
-  static const primaryBlue = Color(0xFF073B8C);
-  static const accentGold = Color(0xFFD4AF37);
+  static const primaryBlue = Color(0xFFE0AD25);
+  static const accentGold = Color(0xFFE0AD25);
 
 
   @override
@@ -65,8 +66,8 @@ class NewGenerationNetworkApp extends StatefulWidget {
 
 class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
   ThemeMode themeMode = ThemeMode.system;
-  static const primaryBlue = Color(0xFF1746A2);
-  static const accentGold = Color(0xFFFFC94A);
+  static const primaryBlue = Color(0xFFE0AD25);
+  static const accentGold = Color(0xFFE0AD25);
 
   @override
   void initState() {
@@ -100,15 +101,15 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           surface: Colors.white,
           onSurface: const Color(0xFF171A1F),
         ),
-        scaffoldBackgroundColor: const Color(0xFFF2F5FA),
+        scaffoldBackgroundColor: const Color(0xFFFFFEFA),
         dividerColor: const Color(0xFFE3E8F0),
         appBarTheme: const AppBarTheme(
-          backgroundColor: primaryBlue,
-          foregroundColor: Colors.white,
+          backgroundColor: const Color(0xFFE0AD25),
+          foregroundColor: const Color(0xFF171717),
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           centerTitle: false,
-          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.2),
+          titleTextStyle: TextStyle(color: Color(0xFF171717), fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.2),
         ),
         cardTheme: CardThemeData(
           color: Colors.white,
@@ -126,7 +127,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFD8DDE6))),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFD8DDE6))),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: primaryBlue, width: 1.5)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE0AD25), width: 1.5)),
         ),
         filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(minimumSize: const Size(0, 48), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), textStyle: const TextStyle(fontWeight: FontWeight.w700))),
         outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), textStyle: const TextStyle(fontWeight: FontWeight.w700))),
@@ -134,7 +135,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           height: 68,
           elevation: 0,
           backgroundColor: Colors.white,
-          indicatorColor: Color(0xFFF3E7B5),
+          indicatorColor: Color(0xFFFFE7A3),
           labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
         ),
       ),
@@ -147,7 +148,7 @@ class _NewGenerationNetworkAppState extends State<NewGenerationNetworkApp> {
           tertiary: const Color(0xFF45C7A4),
           surface: const Color(0xFF102A50),
         ),
-        scaffoldBackgroundColor: const Color(0xFF061B3A),
+        scaffoldBackgroundColor: const Color(0xFF171717),
         appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF081629), surfaceTintColor: Colors.transparent, elevation: 0),
         cardTheme: CardThemeData(color: const Color(0xFF13233A), surfaceTintColor: Colors.transparent, elevation: 0, shape: RoundedRectangleBorder(side: const BorderSide(color: Color(0xFF263B57)), borderRadius: BorderRadius.circular(16))),
         navigationBarTheme: const NavigationBarThemeData(height: 68, elevation: 0, backgroundColor: Color(0xFF0D1E33), indicatorColor: Color(0xFF1B3A62)),
@@ -396,7 +397,7 @@ class HomeContent extends StatelessWidget {
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF123A82), Color(0xFF1764C0), Color(0xFF0D2D64)],
+                      colors: [Color(0xFFFFD76A), Color(0xFFE0AD25), Color(0xFFC18B12)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -408,27 +409,27 @@ class HomeContent extends StatelessWidget {
                     Row(children: [
                       Container(
                         width: 38, height: 38,
-                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: .12), borderRadius: BorderRadius.circular(11)),
+                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: .08), borderRadius: BorderRadius.circular(11)),
                         child: const Icon(Icons.auto_stories_rounded, color: NewGenerationNetworkApp.accentGold, size: 21),
                       ),
                       const SizedBox(width: 11),
-                      const Expanded(child: Text('WORD FOR TODAY', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
+                      const Expanded(child: Text('WORD FOR TODAY', style: TextStyle(color: Color(0xFF171717), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
                     ]),
                     const SizedBox(height: 18),
                     if (snapshot.connectionState == ConnectionState.waiting)
                       const LinearProgressIndicator()
                     else if (verse == null)
-                      const Text('Your offline Word for Today is not available for this date.', style: TextStyle(color: Colors.white, height: 1.55))
+                      const Text('Your offline Word for Today is not available for this date.', style: TextStyle(color: Color(0xFF171717), height: 1.55))
                     else ...[
                       Text(verse['word']?.toString() ?? '', style: const TextStyle(color: NewGenerationNetworkApp.accentGold, fontSize: 25, fontWeight: FontWeight.w900)),
                       const SizedBox(height: 7),
-                      Text(verse['meaning']?.toString() ?? '', style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.45)),
+                      Text(verse['meaning']?.toString() ?? '', style: const TextStyle(color: Color(0xFF171717), fontSize: 14, height: 1.45)),
                       const SizedBox(height: 16),
-                      Text('“${verse['verse_text']?.toString() ?? ''}”', style: const TextStyle(color: Colors.white, fontSize: 17, height: 1.5, fontWeight: FontWeight.w500)),
+                      Text('“${verse['verse_text']?.toString() ?? ''}”', style: const TextStyle(color: Color(0xFF171717), fontSize: 17, height: 1.5, fontWeight: FontWeight.w500)),
                       const SizedBox(height: 10),
                       Text(verse['reference']?.toString() ?? '', style: const TextStyle(color: NewGenerationNetworkApp.accentGold, fontSize: 14, fontWeight: FontWeight.w900)),
                       const SizedBox(height: 5),
-                      Text(verse['translation']?.toString() ?? 'World English Bible (WEB)', style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w600)),
+                      Text(verse['translation']?.toString() ?? 'World English Bible (WEB)', style: const TextStyle(color: Color(0xFF333333), fontSize: 10, fontWeight: FontWeight.w600)),
                     ],
                     const SizedBox(height: 16),
                     Container(width: 42, height: 3, decoration: BoxDecoration(color: NewGenerationNetworkApp.accentGold, borderRadius: BorderRadius.circular(99))),
@@ -484,6 +485,7 @@ class HomeContent extends StatelessWidget {
               runSpacing: 9,
               children: [
                 _HomeQuickLink(icon: Icons.event_rounded, label: 'Upcoming Events', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsPage()))),
+                _HomeQuickLink(icon: Icons.edit_note_rounded, label: 'My Notes', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotesPage()))),
                 _HomeQuickLink(icon: Icons.campaign_rounded, label: 'Announcements', onTap: () {
                   InAppNotificationService.instance.markAnnouncementsRead();
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const AnnouncementsPage()));
