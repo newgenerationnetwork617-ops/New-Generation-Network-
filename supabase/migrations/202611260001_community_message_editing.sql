@@ -4,7 +4,8 @@
 ALTER TABLE public.community_messages
   ADD COLUMN IF NOT EXISTS edited_at timestamptz;
 
-GRANT UPDATE ON TABLE public.community_messages TO authenticated;
+-- Restrict the update grant to the two fields the edit feature actually changes.
+GRANT UPDATE (body, edited_at) ON TABLE public.community_messages TO authenticated;
 
 DO $$
 BEGIN
