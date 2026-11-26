@@ -426,7 +426,7 @@ class HomeContent extends StatelessWidget {
                 return Container(
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       colors: dark ? const [Color(0xFF174A91), Color(0xFF10356D), Color(0xFF0A234B)] : const [Color(0xFFFFD76A), Color(0xFFE0AD25), Color(0xFFC18B12)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
