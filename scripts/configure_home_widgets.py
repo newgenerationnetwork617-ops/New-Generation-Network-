@@ -24,6 +24,56 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin
+import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+private fun todayKey(): String = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+
+private fun loadDailyScripture(context: Context): Triple<String, String, String>? {
+    return try {
+        val root = context.assets.open("flutter_assets/assets/word_of_day/word_of_day.json")
+            .bufferedReader().use { JSONObject(it.readText()) }
+        val entries = root.optJSONArray("entries") ?: return null
+        val today = todayKey()
+        for (index in 0 until entries.length()) {
+            val item = entries.optJSONObject(index) ?: continue
+            if (item.optString("date") == today) {
+                return Triple(
+                    item.optString("word", "Scripture for Today"),
+                    item.optString("reference", ""),
+                    item.optString("verse_text", "Your daily Scripture will appear here.")
+                )
+            }
+        }
+        null
+    } catch (_: Exception) {
+        null
+    }
+}
+
+private fun loadDailyDevotion(context: Context): Triple<String, String, String>? {
+    return try {
+        val today = todayKey()
+        val monthAsset = "flutter_assets/assets/devotionals/spurgeon-morning/${today.substring(0, 7)}.json"
+        val root = context.assets.open(monthAsset).bufferedReader().use { JSONObject(it.readText()) }
+        val entries = root.optJSONArray("entries") ?: return null
+        for (index in 0 until entries.length()) {
+            val item = entries.optJSONObject(index) ?: continue
+            if (item.optString("published_at").startsWith(today)) {
+                return Triple(
+                    item.optString("title", "Daily Devotion"),
+                    item.optString("bible_reference", ""),
+                    item.optString("message", "Open Holy Word to read today's devotion.")
+                )
+            }
+        }
+        null
+    } catch (_: Exception) {
+        null
+    }
+}
 
 private fun launchHolyWord(context: Context, widgetId: Int): PendingIntent? {
     val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
@@ -44,11 +94,12 @@ class DailyScriptureWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         val data = HomeWidgetPlugin.getData(context)
+        val daily = loadDailyScripture(context)
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.ngn_daily_scripture_widget)
-            views.setTextViewText(R.id.ngn_widget_word, data.getString("ngn_scripture_word", "Scripture for Today"))
-            views.setTextViewText(R.id.ngn_widget_reference, data.getString("ngn_scripture_reference", "Open Holy Word"))
-            views.setTextViewText(R.id.ngn_widget_verse, data.getString("ngn_scripture_text", "Your daily Scripture will appear here."))
+            views.setTextViewText(R.id.ngn_widget_word, daily?.first ?: data.getString("ngn_scripture_word", "Scripture for Today"))
+            views.setTextViewText(R.id.ngn_widget_reference, daily?.second ?: data.getString("ngn_scripture_reference", "Open Holy Word"))
+            views.setTextViewText(R.id.ngn_widget_verse, daily?.third ?: data.getString("ngn_scripture_text", "Your daily Scripture will appear here."))
             launchHolyWord(context, widgetId)?.let { views.setOnClickPendingIntent(R.id.ngn_widget_root, it) }
             appWidgetManager.updateAppWidget(widgetId, views)
         }
@@ -62,11 +113,12 @@ class DailyDevotionWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         val data = HomeWidgetPlugin.getData(context)
+        val daily = loadDailyDevotion(context)
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.ngn_daily_devotion_widget)
-            views.setTextViewText(R.id.ngn_devotion_title, data.getString("ngn_devotion_title", "Daily Devotion"))
-            views.setTextViewText(R.id.ngn_devotion_reference, data.getString("ngn_devotion_reference", ""))
-            views.setTextViewText(R.id.ngn_devotion_preview, data.getString("ngn_devotion_preview", "Open Holy Word to read today's devotion."))
+            views.setTextViewText(R.id.ngn_devotion_title, daily?.first ?: data.getString("ngn_devotion_title", "Daily Devotion"))
+            views.setTextViewText(R.id.ngn_devotion_reference, daily?.second ?: data.getString("ngn_devotion_reference", ""))
+            views.setTextViewText(R.id.ngn_devotion_preview, daily?.third ?: data.getString("ngn_devotion_preview", "Open Holy Word to read today's devotion."))
             launchHolyWord(context, widgetId)?.let { views.setOnClickPendingIntent(R.id.ngn_devotion_root, it) }
             appWidgetManager.updateAppWidget(widgetId, views)
         }
@@ -208,7 +260,7 @@ res = Path("android/app/src/main/res")
     android:minHeight="150dp"
     android:targetCellWidth="3"
     android:targetCellHeight="2"
-    android:updatePeriodMillis="0"
+    android:updatePeriodMillis="86400000"
     android:initialLayout="@layout/ngn_daily_scripture_widget"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen" />
