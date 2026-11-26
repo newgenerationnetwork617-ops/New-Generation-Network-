@@ -8,7 +8,7 @@ main_activity = next(Path("android/app/src/main/kotlin").rglob("MainActivity.kt"
 if main_activity is None or not manifest.exists():
     raise SystemExit("Generated Android MainActivity or manifest is missing")
 
-match = re.search(r"^package\\s+([A-Za-z0-9_.]+)", main_activity.read_text(), re.M)
+match = re.search(r"^package\s+([A-Za-z0-9_.]+)", main_activity.read_text(), re.M)
 if not match:
     raise SystemExit("Could not determine Android application package")
 package = match.group(1)
