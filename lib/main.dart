@@ -7,6 +7,7 @@ import 'daily_local_notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'push_notification_service.dart';
+import 'home_screen_widget_service.dart';
 
 import 'settings_page.dart';
 import 'community_page.dart';
@@ -37,6 +38,16 @@ Future<void> _initializePushNotificationsSafely() async {
   }
 }
 
+Future<void> _refreshHomeScreenWidgetsSafely() async {
+  try {
+    await HomeScreenWidgetService.refresh();
+  } catch (error, stackTrace) {
+    // Home-screen widgets are optional and must never block app startup.
+    debugPrint('NGN home-screen widget refresh failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: supabaseUrl, publishableKey: supabasePublishableKey);
@@ -50,6 +61,7 @@ Future<void> main() async {
   runApp(const NewGenerationNetworkApp());
 
   unawaited(_initializePushNotificationsSafely());
+  unawaited(_refreshHomeScreenWidgetsSafely());
   // In-app counters and guest chat identity can refresh after the first frame.
   unawaited(InAppNotificationService.instance.initialize());
 }
@@ -272,6 +284,7 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       InAppNotificationService.instance.refreshCounts();
       DailyLocalNotificationService.instance.scheduleUpcoming();
+      unawaited(_refreshHomeScreenWidgetsSafely());
       if (mounted) {
         setState(() {});
         _scheduleLocalMidnightRefresh();

@@ -13,11 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Java 21
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -180,6 +180,10 @@ jobs:
           gradle.write_text(content)
           print(f"Configured scheduled notifications in {gradle}")
           PY
+
+
+      - name: Configure NGN home-screen widgets
+        run: python3 scripts/configure_home_widgets.py
 
       - name: Install N.G.N. Android app icon
         run: |
