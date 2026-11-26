@@ -65,7 +65,7 @@ class _NotesPageState extends State<NotesPage> {
                   }
                   Navigator.pop(pageContext, true);
                 },
-                child: const Text('Save', style: TextStyle(
+                child: Text('Save', style: TextStyle(
                   color: Theme.of(pageContext).colorScheme.secondary, fontWeight: FontWeight.w800)),
               ),
             ],
@@ -211,7 +211,7 @@ class _NotesPageState extends State<NotesPage> {
                             color: Theme.of(context).colorScheme.secondaryContainer,
                             borderRadius: BorderRadius.circular(24),
                           ),
-                          child: const Icon(Icons.edit_note_rounded,
+                          child: Icon(Icons.edit_note_rounded,
                               size: 42, color: Theme.of(context).colorScheme.onSecondaryContainer),
                         ),
                         const SizedBox(height: 18),
@@ -268,7 +268,7 @@ class _NotesPageState extends State<NotesPage> {
                                   color: Theme.of(context).colorScheme.secondaryContainer,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(Icons.description_outlined,
+                                child: Icon(Icons.description_outlined,
                                     color: Theme.of(context).colorScheme.onSecondaryContainer),
                               ),
                               const SizedBox(width: 12),
@@ -285,11 +285,11 @@ class _NotesPageState extends State<NotesPage> {
                                     Text(body,
                                         maxLines: 3,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                             color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4)),
                                     const SizedBox(height: 8),
                                     Text(_dateLabel(note['updatedAt']),
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                             color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 11)),
                                   ],
                                 ),
