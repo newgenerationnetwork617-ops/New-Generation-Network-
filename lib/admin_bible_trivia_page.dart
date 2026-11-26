@@ -204,17 +204,17 @@ class _AdminBibleTriviaPageState extends State<AdminBibleTriviaPage> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF142E52), Color(0xFF073B8C)]),
+                  gradient: const LinearGradient(colors: [Color(0xFF142E52), Color(0xFF174A91)]),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('BUILD THE 1,000-QUESTION BANK', style: TextStyle(color: Color(0xFFFFD66B), fontWeight: FontWeight.w900, letterSpacing: .7)),
+                  const Text('BUILD THE 1,000-QUESTION BANK', style: TextStyle(color: Color(0xFFE0AD25), fontWeight: FontWeight.w900, letterSpacing: .7)),
                   const SizedBox(height: 8),
                   Text('${rows.length} loaded here • $published published', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 10),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: LinearProgressIndicator(value: (published / 1000).clamp(0.0, 1.0), minHeight: 7, backgroundColor: Colors.white24, color: const Color(0xFFFFD66B)),
+                    child: LinearProgressIndicator(value: (published / 1000).clamp(0.0, 1.0), minHeight: 7, backgroundColor: Colors.white24, color: const Color(0xFFE0AD25)),
                   ),
                   const SizedBox(height: 7),
                   Text('${(published / 1000 * 100).toStringAsFixed(1)}% of the 1,000 target', style: const TextStyle(color: Colors.white70, fontSize: 11)),
