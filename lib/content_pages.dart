@@ -162,7 +162,7 @@ class _DevotionalsPageState extends State<DevotionalsPage> with WidgetsBindingOb
                 padding: const EdgeInsets.all(24),
                 children: [
                   const SizedBox(height: 110),
-                  const Icon(Icons.menu_book_rounded, size: 58, color: Color(0xFF073B8C)),
+                  const Icon(Icons.menu_book_rounded, size: 58, color: Color(0xFF1746A2)),
                   const SizedBox(height: 18),
                   const Text('Today’s devotional is not available yet.',
                       textAlign: TextAlign.center,
@@ -184,7 +184,7 @@ class _DevotionalsPageState extends State<DevotionalsPage> with WidgetsBindingOb
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 36),
               children: [
                 Text(_dateLabel(today),
-                    style: const TextStyle(color: Color(0xFF073B8C), fontWeight: FontWeight.w800)),
+                    style: const TextStyle(color: Color(0xFF1746A2), fontWeight: FontWeight.w800)),
                 const SizedBox(height: 12),
                 Text(item['title']?.toString() ?? 'Daily Devotional',
                     style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w900, height: 1.2)),
@@ -198,11 +198,11 @@ class _DevotionalsPageState extends State<DevotionalsPage> with WidgetsBindingOb
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF073B8C).withValues(alpha: .08),
+                      color: const Color(0xFF1746A2).withValues(alpha: .08),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Text(reference,
-                        style: const TextStyle(color: Color(0xFF073B8C), fontWeight: FontWeight.w900)),
+                        style: const TextStyle(color: Color(0xFF1746A2), fontWeight: FontWeight.w900)),
                   ),
                 const SizedBox(height: 18),
                 SelectableText(
@@ -346,7 +346,7 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
       emptyMessage: 'No published announcements yet.',
       itemBuilder: (_, item) => Card(
         child: ListTile(
-          leading: const CircleAvatar(backgroundColor: Color(0xFFFFF8E1), child: Icon(Icons.campaign_rounded, color: Color(0xFF9A7410))),
+          leading: const CircleAvatar(backgroundColor: Color(0xFF173D70), child: Icon(Icons.campaign_rounded, color: Color(0xFFE0AD25))),
           title: Text(item['title']?.toString() ?? 'Announcement'),
           subtitle: Text(item['body']?.toString() ?? ''),
         ),
@@ -512,7 +512,7 @@ class _TeachingCardState extends State<_TeachingCard> {
           padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(widget.item['title']?.toString() ?? 'Teaching', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-            if (speaker.isNotEmpty) ...[const SizedBox(height: 5), Text(speaker, style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF073B8C)))],
+            if (speaker.isNotEmpty) ...[const SizedBox(height: 5), Text(speaker, style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF1746A2)))],
             if (description.isNotEmpty) ...[const SizedBox(height: 9), Text(description, maxLines: 3, overflow: TextOverflow.ellipsis)],
             if (localPath != null) ...[const SizedBox(height: 8), const Row(children: [Icon(Icons.download_done_rounded, size: 17), SizedBox(width: 5), Text('Available offline')])],
             const SizedBox(height: 14),
